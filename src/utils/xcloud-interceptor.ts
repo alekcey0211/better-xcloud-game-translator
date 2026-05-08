@@ -9,10 +9,10 @@ import { STATES } from "./global";
 import { generateMsDeviceInfo, getOsNameFromResolution, patchIceCandidates } from "./network";
 import { getPreferredServerRegion } from "./region";
 import { BypassServerIps } from "@/enums/bypass-servers";
-import { GlobalPref } from "@/enums/pref-keys";
+import { GlobalPref, StreamPref } from "@/enums/pref-keys";
 import { NativeMkbMode, TouchControllerMode } from "@/enums/pref-values";
 import { BxEventBus } from "./bx-event-bus";
-import { getGlobalPref } from "./pref-utils";
+import { getGlobalPref, getStreamPref } from "./pref-utils";
 
 export class XcloudInterceptor {
     private static readonly SERVER_EXTRA_INFO: Record<string, [string, string, ServerContinent]> = {
@@ -216,6 +216,11 @@ export class XcloudInterceptor {
 
         overrides.inputConfiguration = overrides.inputConfiguration || {};
         overrides.inputConfiguration.enableVibration = true;
+
+        // https://github.com/redphx/better-xcloud/issues/914#issuecomment-4400078173
+        if (getStreamPref(StreamPref.LOCAL_CO_OP_ENABLED)) {
+            overrides.inputConfiguration.useUnreliableInput = false;
+        }
 
         let overrideMkb: boolean | null = null;
 
