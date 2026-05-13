@@ -5649,7 +5649,7 @@ if (this.baseStorageKey in window.BX_EXPOSED.overrideSettings) {
   return str = str.replace(text, text + "return;"), str;
  },
  changeNotificationsSubscription(str) {
-  let text = ";buildSubscriptionQueryParamsForNotifications(", index = str.indexOf(text);
+  let text = "}buildSubscriptionQueryParamsForNotifications(", index = str.indexOf(text);
   if (index < 0) return !1;
   index += text.length;
   let subsVar = str[index];

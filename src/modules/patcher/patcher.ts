@@ -990,7 +990,7 @@ if (this.baseStorageKey in window.BX_EXPOSED.overrideSettings) {
     },
 
     changeNotificationsSubscription(str: string) {
-        let text = ';buildSubscriptionQueryParamsForNotifications(';
+        let text = '}buildSubscriptionQueryParamsForNotifications(';
         let index = str.indexOf(text);
         if (index < 0) {
             return false;
