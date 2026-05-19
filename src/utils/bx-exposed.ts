@@ -158,6 +158,13 @@ export const BxExposed = {
                 titleInfo.details.hasFakeTouchSupport = true;
                 supportedInputTypes.push(SupportedInputType.GENERIC_TOUCH);
             }
+
+            // Use custom touch control for Forza Horizon 6
+            if (titleInfo.titleId === 'FORZAHORIZON6') {
+                titleInfo.details.supportedTabs = [];
+                titleInfo.details.hasTouchSupport = false;
+                supportedInputTypes = [SupportedInputType.CONTROLLER];
+            }
         }
 
         titleInfo.details.supportedInputTypes = supportedInputTypes;
