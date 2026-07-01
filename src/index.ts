@@ -223,7 +223,7 @@ BxEventBus.Script.on('ui.header.rendered', () => {
 BxEventBus.Stream.on('state.loading', () => {
     // Get title ID for screenshot's name
     if (window.location.pathname.includes('/launch/') && STATES.currentStream.titleInfo) {
-        STATES.currentStream.titleSlug = productTitleToSlug(STATES.currentStream.titleInfo.productInfo.title);
+        STATES.currentStream.titleSlug = productTitleToSlug(STATES.currentStream.titleInfo.product.title);
     } else {
         STATES.currentStream.titleSlug = 'remote-play';
     }

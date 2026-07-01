@@ -37,7 +37,7 @@ type XcloudTitleInfo = {
         hasMkbSupport: boolean;
     };
 
-    productInfo: {
+    product: {
         title: string;
         heroImageUrl: string;
         titledHeroImageUrl: string;

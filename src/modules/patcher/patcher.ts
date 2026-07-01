@@ -1375,7 +1375,8 @@ let PATCH_ORDERS = PatcherUtils.filterPatches([
     'gameCardCustomIcons',
     // 'gameCardPassTitle',
 
-    'enableTvRoutes',
+    // Disabled - caused problem in 29.29.17
+    // 'enableTvRoutes',
 
     'overrideStorageGetSettings',
 
