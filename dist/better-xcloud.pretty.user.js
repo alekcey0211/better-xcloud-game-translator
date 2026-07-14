@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better xCloud
 // @namespace    https://github.com/redphx
-// @version      6.7.11
+// @version      6.7.12-beta
 // @description  Improve Xbox Cloud Gaming (xCloud) experience
 // @author       redphx
 // @license      MIT
@@ -195,7 +195,7 @@ class UserAgent {
   });
  }
 }
-var SCRIPT_VERSION = "6.7.11", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
+var SCRIPT_VERSION = "6.7.12-beta", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
 UserAgent.init();
 var userAgent = window.navigator.userAgent.toLowerCase(), isTv = userAgent.includes("smart-tv") || userAgent.includes("smarttv") || /\baft.*\b/.test(userAgent), isVr = window.navigator.userAgent.includes("VR") && window.navigator.userAgent.includes("OculusBrowser"), browserHasTouchSupport = "ontouchstart" in window || navigator.maxTouchPoints > 0, userAgentHasTouchSupport = !isTv && !isVr && browserHasTouchSupport, STATES = {
  supportedRegion: !0,
@@ -8759,17 +8759,25 @@ class RemotePlayManager {
   try {
    GSSV_TOKEN = JSON.parse(localStorage.getItem("xboxcom_xbl_user_info")).tokens["http://gssv.xboxlive.com/"].token;
   } catch (e) {
+   let today = new Date;
    for (let i = 0;i < localStorage.length; i++) {
     let key = localStorage.key(i);
     if (!key.startsWith("Auth.User.")) continue;
-    let json = JSON.parse(localStorage.getItem(key));
-    for (let token of json.tokens) {
+    let authUser = JSON.parse(localStorage.getItem(key));
+    for (let token of authUser.tokens) {
      if (!token.relyingParty.includes("gssv.xboxlive.com")) continue;
-     GSSV_TOKEN = token.tokenData.token;
-     break;
+     let tokenData = token.tokenData;
+     if (new Date(tokenData.expiration) > today) {
+      GSSV_TOKEN = tokenData.token;
+      break;
+     }
     }
-    break;
+    if (GSSV_TOKEN) break;
    }
+  }
+  if (!GSSV_TOKEN) {
+   console.error("xHome: Could not get GSSV_TOKEN");
+   return;
   }
   let request = new Request("https://xhome.gssv-play-prod.xboxlive.com/v2/login/user", {
    method: "POST",

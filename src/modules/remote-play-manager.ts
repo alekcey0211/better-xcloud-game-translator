@@ -17,6 +17,21 @@ export const enum RemotePlayConsoleState {
     UNKNOWN = 'Unknown',
 }
 
+type AuthUserTokens = {
+    tokens: Array<{
+        identityType: 'XToken';
+        relyingParty: string;
+        tokenData: {
+            token: string;
+            expiration: string;
+            issueInstant: string;
+            userHash: string;
+            userConsents: string;
+        };
+        sandboxId: 'RETAIL';
+    }>;
+};
+
 type RemotePlayRegion = {
     name: string;
     baseUri: string;
@@ -105,24 +120,37 @@ export class RemotePlayManager {
         try {
             GSSV_TOKEN = JSON.parse(localStorage.getItem('xboxcom_xbl_user_info')!).tokens['http://gssv.xboxlive.com/'].token;
         } catch (e) {
+            const today = new Date();
+
             for (let i = 0; i < localStorage.length; i++){
                 const key = localStorage.key(i)!;
                 if (!key.startsWith('Auth.User.')) {
                     continue;
                 }
 
-                const json = JSON.parse(localStorage.getItem(key)!);
-                for (const token of json.tokens) {
+                const authUser = JSON.parse(localStorage.getItem(key)!) as AuthUserTokens;
+                for (const token of authUser.tokens) {
                     if (!token.relyingParty.includes('gssv.xboxlive.com')) {
                         continue;
                     }
 
-                    GSSV_TOKEN = token.tokenData.token;
-                    break;
+                    const tokenData = token.tokenData;
+                    const expiration = new Date(tokenData.expiration);
+                    if (expiration > today) {
+                        GSSV_TOKEN = tokenData.token;
+                        break;
+                    }
                 }
 
-                break;
+                if (GSSV_TOKEN) {
+                    break;
+                }
             }
+        }
+
+        if (!GSSV_TOKEN) {
+            console.error('xHome: Could not get GSSV_TOKEN');
+            return;
         }
 
         const request = new Request('https://xhome.gssv-play-prod.xboxlive.com/v2/login/user', {
