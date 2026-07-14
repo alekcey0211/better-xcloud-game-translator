@@ -7796,7 +7796,7 @@ class SettingsDialog extends NavigationDialog {
     continue;
    }
    if (!this.isSupportedVariant(section.requiredVariants)) continue;
-   if (!this.renderFullSettings && settingTab.group === "global" && section.group !== "general" && section.group !== "footer") continue;
+   if (!this.renderFullSettings && settingTab.group === "global" && section.group !== "general" && section.group !== "footer" && section.group !== "advanced") continue;
    let label = section.label;
    if (label === t("better-xcloud")) {
     if (label += " " + SCRIPT_VERSION, SCRIPT_VARIANT === "lite") label += " (Lite)";

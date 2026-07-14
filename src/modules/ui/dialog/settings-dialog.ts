@@ -983,7 +983,7 @@ export class SettingsDialog extends NavigationDialog {
             }
 
             // Don't render other settings in unsupported regions
-            if (!this.renderFullSettings && settingTab.group === 'global' && section.group !== 'general' && section.group !== 'footer') {
+            if (!this.renderFullSettings && settingTab.group === 'global' && section.group !== 'general' && section.group !== 'footer' && section.group !== 'advanced') {
                 continue;
             }
 
