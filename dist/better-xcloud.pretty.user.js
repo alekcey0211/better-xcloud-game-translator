@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better xCloud
 // @namespace    https://github.com/redphx
-// @version      6.7.12-game-translator
+// @version      6.7.12
 // @description  Improve Xbox Cloud Gaming (xCloud) experience
 // @author       redphx
 // @license      MIT
@@ -1100,7 +1100,7 @@ class UserAgent {
   });
  }
 }
-var SCRIPT_VERSION = "6.7.12-game-translator", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
+var SCRIPT_VERSION = "6.7.12", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
 UserAgent.init();
 var userAgent = window.navigator.userAgent.toLowerCase(), isTv = userAgent.includes("smart-tv") || userAgent.includes("smarttv") || /\baft.*\b/.test(userAgent), isVr = window.navigator.userAgent.includes("VR") && window.navigator.userAgent.includes("OculusBrowser"), browserHasTouchSupport = "ontouchstart" in window || navigator.maxTouchPoints > 0, userAgentHasTouchSupport = !isTv && !isVr && browserHasTouchSupport, STATES = {
  supportedRegion: !0,
@@ -1426,7 +1426,7 @@ var SUPPORTED_LANGUAGES = {
  "game-translator-debug-region": "Show OCR region and timings",
  "game-translator-enable": "Enable Game Translator",
  "game-translator-font-size": "Translation font size",
- "game-translator-ocr-interval": "OCR interval",
+ "game-translator-ocr-interval": "Subtitle scan interval",
  "game-translator-ocr-region": "OCR region",
  "game-translator-privacy-note": "OCR runs locally. Recognized English text and game context leave the device only when an online provider is selected.",
  "game-translator-provider": "Translation provider",
@@ -2350,8 +2350,10 @@ class GlobalSettingsStorage extends BaseSettingsStorage {
   "gameTranslator.ocr.interval": {
    requiredVariants: "full",
    label: t("game-translator-ocr-interval"),
-   default: "250",
+   default: "125",
    options: {
+    "100": "100 ms",
+    "125": "125 ms",
     "250": "250 ms",
     "333": "333 ms",
     "500": "500 ms",
@@ -11502,7 +11504,31 @@ class FrameChangeDetector {
   this.previousFrame = null;
  }
 }
-var DETECTION_WIDTH = 640, MAX_OCR_WIDTH = 1280, OCR_LINE_HEIGHT = 64, OCR_REGIONS = {
+function createOcrLayout(lines, sourceWidth, sourceHeight) {
+ let layouts = [...lines].sort((left, right) => left.y - right.y).map((line) => {
+  let cropWidth = Math.max(1, Math.round(line.width * sourceWidth)), cropHeight = Math.max(1, Math.round(line.height * sourceHeight));
+  return {
+   sourceX: Math.round(line.x * sourceWidth),
+   sourceY: Math.round(line.y * sourceHeight),
+   sourceWidth: cropWidth,
+   sourceHeight: cropHeight,
+   targetX: 0,
+   targetY: 0,
+   targetWidth: Math.min(sourceWidth, Math.max(1, Math.round(cropWidth * 48 / cropHeight))),
+   targetHeight: 48
+  };
+ }), width = Math.max(1, ...layouts.map((line) => line.targetWidth));
+ for (let index = 0;index < layouts.length; index++) {
+  let line = layouts[index];
+  line.targetX = Math.round((width - line.targetWidth) / 2), line.targetY = index * 60;
+ }
+ return {
+  width,
+  height: layouts.length ? layouts.length * 48 + (layouts.length - 1) * 12 : 1,
+  lines: layouts
+ };
+}
+var DETECTION_WIDTH = 640, MAX_OCR_WIDTH = 1280, OCR_REGIONS = {
  "top-35": { x: 0.05, y: 0.03, width: 0.9, height: 0.35 },
  "center-35": { x: 0.05, y: 0.325, width: 0.9, height: 0.35 },
  "bottom-35": { x: 0.05, y: 0.62, width: 0.9, height: 0.35 }
@@ -11511,7 +11537,7 @@ class TranslatorFrameCapture {
  screenshotManager = ScreenshotManager.getInstance();
  $detectionCanvas = document.createElement("canvas");
  $ocrSourceCanvas = document.createElement("canvas");
- $ocrLineCanvases = [];
+ $ocrCanvas = document.createElement("canvas");
  detectionContext;
  region;
  constructor(region) {
@@ -11551,20 +11577,16 @@ class TranslatorFrameCapture {
    region: this.region
   }))
    return null;
-  let canvases = [];
-  for (let index = 0;index < lines.length; index++) {
-   let line = lines[index], sourceX = Math.round(line.x * targetWidth), sourceY = Math.round(line.y * targetHeight), sourceWidth = Math.max(1, Math.round(line.width * targetWidth)), sourceHeight = Math.max(1, Math.round(line.height * targetHeight)), lineWidth = Math.min(MAX_OCR_WIDTH, Math.max(1, Math.round(sourceWidth * OCR_LINE_HEIGHT / sourceHeight))), $lineCanvas = this.$ocrLineCanvases[index] || document.createElement("canvas");
-   this.$ocrLineCanvases[index] = $lineCanvas, $lineCanvas.width = lineWidth, $lineCanvas.height = OCR_LINE_HEIGHT;
-   let context = $lineCanvas.getContext("2d", { alpha: !1 });
-   context.imageSmoothingEnabled = !0, context.imageSmoothingQuality = "high", context.filter = "grayscale(1) contrast(1.8)", context.drawImage(this.$ocrSourceCanvas, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, lineWidth, OCR_LINE_HEIGHT), canvases.push($lineCanvas);
-  }
-  return canvases;
+  let layout = createOcrLayout(lines, targetWidth, targetHeight);
+  if (this.$ocrCanvas.width !== layout.width || this.$ocrCanvas.height !== layout.height) this.$ocrCanvas.width = layout.width, this.$ocrCanvas.height = layout.height;
+  let context = this.$ocrCanvas.getContext("2d", { alpha: !1 });
+  context.fillStyle = "#000", context.fillRect(0, 0, layout.width, layout.height), context.imageSmoothingEnabled = !0, context.imageSmoothingQuality = "high", context.filter = "grayscale(1) contrast(1.8)";
+  for (let line of layout.lines)
+   context.drawImage(this.$ocrSourceCanvas, line.sourceX, line.sourceY, line.sourceWidth, line.sourceHeight, line.targetX, line.targetY, line.targetWidth, line.targetHeight);
+  return this.$ocrCanvas;
  }
  destroy() {
-  this.$detectionCanvas.width = 1, this.$detectionCanvas.height = 1, this.$ocrSourceCanvas.width = 1, this.$ocrSourceCanvas.height = 1;
-  for (let $canvas of this.$ocrLineCanvases)
-   $canvas.width = 1, $canvas.height = 1;
-  this.$ocrLineCanvases.length = 0;
+  this.$detectionCanvas.width = 1, this.$detectionCanvas.height = 1, this.$ocrSourceCanvas.width = 1, this.$ocrSourceCanvas.height = 1, this.$ocrCanvas.width = 1, this.$ocrCanvas.height = 1;
  }
 }
 var import_tesseract = __toESM(require_src(), 1);
@@ -11590,7 +11612,7 @@ class TesseractOcrEngine {
     errorHandler: (error) => BxLogger.error(this.LOG_TAG, error)
    }).then(async (worker) => {
     if (await worker.setParameters({
-     tessedit_pageseg_mode: import_tesseract.PSM.SINGLE_LINE,
+     tessedit_pageseg_mode: import_tesseract.PSM.SINGLE_BLOCK,
      preserve_interword_spaces: "1",
      user_defined_dpi: "180"
     }), this.terminated)
@@ -11599,15 +11621,11 @@ class TesseractOcrEngine {
    });
   return this.workerPromise;
  }
- async recognize(images) {
-  let worker = await this.getWorker(), lines = [], confidences = [];
-  for (let image of images) {
-   let result = await worker.recognize(image), line = cleanRecognizedLine(result.data.text, result.data.confidence);
-   if (line) lines.push(line), confidences.push(result.data.confidence);
-  }
+ async recognize(image) {
+  let result = await (await this.getWorker()).recognize(image);
   return {
-   text: lines.join(" "),
-   confidence: confidences.length ? confidences.reduce((sum, confidence) => sum + confidence, 0) / confidences.length : 0
+   text: cleanRecognizedLine(result.data.text, result.data.confidence),
+   confidence: result.data.confidence
   };
  }
  async terminate() {
@@ -11669,7 +11687,34 @@ class SubtitleDetector {
     for (let x = Math.max(0, firstColumn - 2);x <= Math.min(width - 1, lastColumn + 2); x++)
      if (ink[y * width + x]) signature[Math.floor(y / 4) * signatureWidth + Math.floor(x / 4)] = 1;
   }
+  if (lines.length > 3) lines.length = 0, signature.fill(0);
   return { lines, signature };
+ }
+}
+function centerX(line) {
+ return line.x + line.width / 2;
+}
+function centerY(line) {
+ return line.y + line.height / 2;
+}
+function haveSimilarSubtitlePositions(left, right) {
+ if (left.length !== right.length) return !1;
+ return left.every((line, index) => {
+  let other = right[index];
+  return Math.abs(centerX(line) - centerX(other)) <= 0.15 && Math.abs(centerY(line) - centerY(other)) <= 0.08 && Math.abs(line.height - other.height) <= 0.08;
+ });
+}
+class SubtitleTracker {
+ candidateLines = null;
+ matchingFrames = 0;
+ update(lines) {
+  let sortedLines = [...lines].sort((left, right) => left.y - right.y);
+  if (this.candidateLines && haveSimilarSubtitlePositions(this.candidateLines, sortedLines)) this.candidateLines = sortedLines, this.matchingFrames++;
+  else this.candidateLines = sortedLines, this.matchingFrames = 1;
+  return this.matchingFrames >= 2 ? sortedLines : null;
+ }
+ reset() {
+  this.candidateLines = null, this.matchingFrames = 0;
  }
 }
 function normalizeDisplayText(text) {
@@ -11971,6 +12016,7 @@ class GameTranslator {
  LOG_TAG = "GameTranslator";
  changeDetector = new FrameChangeDetector;
  subtitleDetector = new SubtitleDetector;
+ subtitleTracker = new SubtitleTracker;
  translationService = new TranslationService(() => getGlobalPref("gameTranslator.deepl.proxyUrl"));
  translationContext = new GameTranslationContext;
  settings = readSettings();
@@ -11978,7 +12024,9 @@ class GameTranslator {
  ocrEngine = null;
  stabilizer = null;
  overlay = null;
+ $video = null;
  timerId = null;
+ videoFrameCallbackId = null;
  translationAbortController = null;
  providerPreparationId = 0;
  sessionId = 0;
@@ -12004,7 +12052,7 @@ class GameTranslator {
    return;
   }
   let sessionId = ++this.sessionId;
-  this.initializeTranslationContext(sessionId), this.disabledByError = !1, this.analyzePending = !1, this.frameCapture = new TranslatorFrameCapture(this.settings.ocrRegion), this.ocrEngine = new TesseractOcrEngine, this.stabilizer = new TextStabilizer(this.settings.stabilizationInterval, (text) => {
+  this.initializeTranslationContext(sessionId), this.disabledByError = !1, this.analyzePending = !1, this.frameCapture = new TranslatorFrameCapture(this.settings.ocrRegion), this.$video = $video, this.ocrEngine = new TesseractOcrEngine, this.stabilizer = new TextStabilizer(this.settings.stabilizationInterval, (text) => {
    if (sessionId === this.sessionId) this.onStableText(text, sessionId);
   }), this.overlay = new TranslationOverlay($video, this.settings), this.debugMetrics = { interval: this.settings.ocrInterval }, this.overlay.updateDebug(this.debugMetrics), this.updateOverlayGeometry(), this.startTimer(sessionId), this.prepareProvider(), BxLogger.info(this.LOG_TAG, "Started", {
    captureInterval: this.settings.ocrInterval,
@@ -12013,9 +12061,25 @@ class GameTranslator {
   });
  }
  startTimer(sessionId) {
-  this.timerId && window.clearInterval(this.timerId), this.timerId = window.setInterval(() => {
-   this.analyze(sessionId);
-  }, this.settings.ocrInterval), this.analyze(sessionId);
+  this.cancelScheduledAnalysis(), this.analyze(sessionId), this.scheduleNextAnalysis(sessionId);
+ }
+ scheduleNextAnalysis(sessionId) {
+  this.timerId = window.setTimeout(() => {
+   if (this.timerId = null, sessionId !== this.sessionId || this.disabledByError) return;
+   let $video = this.$video;
+   if ($video && "requestVideoFrameCallback" in $video) {
+    this.videoFrameCallbackId = $video.requestVideoFrameCallback(() => {
+     if (this.videoFrameCallbackId = null, sessionId !== this.sessionId || this.disabledByError) return;
+     this.analyze(sessionId), this.scheduleNextAnalysis(sessionId);
+    });
+    return;
+   }
+   this.analyze(sessionId), this.scheduleNextAnalysis(sessionId);
+  }, this.settings.ocrInterval);
+ }
+ cancelScheduledAnalysis() {
+  if (this.timerId !== null) window.clearTimeout(this.timerId), this.timerId = null;
+  if (this.videoFrameCallbackId !== null && this.$video && "cancelVideoFrameCallback" in this.$video) this.$video.cancelVideoFrameCallback(this.videoFrameCallbackId), this.videoFrameCallbackId = null;
  }
  async analyze(sessionId) {
   if (sessionId !== this.sessionId || this.disabledByError) return;
@@ -12034,20 +12098,24 @@ class GameTranslator {
    return;
   }
   if (!detectionFrame) return;
-  let detection = this.subtitleDetector.detect(detectionFrame), changeScore = this.changeDetector.compare(detection.signature);
-  if (this.debugMetrics.changeScore = changeScore, this.debugMetrics.candidates = detection.lines.length, this.overlay?.updateDebug(this.debugMetrics), BxLogger.info(this.LOG_TAG, "Frame change", changeScore), !detection.lines.length) {
+  let detection = this.subtitleDetector.detect(detectionFrame);
+  this.debugMetrics.candidates = detection.lines.length, this.overlay?.updateDebug(this.debugMetrics);
+  let trackedLines = this.subtitleTracker.update(detection.lines);
+  if (trackedLines === null) return;
+  let changeScore = this.changeDetector.compare(detection.signature);
+  if (this.debugMetrics.changeScore = changeScore, this.overlay?.updateDebug(this.debugMetrics), BxLogger.info(this.LOG_TAG, "Frame change", changeScore), !trackedLines.length) {
    this.stabilizer?.push("");
    return;
   }
   if (changeScore < this.settings.changeThreshold) return;
   let $ocrCanvas;
   try {
-   $ocrCanvas = frameCapture.captureForOcr(detection.lines);
+   $ocrCanvas = frameCapture.captureForOcr(trackedLines);
   } catch (error) {
    this.handleCaptureError(error);
    return;
   }
-  if (!$ocrCanvas?.length) return;
+  if (!$ocrCanvas) return;
   this.ocrBusy = !0;
   let startedAt = performance.now();
   try {
@@ -12062,7 +12130,8 @@ class GameTranslator {
   } catch (error) {
    if (sessionId === this.sessionId) this.handleOcrError(error);
   } finally {
-   if (this.ocrBusy = !1, this.analyzePending && sessionId === this.sessionId) this.analyzePending = !1, this.analyze(sessionId);
+   if (sessionId === this.sessionId) this.ocrBusy = !1;
+   if (this.analyzePending && sessionId === this.sessionId) this.analyzePending = !1, this.analyze(sessionId);
   }
  }
  async onStableText(text, sessionId) {
@@ -12089,10 +12158,10 @@ class GameTranslator {
   }
  }
  handleOcrError(error) {
-  this.disabledByError = !0, this.timerId && window.clearInterval(this.timerId), this.timerId = null, BxLogger.error(this.LOG_TAG, "OCR unavailable", error), this.overlay?.showError("OCR unavailable (check CSP/network access)"), Toast.show("Game Translator", "OCR unavailable");
+  this.disabledByError = !0, this.cancelScheduledAnalysis(), BxLogger.error(this.LOG_TAG, "OCR unavailable", error), this.overlay?.showError("OCR unavailable (check CSP/network access)"), Toast.show("Game Translator", "OCR unavailable");
  }
  handleCaptureError(error) {
-  this.disabledByError = !0, this.timerId && window.clearInterval(this.timerId), this.timerId = null, BxLogger.error(this.LOG_TAG, "Frame capture unavailable", error), this.overlay?.showError("Frame capture unavailable"), Toast.show("Game Translator", "Frame capture unavailable");
+  this.disabledByError = !0, this.cancelScheduledAnalysis(), BxLogger.error(this.LOG_TAG, "Frame capture unavailable", error), this.overlay?.showError("Frame capture unavailable"), Toast.show("Game Translator", "Frame capture unavailable");
  }
  updateOverlayGeometry() {
   let frameCapture = this.frameCapture;
@@ -12117,7 +12186,7 @@ class GameTranslator {
   if (providerChanged && this.settings.provider === "deepl-context") this.loadGameDescription(this.sessionId);
   if (providerChanged || providerConfigChanged || !previousSettings.enabled) this.prepareProvider();
   if (!this.frameCapture || !this.overlay || !this.stabilizer) return;
-  if (this.frameCapture.setRegion(this.settings.ocrRegion), this.changeDetector.reset(), this.stabilizer.setDelay(this.settings.stabilizationInterval), this.overlay.applySettings(this.settings), this.updateOverlayGeometry(), previousSettings.ocrInterval !== this.settings.ocrInterval) this.debugMetrics.interval = this.settings.ocrInterval, this.startTimer(this.sessionId);
+  if (this.frameCapture.setRegion(this.settings.ocrRegion), this.changeDetector.reset(), this.subtitleTracker.reset(), this.stabilizer.setDelay(this.settings.stabilizationInterval), this.overlay.applySettings(this.settings), this.updateOverlayGeometry(), previousSettings.ocrInterval !== this.settings.ocrInterval) this.debugMetrics.interval = this.settings.ocrInterval, this.startTimer(this.sessionId);
  }
  prepareProvider() {
   if (this.settings.provider === "my-memory") return;
@@ -12152,7 +12221,7 @@ class GameTranslator {
   });
  }
  stop() {
-  this.sessionId++, this.providerPreparationId++, this.timerId && window.clearInterval(this.timerId), this.timerId = null, this.translationAbortController?.abort(), this.translationAbortController = null, this.translationService.destroy(), this.translationContext.reset(), this.stabilizer?.reset(), this.stabilizer = null, this.changeDetector.reset(), this.frameCapture?.destroy(), this.frameCapture = null, this.overlay?.destroy(), this.overlay = null;
+  this.sessionId++, this.providerPreparationId++, this.cancelScheduledAnalysis(), this.$video = null, this.translationAbortController?.abort(), this.translationAbortController = null, this.translationService.destroy(), this.translationContext.reset(), this.stabilizer?.reset(), this.stabilizer = null, this.changeDetector.reset(), this.subtitleTracker.reset(), this.frameCapture?.destroy(), this.frameCapture = null, this.overlay?.destroy(), this.overlay = null;
   let ocrEngine = this.ocrEngine;
   this.ocrEngine = null, ocrEngine && ocrEngine.terminate(), this.ocrBusy = !1, this.analyzePending = !1, this.disabledByError = !1, BxLogger.info(this.LOG_TAG, "Stopped");
  }

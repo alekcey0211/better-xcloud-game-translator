@@ -17,6 +17,7 @@ const MIN_LUMINANCE = 135;
 const MAX_NEUTRAL_SATURATION = 90;
 const VERY_BRIGHT_LUMINANCE = 205;
 const MIN_LOCAL_CONTRAST = 24;
+const MAX_SUBTITLE_LINES = 3;
 
 function getLuminance(red: number, green: number, blue: number) {
     return (54 * red + 183 * green + 19 * blue) >> 8;
@@ -139,6 +140,11 @@ export class SubtitleDetector {
                     }
                 }
             }
+        }
+
+        if (lines.length > MAX_SUBTITLE_LINES) {
+            lines.length = 0;
+            signature.fill(0);
         }
 
         return { lines, signature };

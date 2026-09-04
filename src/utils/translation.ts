@@ -145,7 +145,7 @@ const Texts = {
     "game-translator-debug-region": "Show OCR region and timings",
     "game-translator-enable": "Enable Game Translator",
     "game-translator-font-size": "Translation font size",
-    "game-translator-ocr-interval": "OCR interval",
+    "game-translator-ocr-interval": "Subtitle scan interval",
     "game-translator-ocr-region": "OCR region",
     "game-translator-privacy-note": "OCR runs locally. Recognized English text and game context leave the device only when an online provider is selected.",
     "game-translator-provider": "Translation provider",

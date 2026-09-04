@@ -6,7 +6,7 @@ const TESSERACT_VERSION = '7.0.0';
 const TESSERACT_CORE_VERSION = '7.0.0';
 
 export interface OcrEngine {
-    recognize(images: HTMLCanvasElement[]): Promise<OcrResult>;
+    recognize(image: HTMLCanvasElement): Promise<OcrResult>;
     terminate(): Promise<void>;
 }
 
@@ -47,7 +47,7 @@ export class TesseractOcrEngine implements OcrEngine {
                 errorHandler: error => BxLogger.error(this.LOG_TAG, error),
             }).then(async worker => {
                 await worker.setParameters({
-                    tessedit_pageseg_mode: PSM.SINGLE_LINE,
+                    tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
                     preserve_interword_spaces: '1',
                     user_defined_dpi: '180',
                 });
@@ -65,24 +65,13 @@ export class TesseractOcrEngine implements OcrEngine {
         return this.workerPromise;
     }
 
-    async recognize(images: HTMLCanvasElement[]) {
+    async recognize(image: HTMLCanvasElement) {
         const worker = await this.getWorker();
-        const lines: string[] = [];
-        const confidences: number[] = [];
-        for (const image of images) {
-            const result = await worker.recognize(image);
-            const line = cleanRecognizedLine(result.data.text, result.data.confidence);
-            if (line) {
-                lines.push(line);
-                confidences.push(result.data.confidence);
-            }
-        }
+        const result = await worker.recognize(image);
 
         return {
-            text: lines.join(' '),
-            confidence: confidences.length
-                ? confidences.reduce((sum, confidence) => sum + confidence, 0) / confidences.length
-                : 0,
+            text: cleanRecognizedLine(result.data.text, result.data.confidence),
+            confidence: result.data.confidence,
         };
     }
 

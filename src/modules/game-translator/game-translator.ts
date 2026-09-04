@@ -13,6 +13,7 @@ import { FrameChangeDetector } from "./frame-change-detector";
 import { TranslatorFrameCapture } from "./frame-capture";
 import { TesseractOcrEngine } from "./ocr-engine";
 import { SubtitleDetector } from "./subtitle-detector";
+import { SubtitleTracker } from "./subtitle-tracker";
 import { looksLikeCompleteSubtitle, TextStabilizer } from "./text-stabilizer";
 import { GameTranslationContext } from "./translation-context";
 import { TranslationOverlay, type TranslationOverlaySettings } from "./translation-overlay";
@@ -66,6 +67,7 @@ export class GameTranslator {
 
     private readonly changeDetector = new FrameChangeDetector();
     private readonly subtitleDetector = new SubtitleDetector();
+    private readonly subtitleTracker = new SubtitleTracker();
     private readonly translationService = new TranslationService(
         () => getGlobalPref(GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL),
     );
@@ -75,7 +77,9 @@ export class GameTranslator {
     private ocrEngine: TesseractOcrEngine | null = null;
     private stabilizer: TextStabilizer | null = null;
     private overlay: TranslationOverlay | null = null;
+    private $video: HTMLVideoElement | null = null;
     private timerId: number | null = null;
+    private videoFrameCallbackId: number | null = null;
     private translationAbortController: AbortController | null = null;
     private providerPreparationId = 0;
     private sessionId = 0;
@@ -131,6 +135,7 @@ export class GameTranslator {
         this.disabledByError = false;
         this.analyzePending = false;
         this.frameCapture = new TranslatorFrameCapture(this.settings.ocrRegion);
+        this.$video = $video;
         this.ocrEngine = new TesseractOcrEngine();
         this.stabilizer = new TextStabilizer(this.settings.stabilizationInterval, text => {
             if (sessionId === this.sessionId) {
@@ -152,11 +157,46 @@ export class GameTranslator {
     }
 
     private startTimer(sessionId: number) {
-        this.timerId && window.clearInterval(this.timerId);
-        this.timerId = window.setInterval(() => {
-            void this.analyze(sessionId);
-        }, this.settings.ocrInterval);
+        this.cancelScheduledAnalysis();
         void this.analyze(sessionId);
+        this.scheduleNextAnalysis(sessionId);
+    }
+
+    private scheduleNextAnalysis(sessionId: number) {
+        this.timerId = window.setTimeout(() => {
+            this.timerId = null;
+            if (sessionId !== this.sessionId || this.disabledByError) {
+                return;
+            }
+
+            const $video = this.$video;
+            if ($video && 'requestVideoFrameCallback' in $video) {
+                this.videoFrameCallbackId = $video.requestVideoFrameCallback(() => {
+                    this.videoFrameCallbackId = null;
+                    if (sessionId !== this.sessionId || this.disabledByError) {
+                        return;
+                    }
+
+                    void this.analyze(sessionId);
+                    this.scheduleNextAnalysis(sessionId);
+                });
+                return;
+            }
+
+            void this.analyze(sessionId);
+            this.scheduleNextAnalysis(sessionId);
+        }, this.settings.ocrInterval);
+    }
+
+    private cancelScheduledAnalysis() {
+        if (this.timerId !== null) {
+            window.clearTimeout(this.timerId);
+            this.timerId = null;
+        }
+        if (this.videoFrameCallbackId !== null && this.$video && 'cancelVideoFrameCallback' in this.$video) {
+            this.$video.cancelVideoFrameCallback(this.videoFrameCallbackId);
+            this.videoFrameCallbackId = null;
+        }
     }
 
     private async analyze(sessionId: number) {
@@ -187,12 +227,18 @@ export class GameTranslator {
         }
 
         const detection = this.subtitleDetector.detect(detectionFrame);
-        const changeScore = this.changeDetector.compare(detection.signature);
-        this.debugMetrics.changeScore = changeScore;
         this.debugMetrics.candidates = detection.lines.length;
         this.overlay?.updateDebug(this.debugMetrics);
+        const trackedLines = this.subtitleTracker.update(detection.lines);
+        if (trackedLines === null) {
+            return;
+        }
+
+        const changeScore = this.changeDetector.compare(detection.signature);
+        this.debugMetrics.changeScore = changeScore;
+        this.overlay?.updateDebug(this.debugMetrics);
         BxLogger.info(this.LOG_TAG, 'Frame change', changeScore);
-        if (!detection.lines.length) {
+        if (!trackedLines.length) {
             this.stabilizer?.push('');
             return;
         }
@@ -202,12 +248,12 @@ export class GameTranslator {
 
         let $ocrCanvas;
         try {
-            $ocrCanvas = frameCapture.captureForOcr(detection.lines);
+            $ocrCanvas = frameCapture.captureForOcr(trackedLines);
         } catch (error) {
             this.handleCaptureError(error);
             return;
         }
-        if (!$ocrCanvas?.length) {
+        if (!$ocrCanvas) {
             return;
         }
 
@@ -237,7 +283,9 @@ export class GameTranslator {
                 this.handleOcrError(error);
             }
         } finally {
-            this.ocrBusy = false;
+            if (sessionId === this.sessionId) {
+                this.ocrBusy = false;
+            }
             if (this.analyzePending && sessionId === this.sessionId) {
                 this.analyzePending = false;
                 void this.analyze(sessionId);
@@ -287,8 +335,7 @@ export class GameTranslator {
 
     private handleOcrError(error: unknown) {
         this.disabledByError = true;
-        this.timerId && window.clearInterval(this.timerId);
-        this.timerId = null;
+        this.cancelScheduledAnalysis();
         BxLogger.error(this.LOG_TAG, 'OCR unavailable', error);
         this.overlay?.showError('OCR unavailable (check CSP/network access)');
         Toast.show('Game Translator', 'OCR unavailable');
@@ -296,8 +343,7 @@ export class GameTranslator {
 
     private handleCaptureError(error: unknown) {
         this.disabledByError = true;
-        this.timerId && window.clearInterval(this.timerId);
-        this.timerId = null;
+        this.cancelScheduledAnalysis();
         BxLogger.error(this.LOG_TAG, 'Frame capture unavailable', error);
         this.overlay?.showError('Frame capture unavailable');
         Toast.show('Game Translator', 'Frame capture unavailable');
@@ -350,6 +396,7 @@ export class GameTranslator {
 
         this.frameCapture.setRegion(this.settings.ocrRegion);
         this.changeDetector.reset();
+        this.subtitleTracker.reset();
         this.stabilizer.setDelay(this.settings.stabilizationInterval);
         this.overlay.applySettings(this.settings);
         this.updateOverlayGeometry();
@@ -425,8 +472,8 @@ export class GameTranslator {
     private stop() {
         this.sessionId++;
         this.providerPreparationId++;
-        this.timerId && window.clearInterval(this.timerId);
-        this.timerId = null;
+        this.cancelScheduledAnalysis();
+        this.$video = null;
         this.translationAbortController?.abort();
         this.translationAbortController = null;
         this.translationService.destroy();
@@ -434,6 +481,7 @@ export class GameTranslator {
         this.stabilizer?.reset();
         this.stabilizer = null;
         this.changeDetector.reset();
+        this.subtitleTracker.reset();
         this.frameCapture?.destroy();
         this.frameCapture = null;
         this.overlay?.destroy();

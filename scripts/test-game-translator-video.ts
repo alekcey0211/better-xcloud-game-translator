@@ -4,7 +4,9 @@ import { resolve } from "node:path";
 
 import { createWorker, OEM, PSM } from "tesseract.js";
 
+import { createOcrLayout } from "../src/modules/game-translator/ocr-layout.ts";
 import { SubtitleDetector, type PixelFrame, type SubtitleLine } from "../src/modules/game-translator/subtitle-detector.ts";
+import { SubtitleTracker } from "../src/modules/game-translator/subtitle-tracker.ts";
 import { normalizeText } from "../src/modules/game-translator/text-stabilizer.ts";
 
 const OCR_REGION = { x: 0.05, y: 0.62, width: 0.9, height: 0.35 };
@@ -70,26 +72,34 @@ function captureRegion(videoPath: string, time: number, targetWidth: number, vid
     };
 }
 
-function createPgm(frame: PixelFrame, line: SubtitleLine) {
-    const x0 = Math.round(line.x * frame.width);
-    const y0 = Math.round(line.y * frame.height);
-    const width = Math.max(1, Math.round(line.width * frame.width));
-    const height = Math.max(1, Math.round(line.height * frame.height));
-    const pixels = Buffer.alloc(width * height);
+function createPgm(frame: PixelFrame, lines: SubtitleLine[]) {
+    const layout = createOcrLayout(lines, frame.width, frame.height);
+    const pixels = Buffer.alloc(layout.width * layout.height);
 
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const sourceIndex = ((y0 + y) * frame.width + x0 + x) * 4;
-            const luminance = (
-                54 * frame.data[sourceIndex]
-                + 183 * frame.data[sourceIndex + 1]
-                + 19 * frame.data[sourceIndex + 2]
-            ) >> 8;
-            pixels[y * width + x] = Math.max(0, Math.min(255, Math.round((luminance - 128) * 1.8 + 128)));
+    for (const line of layout.lines) {
+        for (let y = 0; y < line.targetHeight; y++) {
+            const sourceY = Math.min(
+                frame.height - 1,
+                line.sourceY + Math.floor(y * line.sourceHeight / line.targetHeight),
+            );
+            for (let x = 0; x < line.targetWidth; x++) {
+                const sourceX = Math.min(
+                    frame.width - 1,
+                    line.sourceX + Math.floor(x * line.sourceWidth / line.targetWidth),
+                );
+                const sourceIndex = (sourceY * frame.width + sourceX) * 4;
+                const luminance = (
+                    54 * frame.data[sourceIndex]
+                    + 183 * frame.data[sourceIndex + 1]
+                    + 19 * frame.data[sourceIndex + 2]
+                ) >> 8;
+                const targetIndex = (line.targetY + y) * layout.width + line.targetX + x;
+                pixels[targetIndex] = Math.max(0, Math.min(255, Math.round((luminance - 128) * 1.8 + 128)));
+            }
         }
     }
 
-    return Buffer.concat([Buffer.from(`P5\n${width} ${height}\n255\n`), pixels]);
+    return Buffer.concat([Buffer.from(`P5\n${layout.width} ${layout.height}\n255\n`), pixels]);
 }
 
 const videoPath = process.argv[2] && resolve(process.argv[2]);
@@ -106,7 +116,7 @@ const worker = await createWorker('eng', OEM.LSTM_ONLY, {
     cachePath: '.cache/tesseract',
 });
 await worker.setParameters({
-    tessedit_pageseg_mode: PSM.SINGLE_LINE,
+    tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
     preserve_interword_spaces: '1',
     user_defined_dpi: '180',
 });
@@ -114,19 +124,23 @@ await worker.setParameters({
 let failed = false;
 try {
     for (const sample of samples) {
-        const detectionFrame = captureRegion(videoPath, sample.time, DETECTION_WIDTH, videoSize);
+        const tracker = new SubtitleTracker();
+        const firstDetectionFrame = captureRegion(videoPath, sample.time, DETECTION_WIDTH, videoSize);
+        tracker.update(detector.detect(firstDetectionFrame).lines);
+        const confirmedTime = sample.time + 0.125;
+        const detectionFrame = captureRegion(videoPath, confirmedTime, DETECTION_WIDTH, videoSize);
         const detection = detector.detect(detectionFrame);
-        const ocrFrame = captureRegion(videoPath, sample.time, OCR_WIDTH, videoSize);
-        const recognizedLines: string[] = [];
+        const lines = tracker.update(detection.lines) || [];
+        const ocrFrame = captureRegion(videoPath, confirmedTime, OCR_WIDTH, videoSize);
         const startedAt = performance.now();
-        for (const line of detection.lines) {
-            const result = await worker.recognize(createPgm(ocrFrame, line));
+        let text = '';
+        if (lines.length) {
+            const result = await worker.recognize(createPgm(ocrFrame, lines));
             if (result.data.confidence >= 35) {
-                recognizedLines.push(result.data.text.replace(/\s+/g, ' ').trim());
+                text = result.data.text.replace(/\s+/g, ' ').trim();
             }
         }
 
-        const text = recognizedLines.join(' ');
         const normalized = normalizeText(text);
         const missing = sample.expected.filter(fragment => !normalized.includes(normalizeText(fragment)));
         const passed = sample.expected.length ? !missing.length : !text;
@@ -134,7 +148,8 @@ try {
         console.log(
             `${passed ? '✓' : '✗'} ${sample.time.toFixed(1)}s`,
             `${Math.round(performance.now() - startedAt)}ms`,
-            `lines=${detection.lines.length}`,
+            `lines=${lines.length}`,
+            `ocrCalls=${lines.length ? 1 : 0}`,
             JSON.stringify(text),
             missing.length ? `missing=${JSON.stringify(missing)}` : '',
         );

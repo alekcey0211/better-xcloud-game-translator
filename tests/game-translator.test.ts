@@ -4,7 +4,9 @@ import test from "node:test";
 import { FrameChangeDetector } from "../src/modules/game-translator/frame-change-detector.ts";
 import { BrowserTranslationProvider } from "../src/modules/game-translator/browser-translation-provider.ts";
 import { DeepLContextTranslationProvider } from "../src/modules/game-translator/deepl-context-translation-provider.ts";
+import { createOcrLayout, OCR_LINE_GAP, OCR_LINE_HEIGHT } from "../src/modules/game-translator/ocr-layout.ts";
 import { SubtitleDetector } from "../src/modules/game-translator/subtitle-detector.ts";
+import { SubtitleTracker } from "../src/modules/game-translator/subtitle-tracker.ts";
 import { looksLikeCompleteSubtitle, normalizeText, TextStabilizer } from "../src/modules/game-translator/text-stabilizer.ts";
 import { buildDeepLContext, GameTranslationContext } from "../src/modules/game-translator/translation-context.ts";
 
@@ -49,6 +51,44 @@ test('subtitle detector accepts centered text-like lines and rejects corner UI',
     const corner = detector.detect(cornerFrame);
     assert.equal(corner.lines.length, 0);
     assert.ok(!corner.signature.some(Boolean));
+});
+
+test('subtitle detector rejects menu-like blocks with more than three lines', () => {
+    const detector = new SubtitleDetector();
+    const frame = createFrame();
+    for (const y of [66, 79, 92, 105]) {
+        drawSubtitleStrokes(frame, 210, 430, y);
+    }
+
+    const detection = detector.detect(frame);
+    assert.equal(detection.lines.length, 0);
+    assert.ok(!detection.signature.some(Boolean));
+});
+
+test('subtitle tracker waits for a stable position and debounces disappearance', () => {
+    const tracker = new SubtitleTracker();
+    const line = { x: 0.3, y: 0.65, width: 0.4, height: 0.08 };
+
+    assert.equal(tracker.update([line]), null);
+    assert.deepEqual(tracker.update([{ ...line, x: 0.31 }]), [{ ...line, x: 0.31 }]);
+    assert.deepEqual(tracker.update([{ ...line, x: 0.29 }]), [{ ...line, x: 0.29 }]);
+    assert.equal(tracker.update([]), null);
+    assert.deepEqual(tracker.update([]), []);
+});
+
+test('OCR layout combines subtitle lines into one compact image in reading order', () => {
+    const layout = createOcrLayout([
+        { x: 0.25, y: 0.7, width: 0.5, height: 0.1 },
+        { x: 0.3, y: 0.5, width: 0.4, height: 0.1 },
+    ], 1000, 400);
+
+    assert.equal(layout.lines.length, 2);
+    assert.equal(layout.lines[0].sourceY, 200);
+    assert.equal(layout.lines[1].sourceY, 280);
+    assert.equal(layout.lines[0].targetY, 0);
+    assert.equal(layout.lines[1].targetY, OCR_LINE_HEIGHT + OCR_LINE_GAP);
+    assert.equal(layout.height, OCR_LINE_HEIGHT * 2 + OCR_LINE_GAP);
+    assert.equal(layout.width, Math.round(500 * OCR_LINE_HEIGHT / 40));
 });
 
 test('subtitle-aware change score ignores empty frames and detects changed text', () => {

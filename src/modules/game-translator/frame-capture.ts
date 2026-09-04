@@ -2,11 +2,11 @@ import { GameTranslatorOcrRegion } from "@/enums/pref-values";
 import { StreamPlayerElement } from "@/modules/player/base-stream-player";
 import { ScreenshotManager, type NormalizedFrameRegion } from "@/utils/screenshot-manager";
 
+import { createOcrLayout } from "./ocr-layout";
 import type { SubtitleLine } from "./subtitle-detector";
 
 const DETECTION_WIDTH = 640;
 const MAX_OCR_WIDTH = 1280;
-const OCR_LINE_HEIGHT = 64;
 
 const OCR_REGIONS: Record<GameTranslatorOcrRegion, NormalizedFrameRegion> = {
     [GameTranslatorOcrRegion.TOP]: { x: 0.05, y: 0.03, width: 0.9, height: 0.35 },
@@ -18,7 +18,7 @@ export class TranslatorFrameCapture {
     private readonly screenshotManager = ScreenshotManager.getInstance();
     private readonly $detectionCanvas = document.createElement('canvas');
     private readonly $ocrSourceCanvas = document.createElement('canvas');
-    private readonly $ocrLineCanvases: HTMLCanvasElement[] = [];
+    private readonly $ocrCanvas = document.createElement('canvas');
     private readonly detectionContext: CanvasRenderingContext2D;
     private region: NormalizedFrameRegion;
 
@@ -93,38 +93,33 @@ export class TranslatorFrameCapture {
             return null;
         }
 
-        const canvases: HTMLCanvasElement[] = [];
-        for (let index = 0; index < lines.length; index++) {
-            const line = lines[index];
-            const sourceX = Math.round(line.x * targetWidth);
-            const sourceY = Math.round(line.y * targetHeight);
-            const sourceWidth = Math.max(1, Math.round(line.width * targetWidth));
-            const sourceHeight = Math.max(1, Math.round(line.height * targetHeight));
-            const lineWidth = Math.min(MAX_OCR_WIDTH, Math.max(1, Math.round(sourceWidth * OCR_LINE_HEIGHT / sourceHeight)));
-            const $lineCanvas = this.$ocrLineCanvases[index] || document.createElement('canvas');
-            this.$ocrLineCanvases[index] = $lineCanvas;
-            $lineCanvas.width = lineWidth;
-            $lineCanvas.height = OCR_LINE_HEIGHT;
-
-            const context = $lineCanvas.getContext('2d', { alpha: false })!;
-            context.imageSmoothingEnabled = true;
-            context.imageSmoothingQuality = 'high';
-            context.filter = 'grayscale(1) contrast(1.8)';
-            context.drawImage(
-                this.$ocrSourceCanvas,
-                sourceX,
-                sourceY,
-                sourceWidth,
-                sourceHeight,
-                0,
-                0,
-                lineWidth,
-                OCR_LINE_HEIGHT,
-            );
-            canvases.push($lineCanvas);
+        const layout = createOcrLayout(lines, targetWidth, targetHeight);
+        if (this.$ocrCanvas.width !== layout.width || this.$ocrCanvas.height !== layout.height) {
+            this.$ocrCanvas.width = layout.width;
+            this.$ocrCanvas.height = layout.height;
         }
 
-        return canvases;
+        const context = this.$ocrCanvas.getContext('2d', { alpha: false })!;
+        context.fillStyle = '#000';
+        context.fillRect(0, 0, layout.width, layout.height);
+        context.imageSmoothingEnabled = true;
+        context.imageSmoothingQuality = 'high';
+        context.filter = 'grayscale(1) contrast(1.8)';
+        for (const line of layout.lines) {
+            context.drawImage(
+                this.$ocrSourceCanvas,
+                line.sourceX,
+                line.sourceY,
+                line.sourceWidth,
+                line.sourceHeight,
+                line.targetX,
+                line.targetY,
+                line.targetWidth,
+                line.targetHeight,
+            );
+        }
+
+        return this.$ocrCanvas;
     }
 
     destroy() {
@@ -132,10 +127,7 @@ export class TranslatorFrameCapture {
         this.$detectionCanvas.height = 1;
         this.$ocrSourceCanvas.width = 1;
         this.$ocrSourceCanvas.height = 1;
-        for (const $canvas of this.$ocrLineCanvases) {
-            $canvas.width = 1;
-            $canvas.height = 1;
-        }
-        this.$ocrLineCanvases.length = 0;
+        this.$ocrCanvas.width = 1;
+        this.$ocrCanvas.height = 1;
     }
 }

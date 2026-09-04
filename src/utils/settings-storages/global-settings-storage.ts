@@ -207,8 +207,10 @@ export class GlobalSettingsStorage extends BaseSettingsStorage<GlobalPref> {
         [GlobalPref.GAME_TRANSLATOR_OCR_INTERVAL]: {
             requiredVariants: 'full',
             label: t('game-translator-ocr-interval'),
-            default: '250',
+            default: '125',
             options: {
+                '100': '100 ms',
+                '125': '125 ms',
                 '250': '250 ms',
                 '333': '333 ms',
                 '500': '500 ms',
