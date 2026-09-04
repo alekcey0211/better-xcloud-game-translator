@@ -5,6 +5,7 @@ import { FrameChangeDetector } from "../src/modules/game-translator/frame-change
 import { BrowserTranslationProvider } from "../src/modules/game-translator/browser-translation-provider.ts";
 import { DeepLContextTranslationProvider } from "../src/modules/game-translator/deepl-context-translation-provider.ts";
 import { createOcrLayout, OCR_LINE_GAP, OCR_LINE_HEIGHT } from "../src/modules/game-translator/ocr-layout.ts";
+import { createSceneSignature, isLikelyEnglishSceneText } from "../src/modules/game-translator/scene-text.ts";
 import { SubtitleDetector } from "../src/modules/game-translator/subtitle-detector.ts";
 import { isLikelySubtitleText, MIN_SUBTITLE_OCR_CONFIDENCE } from "../src/modules/game-translator/subtitle-text-filter.ts";
 import { SubtitleTracker } from "../src/modules/game-translator/subtitle-tracker.ts";
@@ -119,6 +120,32 @@ test('subtitle-aware change score ignores empty frames and detects changed text'
     nextLine[12] = 1;
     nextLine[13] = 1;
     assert.equal(changeDetector.compare(nextLine), 1);
+});
+
+test('full-screen mode creates a compact signature for scene change detection', () => {
+    const frame = createFrame(320, 180);
+    const firstSignature = createSceneSignature(frame);
+    assert.equal(firstSignature.length, 32 * 18);
+
+    for (let y = 85; y <= 105; y++) {
+        for (let x = 150; x <= 170; x++) {
+            const index = (y * frame.width + x) * 4;
+            frame.data[index] = 240;
+            frame.data[index + 1] = 240;
+            frame.data[index + 2] = 240;
+        }
+    }
+    const nextSignature = createSceneSignature(frame);
+    assert.notDeepEqual(nextSignature, firstSignature);
+});
+
+test('full-screen text filter accepts English UI and rejects non-text regions', () => {
+    assert.ok(isLikelyEnglishSceneText('Open inventory'));
+    assert.ok(isLikelyEnglishSceneText('AMMO 12 / 30'));
+    assert.ok(isLikelyEnglishSceneText('Mission complete'));
+    assert.ok(!isLikelyEnglishSceneText('123 / 456'));
+    assert.ok(!isLikelyEnglishSceneText('https://example.com'));
+    assert.ok(!isLikelyEnglishSceneText('Сохранение'));
 });
 
 test('normalization and complete-subtitle detection handle game dialogue punctuation', () => {

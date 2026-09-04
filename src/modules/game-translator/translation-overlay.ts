@@ -21,6 +21,12 @@ type DebugMetrics = Partial<{
     candidates: number;
 }>;
 
+export type TranslatedSceneText = {
+    originalText: string;
+    translatedText: string;
+    box: NormalizedFrameRegion;
+};
+
 function getRenderedContentRect($player: HTMLVideoElement | HTMLCanvasElement) {
     const rect = $player.getBoundingClientRect();
     const sourceWidth = $player instanceof HTMLVideoElement ? $player.videoWidth : $player.width;
@@ -48,12 +54,16 @@ export class TranslationOverlay {
     private readonly $subtitle: HTMLElement;
     private readonly $translation: HTMLElement;
     private readonly $original: HTMLElement;
+    private readonly $scene: HTMLElement;
     private readonly $region: HTMLElement;
     private readonly $debug: HTMLElement;
     private settings: TranslationOverlaySettings;
     private originalText = '';
     private clearTimerId: number | null = null;
     private visibleUntil = 0;
+    private sceneItems: TranslatedSceneText[] = [];
+    private contentRect: DOMRect | null = null;
+    private sceneClearTimerId: number | null = null;
 
     constructor($video: HTMLVideoElement, settings: TranslationOverlaySettings) {
         this.settings = settings;
@@ -63,6 +73,7 @@ export class TranslationOverlay {
                 this.$translation = CE('div', { class: 'bx-game-translator-translation' }),
                 this.$original = CE('div', { class: 'bx-game-translator-original' }),
             ),
+            this.$scene = CE('div', { class: 'bx-game-translator-scene bx-gone' }),
             this.$region = CE('div', { class: 'bx-game-translator-region bx-gone' }),
             this.$debug = CE('div', { class: 'bx-game-translator-debug bx-gone' }),
         );
@@ -78,6 +89,7 @@ export class TranslationOverlay {
         this.$original.classList.toggle('bx-gone', !settings.showOriginal || !this.originalText);
         this.$region.classList.toggle('bx-gone', !settings.debugRegion);
         this.$debug.classList.toggle('bx-gone', !settings.debugRegion);
+        this.renderSceneItems();
     }
 
     updateGeometry($player: HTMLVideoElement | HTMLCanvasElement | null | undefined, region: NormalizedFrameRegion) {
@@ -89,6 +101,7 @@ export class TranslationOverlay {
         if (!contentRect.width || !contentRect.height) {
             return;
         }
+        this.contentRect = contentRect;
 
         this.$subtitle.style.left = `${contentRect.left + contentRect.width / 2}px`;
         this.$subtitle.style.bottom = `${window.innerHeight - contentRect.bottom + contentRect.height * this.settings.verticalPosition / 100}px`;
@@ -98,9 +111,11 @@ export class TranslationOverlay {
         this.$region.style.top = `${contentRect.top + contentRect.height * region.y}px`;
         this.$region.style.width = `${contentRect.width * region.width}px`;
         this.$region.style.height = `${contentRect.height * region.height}px`;
+        this.renderSceneItems();
     }
 
     show(originalText: string, translatedText: string) {
+        this.clearSceneImmediately();
         this.cancelClear();
         this.originalText = originalText;
         this.$translation.textContent = translatedText;
@@ -114,6 +129,33 @@ export class TranslationOverlay {
 
     showError(message: string) {
         this.show('', message);
+    }
+
+    showScene(items: TranslatedSceneText[]) {
+        this.cancelClear();
+        this.cancelSceneClear();
+        this.hide();
+        this.sceneItems = items;
+        this.renderSceneItems();
+        this.$scene.classList.toggle('bx-gone', !items.length);
+    }
+
+    clearScene() {
+        if (!this.sceneItems.length || this.sceneClearTimerId !== null) {
+            return;
+        }
+
+        this.sceneClearTimerId = window.setTimeout(() => {
+            this.sceneClearTimerId = null;
+            this.clearSceneImmediately();
+        }, this.settings.minimumDisplayTime);
+    }
+
+    resetContent() {
+        this.cancelClear();
+        this.cancelSceneClear();
+        this.hide();
+        this.clearSceneImmediately();
     }
 
     clear() {
@@ -146,6 +188,7 @@ export class TranslationOverlay {
 
     destroy() {
         this.cancelClear();
+        this.cancelSceneClear();
         this.$root.remove();
     }
 
@@ -162,6 +205,47 @@ export class TranslationOverlay {
         if (this.clearTimerId !== null) {
             window.clearTimeout(this.clearTimerId);
             this.clearTimerId = null;
+        }
+    }
+
+    private renderSceneItems() {
+        const contentRect = this.contentRect;
+        if (!contentRect || !this.sceneItems.length) {
+            return;
+        }
+
+        const elements = this.sceneItems.map(item => {
+            const height = Math.max(18, item.box.height * contentRect.height);
+            const $item = CE('div', { class: 'bx-game-translator-scene-text' },
+                CE('div', { class: 'bx-game-translator-translation' }, item.translatedText),
+                CE('div', {
+                    class: `bx-game-translator-original${this.settings.showOriginal ? '' : ' bx-gone'}`,
+                }, item.originalText),
+            );
+            $item.style.left = `${contentRect.left + item.box.x * contentRect.width}px`;
+            $item.style.top = `${contentRect.top + item.box.y * contentRect.height}px`;
+            $item.style.width = `${Math.max(64, item.box.width * contentRect.width)}px`;
+            $item.style.minHeight = `${height}px`;
+            $item.style.fontSize = `${Math.max(12, Math.min(this.settings.fontSize, height * 0.72))}px`;
+            $item.style.backgroundColor = `rgba(0, 0, 0, ${this.settings.backgroundOpacity / 100})`;
+
+            return $item;
+        });
+
+        this.$scene.replaceChildren(...elements);
+    }
+
+    private clearSceneImmediately() {
+        this.cancelSceneClear();
+        this.sceneItems = [];
+        this.$scene.replaceChildren();
+        this.$scene.classList.add('bx-gone');
+    }
+
+    private cancelSceneClear() {
+        if (this.sceneClearTimerId !== null) {
+            window.clearTimeout(this.sceneClearTimerId);
+            this.sceneClearTimerId = null;
         }
     }
 }

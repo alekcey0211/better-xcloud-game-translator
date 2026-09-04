@@ -1,5 +1,5 @@
 import { GlobalPref } from "@/enums/pref-keys";
-import { GameTranslatorOcrRegion, GameTranslatorProvider } from "@/enums/pref-values";
+import { GameTranslatorMode, GameTranslatorOcrRegion, GameTranslatorProvider } from "@/enums/pref-values";
 import { StreamPlayerElement } from "@/modules/player/base-stream-player";
 import { BxEventBus } from "@/utils/bx-event-bus";
 import { BxLogger } from "@/utils/bx-logger";
@@ -11,17 +11,19 @@ import { XboxApi } from "@/utils/xbox-api";
 
 import { FrameChangeDetector } from "./frame-change-detector";
 import { TranslatorFrameCapture } from "./frame-capture";
-import { TesseractOcrEngine } from "./ocr-engine";
+import { TesseractOcrEngine, type SceneOcrLine } from "./ocr-engine";
+import { createSceneSignature, isLikelyEnglishSceneText } from "./scene-text";
 import { SubtitleDetector } from "./subtitle-detector";
 import { isLikelySubtitleText, MIN_SUBTITLE_OCR_CONFIDENCE } from "./subtitle-text-filter";
 import { SubtitleTracker } from "./subtitle-tracker";
-import { looksLikeCompleteSubtitle, TextStabilizer } from "./text-stabilizer";
+import { looksLikeCompleteSubtitle, normalizeText, TextStabilizer } from "./text-stabilizer";
 import { GameTranslationContext } from "./translation-context";
-import { TranslationOverlay, type TranslationOverlaySettings } from "./translation-overlay";
+import { TranslationOverlay, type TranslatedSceneText, type TranslationOverlaySettings } from "./translation-overlay";
 import { TranslationService } from "./translation-service";
 
 type GameTranslatorSettings = TranslationOverlaySettings & {
     enabled: boolean;
+    mode: GameTranslatorMode;
     ocrRegion: GameTranslatorOcrRegion;
     ocrInterval: number;
     changeThreshold: number;
@@ -31,6 +33,7 @@ type GameTranslatorSettings = TranslationOverlaySettings & {
 
 const TRANSLATOR_PREFS = new Set<GlobalPref>([
     GlobalPref.GAME_TRANSLATOR_ENABLED,
+    GlobalPref.GAME_TRANSLATOR_MODE,
     GlobalPref.GAME_TRANSLATOR_OCR_REGION,
     GlobalPref.GAME_TRANSLATOR_OCR_INTERVAL,
     GlobalPref.GAME_TRANSLATOR_CHANGE_THRESHOLD,
@@ -48,6 +51,7 @@ const TRANSLATOR_PREFS = new Set<GlobalPref>([
 function readSettings(): GameTranslatorSettings {
     return {
         enabled: getGlobalPref(GlobalPref.GAME_TRANSLATOR_ENABLED),
+        mode: getGlobalPref(GlobalPref.GAME_TRANSLATOR_MODE),
         ocrRegion: getGlobalPref(GlobalPref.GAME_TRANSLATOR_OCR_REGION),
         ocrInterval: Number(getGlobalPref(GlobalPref.GAME_TRANSLATOR_OCR_INTERVAL)),
         changeThreshold: getGlobalPref(GlobalPref.GAME_TRANSLATOR_CHANGE_THRESHOLD) / 100,
@@ -67,6 +71,9 @@ export class GameTranslator {
     private static eventsSetup = false;
     public static getInstance = () => GameTranslator.instance ?? (GameTranslator.instance = new GameTranslator());
     private readonly LOG_TAG = 'GameTranslator';
+    private readonly MAX_SCENE_TEXT_LINES = 8;
+    private readonly MIN_SCENE_SCAN_INTERVAL = 750;
+    private readonly MAX_SCENE_CHANGE_THRESHOLD = 0.005;
 
     private readonly changeDetector = new FrameChangeDetector();
     private readonly subtitleDetector = new SubtitleDetector();
@@ -137,7 +144,7 @@ export class GameTranslator {
         this.initializeTranslationContext(sessionId);
         this.disabledByError = false;
         this.analyzePending = false;
-        this.frameCapture = new TranslatorFrameCapture(this.settings.ocrRegion);
+        this.frameCapture = new TranslatorFrameCapture(this.settings.ocrRegion, this.settings.mode);
         this.$video = $video;
         this.ocrEngine = new TesseractOcrEngine();
         this.stabilizer = new TextStabilizer(this.settings.stabilizationInterval, text => {
@@ -146,14 +153,15 @@ export class GameTranslator {
             }
         });
         this.overlay = new TranslationOverlay($video, this.settings);
-        this.debugMetrics = { interval: this.settings.ocrInterval };
+        this.debugMetrics = { interval: this.getAnalysisInterval() };
         this.overlay.updateDebug(this.debugMetrics);
         this.updateOverlayGeometry();
         this.startTimer(sessionId);
         this.prepareProvider();
 
         BxLogger.info(this.LOG_TAG, 'Started', {
-            captureInterval: this.settings.ocrInterval,
+            captureInterval: this.getAnalysisInterval(),
+            mode: this.settings.mode,
             region: this.settings.ocrRegion,
             changeThreshold: this.settings.changeThreshold,
         });
@@ -188,7 +196,13 @@ export class GameTranslator {
 
             void this.analyze(sessionId);
             this.scheduleNextAnalysis(sessionId);
-        }, this.settings.ocrInterval);
+        }, this.getAnalysisInterval());
+    }
+
+    private getAnalysisInterval() {
+        return this.settings.mode === GameTranslatorMode.ALL_TEXT
+            ? Math.max(this.settings.ocrInterval, this.MIN_SCENE_SCAN_INTERVAL)
+            : this.settings.ocrInterval;
     }
 
     private cancelScheduledAnalysis() {
@@ -226,6 +240,11 @@ export class GameTranslator {
             return;
         }
         if (!detectionFrame) {
+            return;
+        }
+
+        if (this.settings.mode === GameTranslatorMode.ALL_TEXT) {
+            await this.analyzeScene(detectionFrame, frameCapture, ocrEngine, sessionId);
             return;
         }
 
@@ -288,11 +307,150 @@ export class GameTranslator {
                 this.handleOcrError(error);
             }
         } finally {
-            if (sessionId === this.sessionId) {
-                this.ocrBusy = false;
+            this.finishOcr(sessionId);
+        }
+    }
+
+    private async analyzeScene(
+        detectionFrame: ImageData,
+        frameCapture: TranslatorFrameCapture,
+        ocrEngine: TesseractOcrEngine,
+        sessionId: number,
+    ) {
+        const changeScore = this.changeDetector.compare(createSceneSignature(detectionFrame));
+        this.debugMetrics.changeScore = changeScore;
+        this.overlay?.updateDebug(this.debugMetrics);
+        if (changeScore < Math.min(this.settings.changeThreshold, this.MAX_SCENE_CHANGE_THRESHOLD)) {
+            return;
+        }
+
+        let $ocrCanvas;
+        try {
+            $ocrCanvas = frameCapture.captureForSceneOcr();
+        } catch (error) {
+            this.handleCaptureError(error);
+            return;
+        }
+        if (!$ocrCanvas) {
+            return;
+        }
+
+        this.ocrBusy = true;
+        const ocrStartedAt = performance.now();
+        try {
+            const recognizedLines = await ocrEngine.recognizeScene($ocrCanvas);
+            if (sessionId !== this.sessionId) {
+                return;
             }
-            if (this.analyzePending && sessionId === this.sessionId) {
-                this.analyzePending = false;
+
+            const lines = this.selectSceneTextLines(recognizedLines);
+            this.debugMetrics.ocrTime = performance.now() - ocrStartedAt;
+            this.debugMetrics.ocrConfidence = lines.length
+                ? lines.reduce((sum, line) => sum + line.confidence, 0) / lines.length
+                : 0;
+            this.debugMetrics.candidates = lines.length;
+            this.overlay?.updateDebug(this.debugMetrics);
+            if (!lines.length) {
+                this.overlay?.clearScene();
+                return;
+            }
+
+            this.translationAbortController?.abort();
+            const abortController = new AbortController();
+            this.translationAbortController = abortController;
+            const translationStartedAt = performance.now();
+            const translatedItems = await this.translateSceneLines(lines, abortController);
+            if (sessionId !== this.sessionId || abortController.signal.aborted) {
+                return;
+            }
+
+            this.debugMetrics.translationTime = performance.now() - translationStartedAt;
+            this.overlay?.updateDebug(this.debugMetrics);
+            if (translatedItems.length) {
+                this.overlay?.showScene(translatedItems);
+            } else {
+                this.overlay?.clearScene();
+            }
+        } catch (error) {
+            if (sessionId === this.sessionId) {
+                this.handleOcrError(error);
+            }
+        } finally {
+            this.finishOcr(sessionId);
+        }
+    }
+
+    private selectSceneTextLines(lines: SceneOcrLine[]) {
+        const seen = new Set<string>();
+        const candidates = lines.filter(line => {
+            const key = normalizeText(line.text);
+            if (
+                line.confidence < MIN_SUBTITLE_OCR_CONFIDENCE
+                || line.box.height < 0.012
+                || line.box.height > 0.25
+                || !isLikelyEnglishSceneText(line.text)
+                || seen.has(key)
+            ) {
+                return false;
+            }
+
+            seen.add(key);
+            return true;
+        });
+
+        return candidates
+            .sort((left, right) => {
+                const leftPriority = left.confidence + Math.min(25, left.box.width * left.box.height * 2000);
+                const rightPriority = right.confidence + Math.min(25, right.box.width * right.box.height * 2000);
+                return rightPriority - leftPriority;
+            })
+            .slice(0, this.MAX_SCENE_TEXT_LINES)
+            .sort((left, right) => left.box.y - right.box.y || left.box.x - right.box.x);
+    }
+
+    private async translateSceneLines(lines: SceneOcrLine[], abortController: AbortController) {
+        const context = this.translationContext.snapshot();
+        const translatedItems: TranslatedSceneText[] = [];
+
+        for (let index = 0; index < lines.length; index += 2) {
+            const batch = lines.slice(index, index + 2);
+            const translations = await Promise.all(batch.map(async line => {
+                try {
+                    const result = await this.translationService.translate(
+                        this.settings.provider,
+                        line.text,
+                        abortController.signal,
+                        context,
+                    );
+                    return {
+                        originalText: line.text,
+                        translatedText: result.text,
+                        box: line.box,
+                    };
+                } catch (error) {
+                    if (!abortController.signal.aborted) {
+                        BxLogger.warning(this.LOG_TAG, 'Scene text translation failed', line.text, error);
+                    }
+                    return null;
+                }
+            }));
+
+            translatedItems.push(...translations.filter(item => item !== null));
+            if (abortController.signal.aborted) {
+                break;
+            }
+        }
+
+        return translatedItems;
+    }
+
+    private finishOcr(sessionId: number) {
+        if (sessionId === this.sessionId) {
+            this.ocrBusy = false;
+        }
+        if (this.analyzePending && sessionId === this.sessionId) {
+            this.analyzePending = false;
+            if (this.settings.mode === GameTranslatorMode.SUBTITLES) {
                 void this.analyze(sessionId);
             }
         }
@@ -369,6 +527,7 @@ export class GameTranslator {
         this.settings = readSettings();
         const providerChanged = previousSettings.provider !== this.settings.provider;
         const providerConfigChanged = settingKey === GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL;
+        const modeChanged = previousSettings.mode !== this.settings.mode;
 
         if (!this.settings.enabled) {
             this.stop();
@@ -388,6 +547,10 @@ export class GameTranslator {
             this.translationAbortController = null;
             this.translationService.destroy();
         }
+        if (modeChanged) {
+            this.translationAbortController?.abort();
+            this.translationAbortController = null;
+        }
         if (providerChanged && this.settings.provider === GameTranslatorProvider.DEEPL_CONTEXT) {
             this.loadGameDescription(this.sessionId);
         }
@@ -400,14 +563,16 @@ export class GameTranslator {
         }
 
         this.frameCapture.setRegion(this.settings.ocrRegion);
+        this.frameCapture.setMode(this.settings.mode);
         this.changeDetector.reset();
         this.subtitleTracker.reset();
         this.stabilizer.setDelay(this.settings.stabilizationInterval);
         this.overlay.applySettings(this.settings);
+        modeChanged && this.overlay.resetContent();
         this.updateOverlayGeometry();
 
-        if (previousSettings.ocrInterval !== this.settings.ocrInterval) {
-            this.debugMetrics.interval = this.settings.ocrInterval;
+        if (previousSettings.ocrInterval !== this.settings.ocrInterval || modeChanged) {
+            this.debugMetrics.interval = this.getAnalysisInterval();
             this.startTimer(this.sessionId);
         }
     }
