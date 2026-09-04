@@ -27,12 +27,14 @@
         .install {
             display: inline-block;
             margin: 12px 0;
+            border: 0;
             padding: 14px 18px;
             border-radius: 8px;
             background: #107c10;
             color: white;
             font-weight: 700;
             text-decoration: none;
+            cursor: pointer;
         }
 
         code {
@@ -43,9 +45,41 @@
 <body>
     <h1>Better xCloud Game Translator</h1>
     <p>Сборка <strong>[[VERSION]]</strong> с переводом игровых субтитров.</p>
+
+    <h2>Браузер с менеджером userscript</h2>
     <p><a class="install" href="./better-xcloud.user.js">Установить или обновить userscript</a></p>
-    <p>Откройте эту страницу на Quest и нажмите кнопку установки. Копировать содержимое большого файла не требуется.</p>
     <p>После установки менеджер userscript будет проверять обновления по этому же адресу.</p>
+
+    <h2>Better xCloud Android на Quest</h2>
+    <ol>
+        <li>В App settings отключите встроенный Better xCloud script.</li>
+        <li>Нажмите кнопку ниже — в буфер будет скопирован только маленький загрузчик.</li>
+        <li>Откройте App settings → Custom userscript, вставьте загрузчик и сохраните.</li>
+        <li>Полностью перезапустите приложение.</li>
+    </ol>
+    <button class="install" id="copy-loader" type="button">Скопировать загрузчик для Quest</button>
+    <p id="copy-status" role="status"></p>
+    <p>При каждом запуске загрузчик получает актуальную сборку из GitHub. Если GitHub временно недоступен, используется последняя успешно загруженная копия.</p>
+    <p><a href="./quest-loader.js">Открыть текст загрузчика</a></p>
+
     <p><a href="https://github.com/alekcey0211/better-xcloud-game-translator/tree/typescript">Исходный код на GitHub</a></p>
+
+    <script>
+        document.querySelector('#copy-loader').addEventListener('click', async () => {
+            const status = document.querySelector('#copy-status');
+
+            try {
+                const response = await fetch('./quest-loader.js', { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                await navigator.clipboard.writeText(await response.text());
+                status.textContent = 'Загрузчик скопирован. Теперь вставьте его в Custom userscript.';
+            } catch (error) {
+                status.textContent = 'Не удалось скопировать автоматически. Откройте текст загрузчика по ссылке ниже.';
+            }
+        });
+    </script>
 </body>
 </html>
