@@ -47,7 +47,7 @@ type SettingTabSectionItem = Partial<{
 }>
 
 type SettingTabSection = {
-    group: 'general' | 'server' | 'stream' | 'game-bar' | 'mkb' | 'touch-control' | 'loading-screen' | 'ui' | 'other' | 'advanced' | 'footer'
+    group: 'general' | 'server' | 'stream' | 'game-translator' | 'game-bar' | 'mkb' | 'touch-control' | 'loading-screen' | 'ui' | 'other' | 'advanced' | 'footer'
         | 'audio' | 'video'
         | 'device' | 'controller' | 'mkb' | 'native-mkb'
         | 'stats';
@@ -222,6 +222,43 @@ export class SettingsDialog extends NavigationDialog {
             GlobalPref.AUDIO_MIC_ON_PLAYING,
             GlobalPref.GAME_FORTNITE_FORCE_CONSOLE,
             GlobalPref.STREAM_COMBINE_SOURCES,
+        ],
+    }, {
+        requiredVariants: 'full',
+        group: 'game-translator',
+        label: t('game-translator'),
+        items: [
+            GlobalPref.GAME_TRANSLATOR_ENABLED,
+            GlobalPref.GAME_TRANSLATOR_OCR_REGION,
+            GlobalPref.GAME_TRANSLATOR_OCR_INTERVAL,
+            GlobalPref.GAME_TRANSLATOR_CHANGE_THRESHOLD,
+            GlobalPref.GAME_TRANSLATOR_STABILIZATION_INTERVAL,
+            GlobalPref.GAME_TRANSLATOR_PROVIDER,
+            {
+                pref: GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL,
+                multiLines: true,
+                content: () => {
+                    const $input = CE('input', {
+                        type: 'url',
+                        value: getGlobalPref(GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL),
+                        placeholder: 'https://translator.example.com/v2/translate',
+                        autocomplete: 'off',
+                        spellcheck: false,
+                        class: 'bx-settings-text-input',
+                        tabindex: 0,
+                    }) as HTMLInputElement;
+                    $input.addEventListener('change', e => {
+                        setGlobalPref(GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL, $input.value.trim(), 'ui');
+                        this.onGlobalSettingChanged(e);
+                    });
+                    return $input;
+                },
+            },
+            GlobalPref.GAME_TRANSLATOR_SHOW_ORIGINAL,
+            GlobalPref.GAME_TRANSLATOR_DEBUG_REGION,
+            GlobalPref.GAME_TRANSLATOR_FONT_SIZE,
+            GlobalPref.GAME_TRANSLATOR_VERTICAL_POSITION,
+            GlobalPref.GAME_TRANSLATOR_BACKGROUND_OPACITY,
         ],
     }, {
         requiredVariants: 'full',

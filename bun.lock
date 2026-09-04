@@ -2,6 +2,9 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
+      "dependencies": {
+        "tesseract.js": "7.0.0",
+      },
       "devDependencies": {
         "@types/bun": "^1.2.21",
         "@types/node": "^24.3.0",
@@ -81,6 +84,8 @@
 
     "balanced-match": ["balanced-match@1.0.2", "", {}, "sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw=="],
 
+    "bmp-js": ["bmp-js@0.1.0", "https://npm.yandex-team.ru/bmp-js/-/bmp-js-0.1.0.tgz?rbtorrent=dc442fd8b330542bae8e200214d04bda17d60bee", {}, "sha1-4Fpj95amwf8l9Hcex62twUjAcjM="],
+
     "brace-expansion": ["brace-expansion@1.1.11", "", { "dependencies": { "balanced-match": "^1.0.0", "concat-map": "0.0.1" } }, "sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA=="],
 
     "browserslist": ["browserslist@4.24.3", "", { "dependencies": { "caniuse-lite": "^1.0.30001688", "electron-to-chromium": "^1.5.73", "node-releases": "^2.0.19", "update-browserslist-db": "^1.1.1" }, "bin": { "browserslist": "cli.js" } }, "sha512-1CPmv8iobE2fyRMV97dAcMVegvvWKxmq94hkLiAkUGwKVTyDLw33K+ZxiFrREKmmps4rIw6grcCFCnTMSZ/YiA=="],
@@ -159,6 +164,8 @@
 
     "has-flag": ["has-flag@4.0.0", "", {}, "sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ=="],
 
+    "idb-keyval": ["idb-keyval@6.3.0", "https://npm.yandex-team.ru/idb-keyval/-/idb-keyval-6.3.0.tgz?rbtorrent=", {}, "sha512-um+2dgAWmYsu615EXpWVwSmapJhON0G43t3Ka/EVaohzPQXSMqKEqeDK/oIW3Ow+BXaF2PvSc+oBTFp793A5Ow=="],
+
     "ignore": ["ignore@5.3.1", "", {}, "sha512-5Fytz/IraMjqpwfd34ke28PTVMjZjJG2MPn5t7OE4eUCUNf8BAa7b5WUS9/Qvr6mwOQS7Mk6vdsMno5he+T8Xw=="],
 
     "import-fresh": ["import-fresh@3.3.0", "", { "dependencies": { "parent-module": "^1.0.0", "resolve-from": "^4.0.0" } }, "sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw=="],
@@ -170,6 +177,8 @@
     "is-fullwidth-code-point": ["is-fullwidth-code-point@3.0.0", "", {}, "sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg=="],
 
     "is-glob": ["is-glob@4.0.3", "", { "dependencies": { "is-extglob": "^2.1.1" } }, "sha512-xelSayHH36ZgE7ZWhli7pW34hNbNl8Ojv5KVmkJD4hBdD3th8Tfk9vYasLM+mXWOZhFkgZfxhLSnrwRr4elSSg=="],
+
+    "is-url": ["is-url@1.2.4", "https://npm.yandex-team.ru/is-url/-/is-url-1.2.4.tgz?rbtorrent=7af68970cc623933c877a51e1e862e8b45a0e9f3", {}, "sha512-ITvGim8FhRiYe4IQ5uHSkj7pVaPDrCTkNd3yq3cV7iZAcJdHTUMPMEHcqSOy9xZ9qFenQCvi+2wjH9a1nXqHww=="],
 
     "isexe": ["isexe@2.0.0", "", {}, "sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw=="],
 
@@ -203,7 +212,11 @@
 
     "natural-compare": ["natural-compare@1.4.0", "", {}, "sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw=="],
 
+    "node-fetch": ["node-fetch@2.7.0", "https://npm.yandex-team.ru/node-fetch/-/node-fetch-2.7.0.tgz?rbtorrent=d6d4a14ed841ae30a4063654e4b066750b49c7d0", { "dependencies": { "whatwg-url": "^5.0.0" }, "peerDependencies": { "encoding": "^0.1.0" }, "optionalPeers": ["encoding"] }, "sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A=="],
+
     "node-releases": ["node-releases@2.0.19", "", {}, "sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw=="],
+
+    "opencollective-postinstall": ["opencollective-postinstall@2.0.3", "https://npm.yandex-team.ru/opencollective-postinstall/-/opencollective-postinstall-2.0.3.tgz?rbtorrent=4ffdafb4012abe4e99a5a5157c007befd036fd32", { "bin": { "opencollective-postinstall": "index.js" } }, "sha512-8AV/sCtuzUeTo8gQK5qDZzARrulB3egtLzFgteqB2tcT4Mw7B8Kt7JcDHmltjz6FOAHsvTevk70gZEbhM4ZS9Q=="],
 
     "optionator": ["optionator@0.9.4", "", { "dependencies": { "deep-is": "^0.1.3", "fast-levenshtein": "^2.0.6", "levn": "^0.4.1", "prelude-ls": "^1.2.1", "type-check": "^0.4.0", "word-wrap": "^1.2.5" } }, "sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g=="],
 
@@ -226,6 +239,8 @@
     "prelude-ls": ["prelude-ls@1.2.1", "", {}, "sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g=="],
 
     "punycode": ["punycode@2.3.1", "", {}, "sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg=="],
+
+    "regenerator-runtime": ["regenerator-runtime@0.13.11", "https://npm.yandex-team.ru/regenerator-runtime/-/regenerator-runtime-0.13.11.tgz?rbtorrent=cbda8b50a2ebf76b1077c1d866555daa89dfd5b9", {}, "sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg=="],
 
     "resolve-from": ["resolve-from@4.0.0", "", {}, "sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g=="],
 
@@ -255,6 +270,12 @@
 
     "supports-color": ["supports-color@7.2.0", "", { "dependencies": { "has-flag": "^4.0.0" } }, "sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw=="],
 
+    "tesseract.js": ["tesseract.js@7.0.0", "https://npm.yandex-team.ru/tesseract.js/-/tesseract.js-7.0.0.tgz?rbtorrent=", { "dependencies": { "bmp-js": "^0.1.0", "idb-keyval": "^6.2.0", "is-url": "^1.2.4", "node-fetch": "^2.6.9", "opencollective-postinstall": "^2.0.3", "regenerator-runtime": "^0.13.3", "tesseract.js-core": "^7.0.0", "wasm-feature-detect": "^1.8.0", "zlibjs": "^0.3.1" } }, "sha512-exPBkd+z+wM1BuMkx/Bjv43OeLBxhL5kKWsz/9JY+DXcXdiBjiAch0V49QR3oAJqCaL5qURE0vx9Eo+G5YE7mA=="],
+
+    "tesseract.js-core": ["tesseract.js-core@7.0.0", "https://npm.yandex-team.ru/tesseract.js-core/-/tesseract.js-core-7.0.0.tgz?rbtorrent=", {}, "sha512-WnNH518NzmbSq9zgTPeoF8c+xmilS8rFIl1YKbk/ptuuc7p6cLNELNuPAzcmsYw450ca6bLa8j3t0VAtq435Vw=="],
+
+    "tr46": ["tr46@0.0.3", "https://npm.yandex-team.ru/tr46/-/tr46-0.0.3.tgz?rbtorrent=c73cc60044b6ee95167d913016ebeaf0bfb9b888", {}, "sha1-gYT9NH2snNwYWZLzpmIuFLnZq2o="],
+
     "type-check": ["type-check@0.4.0", "", { "dependencies": { "prelude-ls": "^1.2.1" } }, "sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew=="],
 
     "typescript": ["typescript@5.8.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ=="],
@@ -265,6 +286,12 @@
 
     "uri-js": ["uri-js@4.4.1", "", { "dependencies": { "punycode": "^2.1.0" } }, "sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg=="],
 
+    "wasm-feature-detect": ["wasm-feature-detect@1.9.0", "https://npm.yandex-team.ru/wasm-feature-detect/-/wasm-feature-detect-1.9.0.tgz?rbtorrent=", {}, "sha512-zonE+xlIIYtxPy++L24ow0hAD8CICb4+FgPyROd3buyXIqsJvUEDkBgfCCoXOd1Hu3DUr0GOfnPIdcGV+YpNaA=="],
+
+    "webidl-conversions": ["webidl-conversions@3.0.1", "https://npm.yandex-team.ru/webidl-conversions/-/webidl-conversions-3.0.1.tgz?rbtorrent=7573d472c2f9e39497e1b78c1a5659a5af833f8d", {}, "sha1-JFNCdeKnvGvnvIZhHMFq4KVlSHE="],
+
+    "whatwg-url": ["whatwg-url@5.0.0", "https://npm.yandex-team.ru/whatwg-url/-/whatwg-url-5.0.0.tgz?rbtorrent=9eec0f38e56ea4a007493fedf0e840f55bea314f", { "dependencies": { "tr46": "~0.0.3", "webidl-conversions": "^3.0.0" } }, "sha1-lmRU6HZUYuN2RNNib2dCzotwll0="],
+
     "which": ["which@2.0.2", "", { "dependencies": { "isexe": "^2.0.0" }, "bin": { "node-which": "./bin/node-which" } }, "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA=="],
 
     "word-wrap": ["word-wrap@1.2.5", "", {}, "sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA=="],
@@ -274,6 +301,8 @@
     "wrap-ansi-cjs": ["wrap-ansi@7.0.0", "", { "dependencies": { "ansi-styles": "^4.0.0", "string-width": "^4.1.0", "strip-ansi": "^6.0.0" } }, "sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q=="],
 
     "yocto-queue": ["yocto-queue@0.1.0", "", {}, "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q=="],
+
+    "zlibjs": ["zlibjs@0.3.1", "https://npm.yandex-team.ru/zlibjs/-/zlibjs-0.3.1.tgz?rbtorrent=b9b9df90fd243dffd1cf15639903e5c957f5da88", {}, "sha1-UBl+2yihxCymWcyLTmqd3W1ERVQ="],
 
     "@eslint-community/eslint-utils/eslint-visitor-keys": ["eslint-visitor-keys@3.4.3", "", {}, "sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag=="],
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better xCloud
 // @namespace    https://github.com/redphx
-// @version      6.7.12
+// @version      6.7.12-game-translator
 // @description  Improve Xbox Cloud Gaming (xCloud) experience
 // @author       redphx
 // @license      MIT
@@ -14,6 +14,899 @@
 // @downloadURL  https://github.com/redphx/better-xcloud/releases/latest/download/better-xcloud.user.js
 // ==/UserScript==
 "use strict";
+var __create = Object.create;
+var { getPrototypeOf: __getProtoOf, defineProperty: __defProp, getOwnPropertyNames: __getOwnPropNames } = Object;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __toESM = (mod, isNodeMode, target) => {
+ target = mod != null ? __create(__getProtoOf(mod)) : {};
+ let to = isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: !0 }) : target;
+ for (let key of __getOwnPropNames(mod))
+  if (!__hasOwnProp.call(to, key)) __defProp(to, key, {
+    get: () => mod[key],
+    enumerable: !0
+   });
+ return to;
+};
+var __commonJS = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
+// node_modules/regenerator-runtime/runtime.js
+var require_runtime = __commonJS((exports, module) => {
+ var runtime = function(exports2) {
+  var Op = Object.prototype, hasOwn = Op.hasOwnProperty, defineProperty = Object.defineProperty || function(obj, key, desc) {
+   obj[key] = desc.value;
+  }, undefined2, $Symbol = typeof Symbol === "function" ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+  function define(obj, key, value) {
+   return Object.defineProperty(obj, key, {
+    value,
+    enumerable: !0,
+    configurable: !0,
+    writable: !0
+   }), obj[key];
+  }
+  try {
+   define({}, "");
+  } catch (err) {
+   define = function(obj, key, value) {
+    return obj[key] = value;
+   };
+  }
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+   var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []);
+   return defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) }), generator;
+  }
+  exports2.wrap = wrap;
+  function tryCatch(fn, obj, arg) {
+   try {
+    return { type: "normal", arg: fn.call(obj, arg) };
+   } catch (err) {
+    return { type: "throw", arg: err };
+   }
+  }
+  var GenStateSuspendedStart = "suspendedStart", GenStateSuspendedYield = "suspendedYield", GenStateExecuting = "executing", GenStateCompleted = "completed", ContinueSentinel = {};
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function() {
+   return this;
+  });
+  var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  if (NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol)) IteratorPrototype = NativeIteratorPrototype;
+  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+  GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), defineProperty(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction");
+  function defineIteratorMethods(prototype) {
+   ["next", "throw", "return"].forEach(function(method) {
+    define(prototype, method, function(arg) {
+     return this._invoke(method, arg);
+    });
+   });
+  }
+  exports2.isGeneratorFunction = function(genFun) {
+   var ctor = typeof genFun === "function" && genFun.constructor;
+   return ctor ? ctor === GeneratorFunction || (ctor.displayName || ctor.name) === "GeneratorFunction" : !1;
+  }, exports2.mark = function(genFun) {
+   if (Object.setPrototypeOf) Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
+   else genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction");
+   return genFun.prototype = Object.create(Gp), genFun;
+  }, exports2.awrap = function(arg) {
+   return { __await: arg };
+  };
+  function AsyncIterator(generator, PromiseImpl) {
+   function invoke(method, arg, resolve, reject) {
+    var record = tryCatch(generator[method], generator, arg);
+    if (record.type === "throw") reject(record.arg);
+    else {
+     var result = record.arg, value = result.value;
+     if (value && typeof value === "object" && hasOwn.call(value, "__await")) return PromiseImpl.resolve(value.__await).then(function(value2) {
+       invoke("next", value2, resolve, reject);
+      }, function(err) {
+       invoke("throw", err, resolve, reject);
+      });
+     return PromiseImpl.resolve(value).then(function(unwrapped) {
+      result.value = unwrapped, resolve(result);
+     }, function(error) {
+      return invoke("throw", error, resolve, reject);
+     });
+    }
+   }
+   var previousPromise;
+   function enqueue(method, arg) {
+    function callInvokeWithMethodAndArg() {
+     return new PromiseImpl(function(resolve, reject) {
+      invoke(method, arg, resolve, reject);
+     });
+    }
+    return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+   }
+   defineProperty(this, "_invoke", { value: enqueue });
+  }
+  defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function() {
+   return this;
+  }), exports2.AsyncIterator = AsyncIterator, exports2.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+   if (PromiseImpl === void 0) PromiseImpl = Promise;
+   var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
+   return exports2.isGeneratorFunction(outerFn) ? iter : iter.next().then(function(result) {
+    return result.done ? result.value : iter.next();
+   });
+  };
+  function makeInvokeMethod(innerFn, self, context) {
+   var state = GenStateSuspendedStart;
+   return function invoke(method, arg) {
+    if (state === GenStateExecuting) throw new Error("Generator is already running");
+    if (state === GenStateCompleted) {
+     if (method === "throw") throw arg;
+     return doneResult();
+    }
+    context.method = method, context.arg = arg;
+    while (!0) {
+     var delegate = context.delegate;
+     if (delegate) {
+      var delegateResult = maybeInvokeDelegate(delegate, context);
+      if (delegateResult) {
+       if (delegateResult === ContinueSentinel) continue;
+       return delegateResult;
+      }
+     }
+     if (context.method === "next") context.sent = context._sent = context.arg;
+     else if (context.method === "throw") {
+      if (state === GenStateSuspendedStart) throw state = GenStateCompleted, context.arg;
+      context.dispatchException(context.arg);
+     } else if (context.method === "return") context.abrupt("return", context.arg);
+     state = GenStateExecuting;
+     var record = tryCatch(innerFn, self, context);
+     if (record.type === "normal") {
+      if (state = context.done ? GenStateCompleted : GenStateSuspendedYield, record.arg === ContinueSentinel) continue;
+      return {
+       value: record.arg,
+       done: context.done
+      };
+     } else if (record.type === "throw") state = GenStateCompleted, context.method = "throw", context.arg = record.arg;
+    }
+   };
+  }
+  function maybeInvokeDelegate(delegate, context) {
+   var methodName = context.method, method = delegate.iterator[methodName];
+   if (method === undefined2) {
+    if (context.delegate = null, methodName === "throw" && delegate.iterator.return) {
+     if (context.method = "return", context.arg = undefined2, maybeInvokeDelegate(delegate, context), context.method === "throw") return ContinueSentinel;
+    }
+    if (methodName !== "return") context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method");
+    return ContinueSentinel;
+   }
+   var record = tryCatch(method, delegate.iterator, context.arg);
+   if (record.type === "throw") return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+   var info = record.arg;
+   if (!info) return context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel;
+   if (info.done) {
+    if (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, context.method !== "return") context.method = "next", context.arg = undefined2;
+   } else return info;
+   return context.delegate = null, ContinueSentinel;
+  }
+  defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function() {
+   return this;
+  }), define(Gp, "toString", function() {
+   return "[object Generator]";
+  });
+  function pushTryEntry(locs) {
+   var entry = { tryLoc: locs[0] };
+   if (1 in locs) entry.catchLoc = locs[1];
+   if (2 in locs) entry.finallyLoc = locs[2], entry.afterLoc = locs[3];
+   this.tryEntries.push(entry);
+  }
+  function resetTryEntry(entry) {
+   var record = entry.completion || {};
+   record.type = "normal", delete record.arg, entry.completion = record;
+  }
+  function Context(tryLocsList) {
+   this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
+  }
+  exports2.keys = function(val) {
+   var object = Object(val), keys = [];
+   for (var key in object)
+    keys.push(key);
+   return keys.reverse(), function next() {
+    while (keys.length) {
+     var key2 = keys.pop();
+     if (key2 in object) return next.value = key2, next.done = !1, next;
+    }
+    return next.done = !0, next;
+   };
+  };
+  function values(iterable) {
+   if (iterable) {
+    var iteratorMethod = iterable[iteratorSymbol];
+    if (iteratorMethod) return iteratorMethod.call(iterable);
+    if (typeof iterable.next === "function") return iterable;
+    if (!isNaN(iterable.length)) {
+     var i = -1, next = function next() {
+      while (++i < iterable.length)
+       if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
+      return next.value = undefined2, next.done = !0, next;
+     };
+     return next.next = next;
+    }
+   }
+   return { next: doneResult };
+  }
+  exports2.values = values;
+  function doneResult() {
+   return { value: undefined2, done: !0 };
+  }
+  return Context.prototype = {
+   constructor: Context,
+   reset: function(skipTempReset) {
+    if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined2, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined2, this.tryEntries.forEach(resetTryEntry), !skipTempReset) {
+     for (var name in this)
+      if (name.charAt(0) === "t" && hasOwn.call(this, name) && !isNaN(+name.slice(1))) this[name] = undefined2;
+    }
+   },
+   stop: function() {
+    this.done = !0;
+    var rootEntry = this.tryEntries[0], rootRecord = rootEntry.completion;
+    if (rootRecord.type === "throw") throw rootRecord.arg;
+    return this.rval;
+   },
+   dispatchException: function(exception) {
+    if (this.done) throw exception;
+    var context = this;
+    function handle(loc, caught) {
+     if (record.type = "throw", record.arg = exception, context.next = loc, caught) context.method = "next", context.arg = undefined2;
+     return !!caught;
+    }
+    for (var i = this.tryEntries.length - 1;i >= 0; --i) {
+     var entry = this.tryEntries[i], record = entry.completion;
+     if (entry.tryLoc === "root") return handle("end");
+     if (entry.tryLoc <= this.prev) {
+      var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc");
+      if (hasCatch && hasFinally) {
+       if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+       else if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+      } else if (hasCatch) {
+       if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+      } else if (hasFinally) {
+       if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+      } else throw new Error("try statement without catch or finally");
+     }
+    }
+   },
+   abrupt: function(type, arg) {
+    for (var i = this.tryEntries.length - 1;i >= 0; --i) {
+     var entry = this.tryEntries[i];
+     if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+      var finallyEntry = entry;
+      break;
+     }
+    }
+    if (finallyEntry && (type === "break" || type === "continue") && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc) finallyEntry = null;
+    var record = finallyEntry ? finallyEntry.completion : {};
+    if (record.type = type, record.arg = arg, finallyEntry) return this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel;
+    return this.complete(record);
+   },
+   complete: function(record, afterLoc) {
+    if (record.type === "throw") throw record.arg;
+    if (record.type === "break" || record.type === "continue") this.next = record.arg;
+    else if (record.type === "return") this.rval = this.arg = record.arg, this.method = "return", this.next = "end";
+    else if (record.type === "normal" && afterLoc) this.next = afterLoc;
+    return ContinueSentinel;
+   },
+   finish: function(finallyLoc) {
+    for (var i = this.tryEntries.length - 1;i >= 0; --i) {
+     var entry = this.tryEntries[i];
+     if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+    }
+   },
+   catch: function(tryLoc) {
+    for (var i = this.tryEntries.length - 1;i >= 0; --i) {
+     var entry = this.tryEntries[i];
+     if (entry.tryLoc === tryLoc) {
+      var record = entry.completion;
+      if (record.type === "throw") {
+       var thrown = record.arg;
+       resetTryEntry(entry);
+      }
+      return thrown;
+     }
+    }
+    throw new Error("illegal catch attempt");
+   },
+   delegateYield: function(iterable, resultName, nextLoc) {
+    if (this.delegate = {
+     iterator: values(iterable),
+     resultName,
+     nextLoc
+    }, this.method === "next")
+     this.arg = undefined2;
+    return ContinueSentinel;
+   }
+  }, exports2;
+ }(typeof module === "object" ? exports : {});
+ try {
+  regeneratorRuntime = runtime;
+ } catch (accidentalStrictMode) {
+  if (typeof globalThis === "object") var regeneratorRuntime = runtime;
+  else Function("r", "regeneratorRuntime = r")(runtime);
+ }
+});
+// node_modules/tesseract.js/src/utils/getId.js
+var require_getId = __commonJS((exports, module) => {
+ module.exports = (prefix, cnt) => `${prefix}-${cnt}-${Math.random().toString(16).slice(3, 8)}`;
+});
+// node_modules/tesseract.js/src/createJob.js
+var require_createJob = __commonJS((exports, module) => {
+ var getId = require_getId(), jobCounter = 0;
+ module.exports = ({
+  id: _id,
+  action,
+  payload = {}
+ }) => {
+  let id = _id;
+  if (typeof id === "undefined") id = getId("Job", jobCounter), jobCounter += 1;
+  return {
+   id,
+   action,
+   payload
+  };
+ };
+});
+// node_modules/tesseract.js/src/utils/log.js
+var require_log = __commonJS((exports) => {
+ var logging = !1;
+ exports.logging = logging;
+ exports.setLogging = (_logging) => {
+  logging = _logging;
+ };
+ exports.log = (...args) => logging ? console.log.apply(exports, args) : null;
+});
+// node_modules/tesseract.js/src/createScheduler.js
+var require_createScheduler = __commonJS((exports, module) => {
+ var createJob = require_createJob(), { log } = require_log(), getId = require_getId(), schedulerCounter = 0;
+ module.exports = () => {
+  let id = getId("Scheduler", schedulerCounter), workers = {}, runningWorkers = {}, jobQueue = [];
+  schedulerCounter += 1;
+  let getQueueLen = () => jobQueue.length, getNumWorkers = () => Object.keys(workers).length, dequeue = () => {
+   if (jobQueue.length !== 0) {
+    let wIds = Object.keys(workers);
+    for (let i = 0;i < wIds.length; i += 1)
+     if (typeof runningWorkers[wIds[i]] === "undefined") {
+      jobQueue[0](workers[wIds[i]]);
+      break;
+     }
+   }
+  }, queue = (action, payload) => new Promise((resolve, reject) => {
+   let job = createJob({ action, payload });
+   jobQueue.push(async (w) => {
+    jobQueue.shift(), runningWorkers[w.id] = job;
+    try {
+     resolve(await w[action].apply(exports, [...payload, job.id]));
+    } catch (err) {
+     reject(err);
+    } finally {
+     delete runningWorkers[w.id], dequeue();
+    }
+   }), log(`[${id}]: Add ${job.id} to JobQueue`), log(`[${id}]: JobQueue length=${jobQueue.length}`), dequeue();
+  });
+  return {
+   addWorker: (w) => {
+    return workers[w.id] = w, log(`[${id}]: Add ${w.id}`), log(`[${id}]: Number of workers=${getNumWorkers()}`), dequeue(), w.id;
+   },
+   addJob: async (action, ...payload) => {
+    if (getNumWorkers() === 0) throw Error(`[${id}]: You need to have at least one worker before adding jobs`);
+    return queue(action, payload);
+   },
+   terminate: async () => {
+    Object.keys(workers).forEach(async (wid) => {
+     await workers[wid].terminate();
+    }), jobQueue = [];
+   },
+   getQueueLen,
+   getNumWorkers
+  };
+ };
+});
+// node_modules/tesseract.js/src/utils/getEnvironment.js
+var require_getEnvironment = __commonJS((exports, module) => {
+ module.exports = (key) => {
+  let env = {};
+  if (typeof WorkerGlobalScope !== "undefined") env.type = "webworker";
+  else if (typeof document === "object") env.type = "browser";
+  else if (typeof process === "object") env.type = "node";
+  if (typeof key === "undefined") return env;
+  return env[key];
+ };
+});
+// node_modules/tesseract.js/src/utils/resolvePaths.js
+var require_resolvePaths = __commonJS((exports, module) => {
+ var isBrowser = require_getEnvironment()("type") === "browser", resolveURL = isBrowser ? (s) => new URL(s, window.location.href).href : (s) => s;
+ module.exports = (options) => {
+  let opts = { ...options };
+  return ["corePath", "workerPath", "langPath"].forEach((key) => {
+   if (options[key]) opts[key] = resolveURL(opts[key]);
+  }), opts;
+ };
+});
+// node_modules/tesseract.js/src/constants/OEM.js
+var require_OEM = __commonJS((exports, module) => {
+ module.exports = {
+  TESSERACT_ONLY: 0,
+  LSTM_ONLY: 1,
+  TESSERACT_LSTM_COMBINED: 2,
+  DEFAULT: 3
+ };
+});
+// node_modules/tesseract.js/package.json
+var require_package = __commonJS((exports, module) => {
+ module.exports = {
+  name: "tesseract.js",
+  version: "7.0.0",
+  description: "Pure Javascript Multilingual OCR",
+  main: "src/index.js",
+  type: "commonjs",
+  types: "src/index.d.ts",
+  unpkg: "dist/tesseract.min.js",
+  jsdelivr: "dist/tesseract.min.js",
+  scripts: {
+   start: "node scripts/server.js",
+   build: "rimraf dist && webpack --config scripts/webpack.config.prod.js && rollup -c scripts/rollup.esm.mjs",
+   "profile:tesseract": "webpack-bundle-analyzer dist/tesseract-stats.json",
+   "profile:worker": "webpack-bundle-analyzer dist/worker-stats.json",
+   prepublishOnly: "npm run build",
+   wait: "rimraf dist && wait-on http://localhost:3000/dist/tesseract.min.js",
+   test: "npm-run-all -p -r start test:all",
+   "test:all": "npm-run-all wait test:browser test:node:all",
+   "test:browser": "karma start karma.conf.js",
+   "test:node": "nyc mocha --exit --bail --require ./scripts/test-helper.mjs",
+   "test:node:all": "npm run test:node -- ./tests/*.test.mjs",
+   lint: "eslint src",
+   "lint:fix": "eslint --fix src",
+   postinstall: "opencollective-postinstall || true"
+  },
+  browser: {
+   "./src/worker/node/index.js": "./src/worker/browser/index.js"
+  },
+  author: "",
+  contributors: [
+   "jeromewu"
+  ],
+  license: "Apache-2.0",
+  devDependencies: {
+   "@babel/core": "^7.21.4",
+   "@babel/eslint-parser": "^7.21.3",
+   "@babel/preset-env": "^7.21.4",
+   "@rollup/plugin-commonjs": "^24.1.0",
+   acorn: "^8.8.2",
+   "babel-loader": "^9.1.2",
+   buffer: "^6.0.3",
+   cors: "^2.8.5",
+   eslint: "^7.32.0",
+   "eslint-config-airbnb-base": "^14.2.1",
+   "eslint-plugin-import": "^2.27.5",
+   "expect.js": "^0.3.1",
+   express: "^4.18.2",
+   mocha: "^10.2.0",
+   "npm-run-all": "^4.1.5",
+   karma: "^6.4.2",
+   "karma-chrome-launcher": "^3.2.0",
+   "karma-firefox-launcher": "^2.1.2",
+   "karma-mocha": "^2.0.1",
+   "karma-webpack": "^5.0.0",
+   nyc: "^15.1.0",
+   rimraf: "^5.0.0",
+   rollup: "^3.20.7",
+   "wait-on": "^7.0.1",
+   webpack: "^5.79.0",
+   "webpack-bundle-analyzer": "^4.8.0",
+   "webpack-cli": "^5.0.1",
+   "webpack-dev-middleware": "^6.0.2",
+   "rollup-plugin-sourcemaps": "^0.6.3"
+  },
+  dependencies: {
+   "bmp-js": "^0.1.0",
+   "idb-keyval": "^6.2.0",
+   "is-url": "^1.2.4",
+   "node-fetch": "^2.6.9",
+   "opencollective-postinstall": "^2.0.3",
+   "regenerator-runtime": "^0.13.3",
+   "tesseract.js-core": "^7.0.0",
+   "wasm-feature-detect": "^1.8.0",
+   zlibjs: "^0.3.1"
+  },
+  overrides: {
+   "@rollup/pluginutils": "^5.0.2"
+  },
+  repository: {
+   type: "git",
+   url: "https://github.com/naptha/tesseract.js.git"
+  },
+  bugs: {
+   url: "https://github.com/naptha/tesseract.js/issues"
+  },
+  homepage: "https://github.com/naptha/tesseract.js",
+  collective: {
+   type: "opencollective",
+   url: "https://opencollective.com/tesseractjs"
+  }
+ };
+});
+// node_modules/tesseract.js/src/constants/defaultOptions.js
+var require_defaultOptions = __commonJS((exports, module) => {
+ module.exports = {
+  workerBlobURL: !0,
+  logger: () => {}
+ };
+});
+// node_modules/tesseract.js/src/worker/browser/defaultOptions.js
+var require_defaultOptions2 = __commonJS((exports, module) => {
+ var version = require_package().version, defaultOptions = require_defaultOptions();
+ module.exports = {
+  ...defaultOptions,
+  workerPath: `https://cdn.jsdelivr.net/npm/tesseract.js@v${version}/dist/worker.min.js`
+ };
+});
+// node_modules/tesseract.js/src/worker/browser/spawnWorker.js
+var require_spawnWorker = __commonJS((exports, module) => {
+ module.exports = ({ workerPath, workerBlobURL }) => {
+  let worker;
+  if (Blob && URL && workerBlobURL) {
+   let blob = new Blob([`importScripts("${workerPath}");`], {
+    type: "application/javascript"
+   });
+   worker = new Worker(URL.createObjectURL(blob));
+  } else worker = new Worker(workerPath);
+  return worker;
+ };
+});
+// node_modules/tesseract.js/src/worker/browser/terminateWorker.js
+var require_terminateWorker = __commonJS((exports, module) => {
+ module.exports = (worker) => {
+  worker.terminate();
+ };
+});
+// node_modules/tesseract.js/src/worker/browser/onMessage.js
+var require_onMessage = __commonJS((exports, module) => {
+ module.exports = (worker, handler) => {
+  worker.onmessage = ({ data }) => {
+   handler(data);
+  };
+ };
+});
+// node_modules/tesseract.js/src/worker/browser/send.js
+var require_send = __commonJS((exports, module) => {
+ module.exports = async (worker, packet) => {
+  worker.postMessage(packet);
+ };
+});
+// node_modules/tesseract.js/src/worker/browser/loadImage.js
+var require_loadImage = __commonJS((exports, module) => {
+ var readFromBlobOrFile = (blob) => new Promise((resolve, reject) => {
+  let fileReader = new FileReader;
+  fileReader.onload = () => {
+   resolve(fileReader.result);
+  }, fileReader.onerror = ({ target: { error: { code } } }) => {
+   reject(Error(`File could not be read! Code=${code}`));
+  }, fileReader.readAsArrayBuffer(blob);
+ }), loadImage = async (image) => {
+  let data = image;
+  if (typeof image === "undefined") return "undefined";
+  if (typeof image === "string") if (/data:image\/([a-zA-Z]*);base64,([^"]*)/.test(image)) data = atob(image.split(",")[1]).split("").map((c) => c.charCodeAt(0));
+   else data = await (await fetch(image)).arrayBuffer();
+  else if (typeof HTMLElement !== "undefined" && image instanceof HTMLElement) {
+   if (image.tagName === "IMG") data = await loadImage(image.src);
+   if (image.tagName === "VIDEO") data = await loadImage(image.poster);
+   if (image.tagName === "CANVAS") await new Promise((resolve) => {
+     image.toBlob(async (blob) => {
+      data = await readFromBlobOrFile(blob), resolve();
+     });
+    });
+  } else if (typeof OffscreenCanvas !== "undefined" && image instanceof OffscreenCanvas) {
+   let blob = await image.convertToBlob();
+   data = await readFromBlobOrFile(blob);
+  } else if (image instanceof File || image instanceof Blob) data = await readFromBlobOrFile(image);
+  return new Uint8Array(data);
+ };
+ module.exports = loadImage;
+});
+// node_modules/tesseract.js/src/worker/browser/index.js
+var require_browser = __commonJS((exports, module) => {
+ var defaultOptions = require_defaultOptions2(), spawnWorker = require_spawnWorker(), terminateWorker = require_terminateWorker(), onMessage = require_onMessage(), send = require_send(), loadImage = require_loadImage();
+ module.exports = {
+  defaultOptions,
+  spawnWorker,
+  terminateWorker,
+  onMessage,
+  send,
+  loadImage
+ };
+});
+// node_modules/tesseract.js/src/createWorker.js
+var require_createWorker = __commonJS((exports, module) => {
+ var resolvePaths = require_resolvePaths(), createJob = require_createJob(), { log } = require_log(), getId = require_getId(), OEM = require_OEM(), {
+  defaultOptions,
+  spawnWorker,
+  terminateWorker,
+  onMessage,
+  loadImage,
+  send
+ } = require_browser(), workerCounter = 0;
+ module.exports = async (langs = "eng", oem = OEM.LSTM_ONLY, _options = {}, config = {}) => {
+  let id = getId("Worker", workerCounter), {
+   logger,
+   errorHandler,
+   ...options
+  } = resolvePaths({
+   ...defaultOptions,
+   ..._options
+  }), promises = {}, currentLangs = typeof langs === "string" ? langs.split("+") : langs, currentOem = oem, currentConfig = config, lstmOnlyCore = [OEM.DEFAULT, OEM.LSTM_ONLY].includes(oem) && !options.legacyCore, workerResReject, workerResResolve, workerRes = new Promise((resolve, reject) => {
+   workerResResolve = resolve, workerResReject = reject;
+  }), workerError = (event) => {
+   workerResReject(event.message);
+  }, worker = spawnWorker(options);
+  worker.onerror = workerError, workerCounter += 1;
+  let startJob = ({ id: jobId, action, payload }) => new Promise((resolve, reject) => {
+   log(`[${id}]: Start ${jobId}, action=${action}`);
+   let promiseId = `${action}-${jobId}`;
+   promises[promiseId] = { resolve, reject }, send(worker, {
+    workerId: id,
+    jobId,
+    action,
+    payload
+   });
+  }), load = () => console.warn("`load` is depreciated and should be removed from code (workers now come pre-loaded)"), loadInternal = (jobId) => startJob(createJob({
+   id: jobId,
+   action: "load",
+   payload: { options: { lstmOnly: lstmOnlyCore, corePath: options.corePath, logging: options.logging } }
+  })), writeText = (path, text, jobId) => startJob(createJob({
+   id: jobId,
+   action: "FS",
+   payload: { method: "writeFile", args: [path, text] }
+  })), readText = (path, jobId) => startJob(createJob({
+   id: jobId,
+   action: "FS",
+   payload: { method: "readFile", args: [path, { encoding: "utf8" }] }
+  })), removeFile = (path, jobId) => startJob(createJob({
+   id: jobId,
+   action: "FS",
+   payload: { method: "unlink", args: [path] }
+  })), FS = (method, args, jobId) => startJob(createJob({
+   id: jobId,
+   action: "FS",
+   payload: { method, args }
+  })), loadLanguageInternal = (_langs, jobId) => startJob(createJob({
+   id: jobId,
+   action: "loadLanguage",
+   payload: {
+    langs: _langs,
+    options: {
+     langPath: options.langPath,
+     dataPath: options.dataPath,
+     cachePath: options.cachePath,
+     cacheMethod: options.cacheMethod,
+     gzip: options.gzip,
+     lstmOnly: [OEM.DEFAULT, OEM.LSTM_ONLY].includes(currentOem) && !options.legacyLang
+    }
+   }
+  })), initializeInternal = (_langs, _oem, _config, jobId) => startJob(createJob({
+   id: jobId,
+   action: "initialize",
+   payload: { langs: _langs, oem: _oem, config: _config }
+  })), reinitialize = (langs2 = "eng", oem2, config2, jobId) => {
+   if (lstmOnlyCore && [OEM.TESSERACT_ONLY, OEM.TESSERACT_LSTM_COMBINED].includes(oem2)) throw Error("Legacy model requested but code missing.");
+   let _oem = oem2 || currentOem;
+   currentOem = _oem;
+   let _config = config2 || currentConfig;
+   currentConfig = _config;
+   let _langs = (typeof langs2 === "string" ? langs2.split("+") : langs2).filter((x) => !currentLangs.includes(x));
+   if (currentLangs.push(..._langs), _langs.length > 0) return loadLanguageInternal(_langs, jobId).then(() => initializeInternal(langs2, _oem, _config, jobId));
+   return initializeInternal(langs2, _oem, _config, jobId);
+  }, setParameters = (params = {}, jobId) => startJob(createJob({
+   id: jobId,
+   action: "setParameters",
+   payload: { params }
+  })), recognize = async (image, opts = {}, output = {
+   text: !0
+  }, jobId) => startJob(createJob({
+   id: jobId,
+   action: "recognize",
+   payload: { image: await loadImage(image), options: opts, output }
+  })), detect = async (image, jobId) => {
+   if (lstmOnlyCore) throw Error("`worker.detect` requires Legacy model, which was not loaded.");
+   return startJob(createJob({
+    id: jobId,
+    action: "detect",
+    payload: { image: await loadImage(image) }
+   }));
+  }, terminate = async () => {
+   if (worker !== null) terminateWorker(worker), worker = null;
+   return Promise.resolve();
+  };
+  onMessage(worker, ({
+   workerId,
+   jobId,
+   status,
+   action,
+   data
+  }) => {
+   let promiseId = `${action}-${jobId}`;
+   if (status === "resolve") log(`[${workerId}]: Complete ${jobId}`), promises[promiseId].resolve({ jobId, data }), delete promises[promiseId];
+   else if (status === "reject") {
+    if (promises[promiseId].reject(data), delete promises[promiseId], action === "load") workerResReject(data);
+    if (errorHandler) errorHandler(data);
+    else throw Error(data);
+   } else if (status === "progress") logger({ ...data, userJobId: jobId });
+  });
+  let resolveObj = {
+   id,
+   worker,
+   load,
+   writeText,
+   readText,
+   removeFile,
+   FS,
+   reinitialize,
+   setParameters,
+   recognize,
+   detect,
+   terminate
+  };
+  return loadInternal().then(() => loadLanguageInternal(langs)).then(() => initializeInternal(langs, oem, config)).then(() => workerResResolve(resolveObj)).catch(() => {}), workerRes;
+ };
+});
+// node_modules/tesseract.js/src/Tesseract.js
+var require_Tesseract = __commonJS((exports, module) => {
+ var createWorker = require_createWorker(), recognize = async (image, langs, options) => {
+  let worker = await createWorker(langs, 1, options);
+  return worker.recognize(image).finally(async () => {
+   await worker.terminate();
+  });
+ }, detect = async (image, options) => {
+  let worker = await createWorker("osd", 0, options);
+  return worker.detect(image).finally(async () => {
+   await worker.terminate();
+  });
+ };
+ module.exports = {
+  recognize,
+  detect
+ };
+});
+// node_modules/tesseract.js/src/constants/languages.js
+var require_languages = __commonJS((exports, module) => {
+ module.exports = {
+  AFR: "afr",
+  AMH: "amh",
+  ARA: "ara",
+  ASM: "asm",
+  AZE: "aze",
+  AZE_CYRL: "aze_cyrl",
+  BEL: "bel",
+  BEN: "ben",
+  BOD: "bod",
+  BOS: "bos",
+  BUL: "bul",
+  CAT: "cat",
+  CEB: "ceb",
+  CES: "ces",
+  CHI_SIM: "chi_sim",
+  CHI_TRA: "chi_tra",
+  CHR: "chr",
+  CYM: "cym",
+  DAN: "dan",
+  DEU: "deu",
+  DZO: "dzo",
+  ELL: "ell",
+  ENG: "eng",
+  ENM: "enm",
+  EPO: "epo",
+  EST: "est",
+  EUS: "eus",
+  FAS: "fas",
+  FIN: "fin",
+  FRA: "fra",
+  FRK: "frk",
+  FRM: "frm",
+  GLE: "gle",
+  GLG: "glg",
+  GRC: "grc",
+  GUJ: "guj",
+  HAT: "hat",
+  HEB: "heb",
+  HIN: "hin",
+  HRV: "hrv",
+  HUN: "hun",
+  IKU: "iku",
+  IND: "ind",
+  ISL: "isl",
+  ITA: "ita",
+  ITA_OLD: "ita_old",
+  JAV: "jav",
+  JPN: "jpn",
+  KAN: "kan",
+  KAT: "kat",
+  KAT_OLD: "kat_old",
+  KAZ: "kaz",
+  KHM: "khm",
+  KIR: "kir",
+  KOR: "kor",
+  KUR: "kur",
+  LAO: "lao",
+  LAT: "lat",
+  LAV: "lav",
+  LIT: "lit",
+  MAL: "mal",
+  MAR: "mar",
+  MKD: "mkd",
+  MLT: "mlt",
+  MSA: "msa",
+  MYA: "mya",
+  NEP: "nep",
+  NLD: "nld",
+  NOR: "nor",
+  ORI: "ori",
+  PAN: "pan",
+  POL: "pol",
+  POR: "por",
+  PUS: "pus",
+  RON: "ron",
+  RUS: "rus",
+  SAN: "san",
+  SIN: "sin",
+  SLK: "slk",
+  SLV: "slv",
+  SPA: "spa",
+  SPA_OLD: "spa_old",
+  SQI: "sqi",
+  SRP: "srp",
+  SRP_LATN: "srp_latn",
+  SWA: "swa",
+  SWE: "swe",
+  SYR: "syr",
+  TAM: "tam",
+  TEL: "tel",
+  TGK: "tgk",
+  TGL: "tgl",
+  THA: "tha",
+  TIR: "tir",
+  TUR: "tur",
+  UIG: "uig",
+  UKR: "ukr",
+  URD: "urd",
+  UZB: "uzb",
+  UZB_CYRL: "uzb_cyrl",
+  VIE: "vie",
+  YID: "yid"
+ };
+});
+// node_modules/tesseract.js/src/constants/PSM.js
+var require_PSM = __commonJS((exports, module) => {
+ module.exports = {
+  OSD_ONLY: "0",
+  AUTO_OSD: "1",
+  AUTO_ONLY: "2",
+  AUTO: "3",
+  SINGLE_COLUMN: "4",
+  SINGLE_BLOCK_VERT_TEXT: "5",
+  SINGLE_BLOCK: "6",
+  SINGLE_LINE: "7",
+  SINGLE_WORD: "8",
+  CIRCLE_WORD: "9",
+  SINGLE_CHAR: "10",
+  SPARSE_TEXT: "11",
+  SPARSE_TEXT_OSD: "12",
+  RAW_LINE: "13"
+ };
+});
+// node_modules/tesseract.js/src/index.js
+var require_src = __commonJS((exports, module) => {
+ require_runtime();
+ var createScheduler = require_createScheduler(), createWorker = require_createWorker(), Tesseract = require_Tesseract(), languages = require_languages(), OEM = require_OEM(), PSM = require_PSM(), { setLogging } = require_log();
+ module.exports = {
+  languages,
+  OEM,
+  PSM,
+  createScheduler,
+  createWorker,
+  setLogging,
+  ...Tesseract
+ };
+});
 class BxLogger {
  static info = (tag, ...args) => BX_FLAGS.Debug && BxLogger.log("#008746", tag, ...args);
  static warning = (tag, ...args) => BX_FLAGS.Debug && BxLogger.log("#c1a404", tag, ...args);
@@ -50,6 +943,18 @@ var ALL_PREFS = {
   "block.tracking",
   "gameBar.position",
   "game.fortnite.forceConsole",
+  "gameTranslator.enabled",
+  "gameTranslator.ocr.region",
+  "gameTranslator.ocr.interval",
+  "gameTranslator.changeThreshold",
+  "gameTranslator.stabilizationInterval",
+  "gameTranslator.provider",
+  "gameTranslator.deepl.proxyUrl",
+  "gameTranslator.showOriginal",
+  "gameTranslator.debugRegion",
+  "gameTranslator.fontSize",
+  "gameTranslator.verticalPosition",
+  "gameTranslator.backgroundOpacity",
   "loadingScreen.gameArt.show",
   "loadingScreen.rocket",
   "loadingScreen.waitTime.show",
@@ -153,7 +1058,7 @@ class UserAgent {
  }
  static updateStorage(profile, custom) {
   let config = UserAgent.#config;
-  if (config.profile = profile, profile === "custom" && typeof custom < "u") config.custom = custom;
+  if (config.profile = profile, profile === "custom" && typeof custom !== "undefined") config.custom = custom;
   window.localStorage.setItem(UserAgent.STORAGE_KEY, JSON.stringify(config));
  }
  static getDefault() {
@@ -195,7 +1100,7 @@ class UserAgent {
   });
  }
 }
-var SCRIPT_VERSION = "6.7.12", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
+var SCRIPT_VERSION = "6.7.12-game-translator", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
 UserAgent.init();
 var userAgent = window.navigator.userAgent.toLowerCase(), isTv = userAgent.includes("smart-tv") || userAgent.includes("smarttv") || /\baft.*\b/.test(userAgent), isVr = window.navigator.userAgent.includes("VR") && window.navigator.userAgent.includes("OculusBrowser"), browserHasTouchSupport = "ontouchstart" in window || navigator.maxTouchPoints > 0, userAgentHasTouchSupport = !isTv && !isVr && browserHasTouchSupport, STATES = {
  supportedRegion: !0,
@@ -513,6 +1418,27 @@ var SUPPORTED_LANGUAGES = {
  "fortnite-force-console-version": "Fortnite: force console version",
  "friends-followers": "Friends and followers",
  "game-bar": "Game Bar",
+ "game-translator": "Game Translator (English → Russian)",
+ "game-translator-background-opacity": "Translation background opacity",
+ "game-translator-change-threshold": "Image change threshold",
+ "game-translator-deepl-proxy-note": "HTTPS proxy compatible with the DeepL /v2/translate response. Keep the DeepL API key on the proxy, never in this userscript.",
+ "game-translator-deepl-proxy-url": "DeepL proxy URL",
+ "game-translator-debug-region": "Show OCR region and timings",
+ "game-translator-enable": "Enable Game Translator",
+ "game-translator-font-size": "Translation font size",
+ "game-translator-ocr-interval": "OCR interval",
+ "game-translator-ocr-region": "OCR region",
+ "game-translator-privacy-note": "OCR runs locally. Recognized English text and game context leave the device only when an online provider is selected.",
+ "game-translator-provider": "Translation provider",
+ "game-translator-provider-browser": "Chrome Translator (local, desktop)",
+ "game-translator-provider-deepl": "DeepL Context (proxy)",
+ "game-translator-provider-note": "MyMemory works without setup. Chrome Translator is local and desktop-only. DeepL Context requires the HTTPS proxy URL below.",
+ "game-translator-region-bottom": "Bottom 35%",
+ "game-translator-region-center": "Center 35%",
+ "game-translator-region-top": "Top 35%",
+ "game-translator-show-original": "Show recognized English text",
+ "game-translator-stabilization": "Text stabilization",
+ "game-translator-vertical-position": "Vertical position from bottom",
  "getting-consoles-list": "Getting the list of consoles...",
  guide: "Guide",
  help: "Help",
@@ -936,7 +1862,7 @@ function createElement(elmName, props, ..._) {
  }
  for (let i = 2, size = arguments.length;i < size; i++) {
   let arg = arguments[i];
-  if (arg !== null && arg !== !1 && typeof arg < "u") $elm.append(arg);
+  if (arg !== null && arg !== !1 && typeof arg !== "undefined") $elm.append(arg);
  }
  return $elm;
 }
@@ -1233,7 +2159,7 @@ class BaseSettingsStorage {
  validateValue(action, key, value) {
   let def = this.definitions[key];
   if (!def) return value;
-  if (typeof value > "u" || value === null) value = def.default;
+  if (typeof value === "undefined" || value === null) value = def.default;
   if (def.transformValue && action === "get") value = def.transformValue.get.call(def, value);
   if ("min" in def) value = Math.max(def.min, value);
   if ("max" in def) value = Math.min(def.max, value);
@@ -1403,6 +2329,120 @@ class GlobalSettingsStorage extends BaseSettingsStorage {
    requiredVariants: "full",
    label: t("screenshot-apply-filters"),
    default: !1
+  },
+  "gameTranslator.enabled": {
+   requiredVariants: "full",
+   label: t("game-translator-enable"),
+   default: !1,
+   experimental: !0,
+   note: t("game-translator-privacy-note")
+  },
+  "gameTranslator.ocr.region": {
+   requiredVariants: "full",
+   label: t("game-translator-ocr-region"),
+   default: "bottom-35",
+   options: {
+    "top-35": t("game-translator-region-top"),
+    "center-35": t("game-translator-region-center"),
+    "bottom-35": t("game-translator-region-bottom")
+   }
+  },
+  "gameTranslator.ocr.interval": {
+   requiredVariants: "full",
+   label: t("game-translator-ocr-interval"),
+   default: "250",
+   options: {
+    "250": "250 ms",
+    "333": "333 ms",
+    "500": "500 ms",
+    "1000": "1000 ms"
+   }
+  },
+  "gameTranslator.changeThreshold": {
+   requiredVariants: "full",
+   label: t("game-translator-change-threshold"),
+   default: 12,
+   min: 2,
+   max: 40,
+   params: {
+    steps: 2,
+    suffix: "%",
+    exactTicks: 10
+   }
+  },
+  "gameTranslator.stabilizationInterval": {
+   requiredVariants: "full",
+   label: t("game-translator-stabilization"),
+   default: "250",
+   options: {
+    "250": "250 ms",
+    "500": "500 ms",
+    "750": "750 ms",
+    "1000": "1000 ms"
+   }
+  },
+  "gameTranslator.provider": {
+   requiredVariants: "full",
+   label: t("game-translator-provider"),
+   default: "my-memory",
+   options: {
+    browser: t("game-translator-provider-browser"),
+    "deepl-context": t("game-translator-provider-deepl"),
+    "my-memory": "MyMemory"
+   },
+   note: t("game-translator-provider-note")
+  },
+  "gameTranslator.deepl.proxyUrl": {
+   requiredVariants: "full",
+   label: t("game-translator-deepl-proxy-url"),
+   default: "",
+   note: t("game-translator-deepl-proxy-note")
+  },
+  "gameTranslator.showOriginal": {
+   requiredVariants: "full",
+   label: t("game-translator-show-original"),
+   default: !1
+  },
+  "gameTranslator.debugRegion": {
+   requiredVariants: "full",
+   label: t("game-translator-debug-region"),
+   default: !1
+  },
+  "gameTranslator.fontSize": {
+   requiredVariants: "full",
+   label: t("game-translator-font-size"),
+   default: 26,
+   min: 16,
+   max: 40,
+   params: {
+    steps: 2,
+    suffix: "px",
+    exactTicks: 8
+   }
+  },
+  "gameTranslator.verticalPosition": {
+   requiredVariants: "full",
+   label: t("game-translator-vertical-position"),
+   default: 8,
+   min: 2,
+   max: 40,
+   params: {
+    steps: 2,
+    suffix: "%",
+    exactTicks: 10
+   }
+  },
+  "gameTranslator.backgroundOpacity": {
+   requiredVariants: "full",
+   label: t("game-translator-background-opacity"),
+   default: 72,
+   min: 0,
+   max: 100,
+   params: {
+    steps: 5,
+    suffix: "%",
+    exactTicks: 25
+   }
   },
   "ui.splashVideo.skip": {
    label: t("skip-splash-video"),
@@ -3235,7 +4275,7 @@ class PointerClient {
   BxLogger.info(this.LOG_TAG, "constructor()");
  }
  start(port, mkbHandler) {
-  if (!port) throw Error("PointerServer port is 0");
+  if (!port) throw new Error("PointerServer port is 0");
   this.mkbHandler = mkbHandler, this.socket = new WebSocket(`ws://localhost:${port}`), this.socket.binaryType = "arraybuffer", this.socket.addEventListener("open", (event) => {
    BxLogger.info(this.LOG_TAG, "connected");
   }), this.socket.addEventListener("error", (event) => {
@@ -3370,7 +4410,7 @@ class MkbPopup {
 class NativeMkbHandler extends MkbHandler {
  static instance;
  static getInstance() {
-  if (typeof NativeMkbHandler.instance > "u") if (NativeMkbHandler.isAllowed()) NativeMkbHandler.instance = new NativeMkbHandler;
+  if (typeof NativeMkbHandler.instance === "undefined") if (NativeMkbHandler.isAllowed()) NativeMkbHandler.instance = new NativeMkbHandler;
    else NativeMkbHandler.instance = null;
   return NativeMkbHandler.instance;
  }
@@ -3441,7 +4481,7 @@ class NativeMkbHandler extends MkbHandler {
  }
  toggle(force) {
   let setEnable;
-  if (typeof force < "u") setEnable = force;
+  if (typeof force !== "undefined") setEnable = force;
   else setEnable = !this.enabled;
   if (setEnable) document.documentElement.requestPointerLock();
   else document.exitPointerLock();
@@ -3676,7 +4716,7 @@ class PointerLockMouseDataProvider extends MouseDataProvider {
 class EmulatedMkbHandler extends MkbHandler {
  static instance;
  static getInstance() {
-  if (typeof EmulatedMkbHandler.instance > "u") if (EmulatedMkbHandler.isAllowed()) EmulatedMkbHandler.instance = new EmulatedMkbHandler;
+  if (typeof EmulatedMkbHandler.instance === "undefined") if (EmulatedMkbHandler.isAllowed()) EmulatedMkbHandler.instance = new EmulatedMkbHandler;
    else EmulatedMkbHandler.instance = null;
   return EmulatedMkbHandler.instance;
  }
@@ -3692,7 +4732,7 @@ class EmulatedMkbHandler extends MkbHandler {
   hapticActuators: null,
   mapping: "standard",
   axes: [0, 0, 0, 0],
-  buttons: Array(17).fill(null).map(() => ({ pressed: !1, value: 0 })),
+  buttons: new Array(17).fill(null).map(() => ({ pressed: !1, value: 0 })),
   timestamp: performance.now(),
   vibrationActuator: null
  };
@@ -3771,7 +4811,7 @@ class EmulatedMkbHandler extends MkbHandler {
   if (!this.isPolling || !this.PRESET) return;
   if (window.BX_STREAM_SETTINGS.xCloudPollingMode !== "none") return;
   let buttonIndex = this.PRESET.mapping[e.code || e.key];
-  if (typeof buttonIndex > "u") return;
+  if (typeof buttonIndex === "undefined") return;
   if (e.repeat) return;
   e.preventDefault(), this.pressButton(buttonIndex, isKeyDown);
  };
@@ -3782,14 +4822,14 @@ class EmulatedMkbHandler extends MkbHandler {
  };
  handleMouseClick(data) {
   let mouseButton;
-  if (typeof data.mouseButton < "u") mouseButton = data.mouseButton;
-  else if (typeof data.pointerButton < "u") mouseButton = PointerToMouseButton[data.pointerButton];
+  if (typeof data.mouseButton !== "undefined") mouseButton = data.mouseButton;
+  else if (typeof data.pointerButton !== "undefined") mouseButton = PointerToMouseButton[data.pointerButton];
   let key = {
    code: "Mouse" + mouseButton
   };
   if (!this.PRESET) return;
   let buttonIndex = this.PRESET.mapping[key.code];
-  if (typeof buttonIndex > "u") return;
+  if (typeof buttonIndex === "undefined") return;
   this.pressButton(buttonIndex, data.pressed);
  }
  handleMouseMove(data) {
@@ -3815,7 +4855,7 @@ class EmulatedMkbHandler extends MkbHandler {
   let key = {
    code
   }, buttonIndex = this.PRESET.mapping[key.code];
-  if (typeof buttonIndex > "u") return !1;
+  if (typeof buttonIndex === "undefined") return !1;
   if (this.prevWheelCode === null || this.prevWheelCode === key.code) this.wheelStoppedTimeoutId && clearTimeout(this.wheelStoppedTimeoutId), this.pressButton(buttonIndex, !0);
   return this.wheelStoppedTimeoutId = window.setTimeout(() => {
    this.prevWheelCode = null, this.pressButton(buttonIndex, !1);
@@ -3823,7 +4863,7 @@ class EmulatedMkbHandler extends MkbHandler {
  }
  async toggle(force) {
   if (!this.initialized) return;
-  if (typeof force < "u") this.enabled = force;
+  if (typeof force !== "undefined") this.enabled = force;
   else this.enabled = !this.enabled;
   if (this.enabled) try {
     await document.body.requestPointerLock({ unadjustedMovement: !0 });
@@ -4398,6 +5438,7 @@ class BxSelectElement extends HTMLSelectElement {
 }
 class XboxApi {
  static CACHED_TITLES = {};
+ static CACHED_PRODUCT_CONTEXTS = {};
  static async getProductTitle(xboxTitleId) {
   if (xboxTitleId = xboxTitleId.toString(), XboxApi.CACHED_TITLES[xboxTitleId]) return XboxApi.CACHED_TITLES[xboxTitleId];
   let title;
@@ -4408,6 +5449,27 @@ class XboxApi {
    title = "Unknown Game #" + xboxTitleId;
   }
   return XboxApi.CACHED_TITLES[xboxTitleId] = title, title;
+ }
+ static async getProductContext(productId) {
+  if (XboxApi.CACHED_PRODUCT_CONTEXTS[productId]) return XboxApi.CACHED_PRODUCT_CONTEXTS[productId];
+  try {
+   let params = new URLSearchParams({
+    bigIds: productId,
+    market: "US",
+    languages: "en-US",
+    "MS-CV": "better-xcloud.game-translator"
+   }), response = await NATIVE_FETCH(`https://displaycatalog.mp.microsoft.com/v7.0/products?${params}`);
+   if (!response.ok) return;
+   let localized = (await response.json()).Products?.[0]?.LocalizedProperties?.[0];
+   if (!localized) return;
+   let context = {
+    title: String(localized.ProductTitle || "").trim(),
+    description: String(localized.ShortDescription || localized.ProductDescription || "").trim()
+   };
+   return XboxApi.CACHED_PRODUCT_CONTEXTS[productId] = context, context;
+  } catch {
+   return;
+  }
  }
 }
 class SettingsManager {
@@ -6286,7 +7348,7 @@ class BxDualNumberStepper extends HTMLInputElement {
      let tmp = value.split(",");
      from = parseInt(tmp[0]), to = parseInt(tmp[1]);
     } else if (Array.isArray(value)) [from, to] = value;
-    if (typeof from < "u" && typeof to < "u") BxDualNumberStepper.setValues.call(self, [from, to]);
+    if (typeof from !== "undefined" && typeof to !== "undefined") BxDualNumberStepper.setValues.call(self, [from, to]);
    }
   }), self;
  }
@@ -6399,7 +7461,7 @@ class ControllerCustomizationsManagerDialog extends BaseProfileManagerDialog {
     };
     for (let dir in directions) {
      let idx = directions[dir];
-     if (typeof this.selectsOrder[idx] > "u") continue;
+     if (typeof this.selectsOrder[idx] === "undefined") continue;
      let $targetSelect = this.selectsMap[this.selectsOrder[idx]];
      setNearby($select, {
       [dir]: $targetSelect
@@ -6487,7 +7549,7 @@ class ControllerCustomizationsManagerDialog extends BaseProfileManagerDialog {
    let $select = selectsMap[buttonIndex];
    if (!$select) continue;
    let mappedButton = presetData.mapping[buttonIndex];
-   $select.value = typeof mappedButton > "u" ? "" : mappedButton.toString(), $select.disabled = isDefaultPreset, BxEvent.dispatch($select, "input", {
+   $select.value = typeof mappedButton === "undefined" ? "" : mappedButton.toString(), $select.disabled = isDefaultPreset, BxEvent.dispatch($select, "input", {
     ignoreOnChange: !0,
     manualTrigger: !0
    });
@@ -7311,6 +8373,41 @@ class SettingsDialog extends NavigationDialog {
   ]
  }, {
   requiredVariants: "full",
+  group: "game-translator",
+  label: t("game-translator"),
+  items: [
+   "gameTranslator.enabled",
+   "gameTranslator.ocr.region",
+   "gameTranslator.ocr.interval",
+   "gameTranslator.changeThreshold",
+   "gameTranslator.stabilizationInterval",
+   "gameTranslator.provider",
+   {
+    pref: "gameTranslator.deepl.proxyUrl",
+    multiLines: !0,
+    content: () => {
+     let $input = CE("input", {
+      type: "url",
+      value: getGlobalPref("gameTranslator.deepl.proxyUrl"),
+      placeholder: "https://translator.example.com/v2/translate",
+      autocomplete: "off",
+      spellcheck: !1,
+      class: "bx-settings-text-input",
+      tabindex: 0
+     });
+     return $input.addEventListener("change", (e) => {
+      setGlobalPref("gameTranslator.deepl.proxyUrl", $input.value.trim(), "ui"), this.onGlobalSettingChanged(e);
+     }), $input;
+    }
+   },
+   "gameTranslator.showOriginal",
+   "gameTranslator.debugRegion",
+   "gameTranslator.fontSize",
+   "gameTranslator.verticalPosition",
+   "gameTranslator.backgroundOpacity"
+  ]
+ }, {
+  requiredVariants: "full",
   group: "mkb",
   label: t("mouse-and-keyboard"),
   items: [
@@ -7657,7 +8754,7 @@ class SettingsDialog extends NavigationDialog {
   this.$btnGlobalReload.disabled = !0, this.$btnGlobalReload.firstElementChild.textContent = t("settings-reloading"), this.hide(), FullscreenText.getInstance().show(t("settings-reloading")), window.location.reload();
  }
  isSupportedVariant(requiredVariants) {
-  if (typeof requiredVariants > "u") return !0;
+  if (typeof requiredVariants === "undefined") return !0;
   return requiredVariants = typeof requiredVariants === "string" ? [requiredVariants] : requiredVariants, requiredVariants.includes(SCRIPT_VARIANT);
  }
  onTabClicked = (e) => {
@@ -7764,7 +8861,7 @@ class SettingsDialog extends NavigationDialog {
   if (typeof note === "function") note = note();
   if (typeof unsupportedNote === "function") unsupportedNote = unsupportedNote();
   if (settingTabContent.label && setting.pref) {
-   if (prefDefinition?.suggest) typeof prefDefinition.suggest.lowest < "u" && (this.suggestedSettings.lowest[setting.pref] = prefDefinition.suggest.lowest), typeof prefDefinition.suggest.highest < "u" && (this.suggestedSettings.highest[setting.pref] = prefDefinition.suggest.highest);
+   if (prefDefinition?.suggest) typeof prefDefinition.suggest.lowest !== "undefined" && (this.suggestedSettings.lowest[setting.pref] = prefDefinition.suggest.lowest), typeof prefDefinition.suggest.highest !== "undefined" && (this.suggestedSettings.highest[setting.pref] = prefDefinition.suggest.highest);
   }
   if (experimental) if (label = "🧪 " + label, !note) note = t("experimental");
    else note = `${t("experimental")}: ${note}`;
@@ -8054,17 +9151,25 @@ class ScreenshotManager {
  onAnimationEnd(e) {
   e.target.classList.remove("bx-taking-screenshot");
  }
- takeScreenshot(callback) {
-  let currentStream = STATES.currentStream, streamPlayerManager = currentStream.streamPlayerManager, $canvas = this.$canvas;
-  if (!streamPlayerManager || !$canvas) return;
-  let $player;
-  if (getGlobalPref("screenshot.applyFilters")) $player = streamPlayerManager.getPlayerElement();
-  else $player = streamPlayerManager.getPlayerElement("video");
-  if (!$player || !$player.isConnected) return;
-  let canvasContext = this.canvasContext;
+ getCurrentFrameSource(elementType) {
+  return STATES.currentStream.streamPlayerManager?.getPlayerElement(elementType);
+ }
+ captureFrame($target, options = {}) {
+  let streamPlayerManager = STATES.currentStream.streamPlayerManager, $player = this.getCurrentFrameSource(options.elementType);
+  if (!streamPlayerManager || !$player || !$player.isConnected) return !1;
   if ($player instanceof HTMLCanvasElement) streamPlayerManager.getCanvasPlayer()?.updateFrame();
-  canvasContext.drawImage($player, 0, 0);
-  let $gameStream = $player.closest("#game-stream");
+  let sourceWidth = $player instanceof HTMLVideoElement ? $player.videoWidth : $player.width, sourceHeight = $player instanceof HTMLVideoElement ? $player.videoHeight : $player.height;
+  if (!sourceWidth || !sourceHeight || !$target.width || !$target.height) return !1;
+  let region = options.region || { x: 0, y: 0, width: 1, height: 1 }, context = $target === this.$canvas ? this.canvasContext : $target.getContext("2d", { alpha: !1, willReadFrequently: !0 });
+  if (!context) return !1;
+  return context.drawImage($player, Math.round(region.x * sourceWidth), Math.round(region.y * sourceHeight), Math.round(region.width * sourceWidth), Math.round(region.height * sourceHeight), 0, 0, $target.width, $target.height), !0;
+ }
+ takeScreenshot(callback) {
+  let currentStream = STATES.currentStream, $canvas = this.$canvas, elementType;
+  if (getGlobalPref("screenshot.applyFilters")) elementType = void 0;
+  else elementType = "video";
+  if (!this.captureFrame($canvas, { elementType })) return;
+  let $player = this.getCurrentFrameSource(elementType), canvasContext = this.canvasContext, $gameStream = $player.closest("#game-stream");
   if ($gameStream) $gameStream.addEventListener("animationend", this.onAnimationEnd, { once: !0 }), $gameStream.classList.add("bx-taking-screenshot");
   if (AppInterface) {
    let data = $canvas.toDataURL("image/png").split(";base64,")[1];
@@ -8134,7 +9239,7 @@ class TrueAchievements {
    if ($container) xboxTitleId = getReactProps($container).children.props.data.data.xboxTitleId;
   } catch (e) {}
   if (!xboxTitleId) xboxTitleId = this.getStreamXboxTitleId();
-  if (typeof xboxTitleId < "u") xboxTitleId = xboxTitleId.toString();
+  if (typeof xboxTitleId !== "undefined") xboxTitleId = xboxTitleId.toString();
   if (this.updateIds(xboxTitleId), document.body.dataset.mediaType === "tv") $div.appendChild(this.$link);
   else $div.appendChild(this.$button);
   $parent.appendChild($div);
@@ -8717,7 +9822,7 @@ class RemotePlayDialog extends NavigationDialog {
 class RemotePlayManager {
  static instance;
  static getInstance() {
-  if (typeof RemotePlayManager.instance > "u") if (!getGlobalPref("block.features").includes("remote-play")) RemotePlayManager.instance = new RemotePlayManager;
+  if (typeof RemotePlayManager.instance === "undefined") if (!getGlobalPref("block.features").includes("remote-play")) RemotePlayManager.instance = new RemotePlayManager;
    else RemotePlayManager.instance = null;
   return RemotePlayManager.instance;
  }
@@ -9394,7 +10499,7 @@ function getOsNameFromResolution(resolution) {
  return osName;
 }
 function addCss() {
- let css = ':root{--bx-title-font:Bahnschrift,Arial,Helvetica,sans-serif;--bx-title-font-semibold:Bahnschrift Semibold,Arial,Helvetica,sans-serif;--bx-normal-font:"Segoe UI",Arial,Helvetica,sans-serif;--bx-monospaced-font:Consolas,"Courier New",Courier,monospace;--bx-promptfont-font:promptfont;--bx-button-height:40px;--bx-default-button-color:#2d3036;--bx-default-button-rgb:45,48,54;--bx-default-button-hover-color:#515863;--bx-default-button-hover-rgb:81,88,99;--bx-default-button-active-color:#222428;--bx-default-button-active-rgb:34,36,40;--bx-default-button-disabled-color:#8e8e8e;--bx-default-button-disabled-rgb:142,142,142;--bx-primary-button-color:#008746;--bx-primary-button-rgb:0,135,70;--bx-primary-button-hover-color:#04b358;--bx-primary-button-hover-rgb:4,179,88;--bx-primary-button-active-color:#044e2a;--bx-primary-button-active-rgb:4,78,42;--bx-primary-button-disabled-color:#448262;--bx-primary-button-disabled-rgb:68,130,98;--bx-warning-button-color:#c16e04;--bx-warning-button-rgb:193,110,4;--bx-warning-button-hover-color:#fa9005;--bx-warning-button-hover-rgb:250,144,5;--bx-warning-button-active-color:#965603;--bx-warning-button-active-rgb:150,86,3;--bx-warning-button-disabled-color:#a2816c;--bx-warning-button-disabled-rgb:162,129,108;--bx-danger-button-color:#c10404;--bx-danger-button-rgb:193,4,4;--bx-danger-button-hover-color:#e61d1d;--bx-danger-button-hover-rgb:230,29,29;--bx-danger-button-active-color:#a26c6c;--bx-danger-button-active-rgb:162,108,108;--bx-danger-button-disabled-color:#bd8282;--bx-danger-button-disabled-rgb:189,130,130;--bx-fullscreen-text-z-index:9999;--bx-toast-z-index:6000;--bx-key-binding-dialog-z-index:5010;--bx-key-binding-dialog-overlay-z-index:5000;--bx-stats-bar-z-index:4010;--bx-navigation-dialog-z-index:3010;--bx-navigation-dialog-overlay-z-index:3000;--bx-mkb-pointer-lock-msg-z-index:2000;--bx-game-bar-z-index:1000;--bx-screenshot-animation-z-index:200;--bx-wait-time-box-z-index:100}@font-face{font-family:\'promptfont\';src:url("https://redphx.github.io/better-xcloud/fonts/promptfont.otf");unicode-range:U+2196-E011,U+27F6,U+FF31}#StreamHud div[class^=HUDButton-module__hiddenContainer] ~ div:not([class^=HUDButton-module__hiddenContainer]){opacity:0;pointer-events:none !important;position:absolute;top:-9999px;left:-9999px}@media screen and (min-width:641px) and (max-width:767px){header button[class^="ExperienceDropdown-module__toggleButton"],header button[class^="XboxButton-module__headerXboxButton"]{margin-right:10px !important}header a[href="/play"] > div > div,header button[class^="ExperienceDropdown-module__toggleButton"] > div > div{font-size:12px}header a[href="/play"] > div > svg,header button[class^="ExperienceDropdown-module__toggleButton"] > div > svg{width:20px;height:20px}}@media screen and (max-width:640px){header a[href="/play"],header button[class^="ExperienceDropdown-module__toggleButton"]{display:none}}.bx-full-width{width:100% !important}.bx-full-height{height:100% !important}.bx-auto-height{height:auto !important}.bx-no-scroll{overflow:hidden !important}.bx-hide-scroll-bar{scrollbar-width:none}.bx-hide-scroll-bar::-webkit-scrollbar{display:none}.bx-gone{display:none !important}.bx-offscreen{position:absolute !important;top:-9999px !important;left:-9999px !important;visibility:hidden !important}.bx-hidden{visibility:hidden !important}.bx-invisible{opacity:0}.bx-unclickable{pointer-events:none}.bx-pixel{width:1px !important;height:1px !important}.bx-no-margin{margin:0 !important}.bx-no-padding{padding:0 !important}.bx-prompt{font-family:var(--bx-promptfont-font) !important}.bx-monospaced{font-family:var(--bx-monospaced-font) !important}.bx-line-through{text-decoration:line-through !important}.bx-normal-case{text-transform:none !important}.bx-normal-link{text-transform:none !important;text-align:left !important;font-weight:400 !important;font-family:var(--bx-normal-font) !important}.bx-frosted{backdrop-filter:blur(4px) brightness(1.5)}select[multiple],select[multiple]:focus{overflow:auto;border:none}select[multiple] option,select[multiple]:focus option{padding:4px 6px}select[multiple] option:checked,select[multiple]:focus option:checked{background:#1a7bc0 linear-gradient(0deg,#1a7bc0 0%,#1a7bc0 100%)}select[multiple] option:checked::before,select[multiple]:focus option:checked::before{content:\'☑️\';font-size:12px;display:inline-block;margin-right:6px;height:100%;line-height:100%;vertical-align:middle}#headerArea,#uhfSkipToMain,.uhf-footer{display:none}#game-stream div[class^=NotFocusedDialog]{position:absolute !important;top:-9999px !important;left:-9999px !important;width:0 !important;height:0 !important}#game-stream video:not([src]){visibility:hidden}.bx-game-tile-wait-time{position:absolute;top:0;left:0;z-index:1;background:rgba(0,0,0,0.5);display:flex;border-radius:4px 0 4px 0;align-items:center;padding:4px 8px}.bx-game-tile-wait-time svg{width:14px;height:16px;margin-right:2px}.bx-game-tile-wait-time span{display:inline-block;height:16px;line-height:16px;font-size:12px;font-weight:bold;margin-left:2px}.bx-game-tile-wait-time[data-duration=short]{background-color:rgba(0,133,133,0.75)}.bx-game-tile-wait-time[data-duration=medium]{background-color:rgba(213,133,0,0.75)}.bx-game-tile-wait-time[data-duration=long]{background-color:rgba(150,0,0,0.75)}.bx-fullscreen-text{position:fixed;top:0;bottom:0;left:0;right:0;background:rgba(0,0,0,0.8);z-index:var(--bx-fullscreen-text-z-index);line-height:100vh;color:#fff;text-align:center;font-weight:400;font-family:var(--bx-normal-font);font-size:1.3rem;user-select:none;-webkit-user-select:none}#root section[class*=DeviceCodePage-module__page]{margin-left:20px !important;margin-right:20px !important;margin-top:20px !important;max-width:800px !important}#root div[class*=DeviceCodePage-module__back]{display:none}.bx-blink-me{animation:bx-blinker 1s linear infinite}.bx-horizontal-shaking{animation:bx-horizontal-shaking .4s ease-in-out 2}@-moz-keyframes bx-blinker{100%{opacity:0}}@-webkit-keyframes bx-blinker{100%{opacity:0}}@-o-keyframes bx-blinker{100%{opacity:0}}@keyframes bx-blinker{100%{opacity:0}}@-moz-keyframes bx-horizontal-shaking{0%{transform:translateX(0)}25%{transform:translateX(5px)}50%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}@-webkit-keyframes bx-horizontal-shaking{0%{transform:translateX(0)}25%{transform:translateX(5px)}50%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}@-o-keyframes bx-horizontal-shaking{0%{transform:translateX(0)}25%{transform:translateX(5px)}50%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}@keyframes bx-horizontal-shaking{0%{transform:translateX(0)}25%{transform:translateX(5px)}50%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}.bx-button{--button-rgb:var(--bx-default-button-rgb);--button-hover-rgb:var(--bx-default-button-hover-rgb);--button-active-rgb:var(--bx-default-button-active-rgb);--button-disabled-rgb:var(--bx-default-button-disabled-rgb);background-color:rgb(var(--button-rgb));user-select:none;-webkit-user-select:none;color:#fff;font-family:var(--bx-title-font-semibold);font-size:14px;border:none;font-weight:400;height:var(--bx-button-height);border-radius:4px;padding:0 8px;text-transform:uppercase;cursor:pointer;overflow:hidden}.bx-button:not([disabled]):active{background-color:rgb(var(--button-active-rgb))}.bx-button:focus{outline:none !important}.bx-button:not([disabled]):not(:active):hover,.bx-button:not([disabled]):not(:active).bx-focusable:focus{background-color:rgb(var(--button-hover-rgb))}.bx-button:disabled{cursor:default;background-color:rgb(var(--button-disabled-rgb));opacity:.5}.bx-button.bx-ghost{background-color:transparent}.bx-button.bx-ghost:not([disabled]):not(:active):hover,.bx-button.bx-ghost:not([disabled]):not(:active).bx-focusable:focus{background-color:rgb(var(--button-hover-rgb))}.bx-button.bx-primary{--button-rgb:var(--bx-primary-button-rgb)}.bx-button.bx-primary:not([disabled]):active{--button-active-rgb:var(--bx-primary-button-active-rgb)}.bx-button.bx-primary:not([disabled]):not(:active):hover,.bx-button.bx-primary:not([disabled]):not(:active).bx-focusable:focus{--button-hover-rgb:var(--bx-primary-button-hover-rgb)}.bx-button.bx-primary:disabled{--button-disabled-rgb:var(--bx-primary-button-disabled-rgb)}.bx-button.bx-warning{--button-rgb:var(--bx-warning-button-rgb)}.bx-button.bx-warning:not([disabled]):active{--button-active-rgb:var(--bx-warning-button-active-rgb)}.bx-button.bx-warning:not([disabled]):not(:active):hover,.bx-button.bx-warning:not([disabled]):not(:active).bx-focusable:focus{--button-hover-rgb:var(--bx-warning-button-hover-rgb)}.bx-button.bx-warning:disabled{--button-disabled-rgb:var(--bx-warning-button-disabled-rgb)}.bx-button.bx-danger{--button-rgb:var(--bx-danger-button-rgb)}.bx-button.bx-danger:not([disabled]):active{--button-active-rgb:var(--bx-danger-button-active-rgb)}.bx-button.bx-danger:not([disabled]):not(:active):hover,.bx-button.bx-danger:not([disabled]):not(:active).bx-focusable:focus{--button-hover-rgb:var(--bx-danger-button-hover-rgb)}.bx-button.bx-danger:disabled{--button-disabled-rgb:var(--bx-danger-button-disabled-rgb)}.bx-button.bx-frosted{--button-alpha:.2;background-color:rgba(var(--button-rgb), var(--button-alpha))}.bx-button.bx-frosted:not([disabled]):not(:active):hover,.bx-button.bx-frosted:not([disabled]):not(:active).bx-focusable:focus{background-color:rgba(var(--button-hover-rgb), var(--button-alpha))}.bx-button.bx-drop-shadow{box-shadow:0 0 4px rgba(0,0,0,0.502)}.bx-button.bx-tall{height:calc(var(--bx-button-height) * 1.5) !important}.bx-button.bx-circular{border-radius:var(--bx-button-height);width:var(--bx-button-height);height:var(--bx-button-height)}.bx-button svg{display:inline-block;width:16px;height:var(--bx-button-height)}.bx-button span{display:inline-block;line-height:var(--bx-button-height);vertical-align:middle;color:#fff;overflow:hidden;white-space:nowrap}.bx-button span:not(:only-child){margin-inline-start:8px}.bx-button.bx-button-multi-lines{height:auto;text-align:left;padding:10px}.bx-button.bx-button-multi-lines span{line-height:unset;display:block}.bx-button.bx-button-multi-lines span:last-of-type{text-transform:none;font-weight:normal;font-family:"Segoe Sans Variable Text";font-size:12px;margin-top:4px}.bx-focusable{position:relative;overflow:visible}.bx-focusable::after{border:2px solid transparent;border-radius:10px}.bx-focusable:focus::after{content:\'\';border-color:#fff;position:absolute;top:-6px;left:-6px;right:-6px;bottom:-6px}html[data-active-input=touch] .bx-focusable:focus::after,html[data-active-input=mouse] .bx-focusable:focus::after{border-color:transparent !important}.bx-focusable.bx-circular::after{border-radius:var(--bx-button-height)}a.bx-button{display:inline-block}a.bx-button.bx-full-width{text-align:center}button.bx-inactive{pointer-events:none;opacity:.2;background:transparent !important}.bx-header-remote-play-button{height:auto;margin-right:8px !important}.bx-header-remote-play-button svg{width:24px;height:24px}.bx-header-settings-button{line-height:30px;font-size:14px;text-transform:uppercase;position:relative}.bx-header-settings-button[data-update-available]::before{content:\'🌟\' !important;line-height:var(--bx-button-height);display:inline-block;margin-left:4px}.bx-key-binding-dialog-overlay{position:fixed;inset:0;z-index:var(--bx-key-binding-dialog-overlay-z-index);background:#000;opacity:50%}.bx-key-binding-dialog{display:flex;flex-flow:column;max-height:90vh;position:fixed;top:50%;left:50%;margin-right:-50%;transform:translate(-50%,-50%);min-width:420px;padding:16px;border-radius:8px;z-index:var(--bx-key-binding-dialog-z-index);background:#1a1b1e;color:#fff;font-weight:400;font-size:16px;font-family:var(--bx-normal-font);box-shadow:0 0 6px #000;user-select:none;-webkit-user-select:none}.bx-key-binding-dialog *:focus{outline:none !important}.bx-key-binding-dialog h2{margin-bottom:12px;color:#fff;display:block;font-family:var(--bx-title-font);font-size:32px;font-weight:400;line-height:var(--bx-button-height)}.bx-key-binding-dialog > div{overflow:auto;padding:2px 0}.bx-key-binding-dialog > button{padding:8px 32px;margin:10px auto 0;border:none;border-radius:4px;display:block;background-color:#2d3036;text-align:center;color:#fff;text-transform:uppercase;font-family:var(--bx-title-font);font-weight:400;line-height:18px;font-size:14px}@media (hover:hover){.bx-key-binding-dialog > button:hover{background-color:#515863}}.bx-key-binding-dialog > button:focus{background-color:#515863}.bx-key-binding-dialog ul{margin-bottom:1rem}.bx-key-binding-dialog ul li{display:none}.bx-key-binding-dialog ul[data-flags*="[1]"] > li[data-flag="1"],.bx-key-binding-dialog ul[data-flags*="[2]"] > li[data-flag="2"],.bx-key-binding-dialog ul[data-flags*="[4]"] > li[data-flag="4"],.bx-key-binding-dialog ul[data-flags*="[8]"] > li[data-flag="8"]{display:list-item}@media screen and (max-width:450px){.bx-key-binding-dialog{min-width:100%}}.bx-navigation-dialog{position:absolute;z-index:var(--bx-navigation-dialog-z-index);font-family:var(--bx-title-font)}.bx-navigation-dialog *:focus{outline:none !important}.bx-navigation-dialog select:disabled{-webkit-appearance:none;text-align-last:right;text-align:right;color:#fff;background:#131416;border:none;border-radius:4px;padding:0 5px}.bx-navigation-dialog .bx-focusable::after{border-radius:4px}.bx-navigation-dialog .bx-focusable:focus::after{top:0;left:0;right:0;bottom:0}.bx-navigation-dialog-overlay{position:fixed;background:rgba(11,11,11,0.89);top:0;left:0;right:0;bottom:0;z-index:var(--bx-navigation-dialog-overlay-z-index)}.bx-navigation-dialog-overlay[data-is-playing="true"]{background:transparent}.bx-centered-dialog{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;background:#1a1b1e;border-radius:10px;min-width:min(calc(100vw - 20px), 500px);max-width:calc(100vw - 20px);margin:0 0 0 auto;padding:16px;max-height:95vh;flex-direction:column;overflow:hidden;display:flex;flex-direction:column}.bx-centered-dialog .bx-dialog-title{display:flex;flex-direction:row;align-items:center;margin-bottom:10px}.bx-centered-dialog .bx-dialog-title p{padding:0;margin:0;flex:1;font-size:1.5rem;font-weight:bold}.bx-centered-dialog .bx-dialog-title button{flex-shrink:0}.bx-centered-dialog .bx-dialog-content{flex:1;padding:6px;overflow:auto;overflow-x:hidden}.bx-centered-dialog .bx-dialog-preset-tools{display:flex;margin-bottom:12px;gap:6px}.bx-centered-dialog .bx-dialog-preset-tools button{align-self:center;min-height:50px}.bx-centered-dialog .bx-default-preset-note{font-size:12px;font-style:italic;text-align:center;margin-bottom:10px}.bx-centered-dialog input,.bx-settings-dialog input{accent-color:var(--bx-primary-button-color)}.bx-centered-dialog input:focus,.bx-settings-dialog input:focus{accent-color:var(--bx-danger-button-color)}.bx-centered-dialog select:disabled,.bx-settings-dialog select:disabled{-webkit-appearance:none;background:transparent;text-align-last:right;border:none;color:#fff}.bx-centered-dialog select option:disabled,.bx-settings-dialog select option:disabled{display:none}.bx-centered-dialog input[type=checkbox]:focus,.bx-settings-dialog input[type=checkbox]:focus,.bx-centered-dialog select:focus,.bx-settings-dialog select:focus{filter:drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff)}.bx-centered-dialog a,.bx-settings-dialog a{color:#1c9d1c;text-decoration:none}.bx-centered-dialog a:hover,.bx-settings-dialog a:hover,.bx-centered-dialog a:focus,.bx-settings-dialog a:focus{color:#5dc21e}.bx-centered-dialog label,.bx-settings-dialog label{margin:0}.bx-controller-shortcuts-manager-container .bx-shortcut-note{margin-top:10px;font-size:14px;text-align:center}.bx-controller-shortcuts-manager-container .bx-shortcut-row{display:flex;gap:10px;margin-bottom:10px;align-items:center}.bx-controller-shortcuts-manager-container .bx-shortcut-row label.bx-prompt{flex-shrink:0;font-size:32px;margin:0}.bx-controller-shortcuts-manager-container .bx-shortcut-row label.bx-prompt::first-letter{letter-spacing:6px}.bx-controller-shortcuts-manager-container select:disabled{text-align:left;text-align-last:left}.bx-keyboard-shortcuts-manager-container{display:flex;flex-direction:column;gap:16px}.bx-keyboard-shortcuts-manager-container fieldset{background:#2a2a2a;border:1px solid #2a2a2a;border-radius:4px;padding:4px}.bx-keyboard-shortcuts-manager-container legend{width:auto;padding:4px 8px;margin:0 4px 4px;background:#004f87;box-shadow:0 2px 0 #071e3d;border-radius:4px;font-size:14px;font-weight:bold;text-transform:uppercase}.bx-keyboard-shortcuts-manager-container .bx-settings-row{background:none;padding:10px}.bx-settings-dialog{display:flex;position:fixed;top:0;right:0;bottom:0;opacity:.98;user-select:none;-webkit-user-select:none}.bx-settings-dialog .bx-settings-reload-note{font-size:.8rem;display:block;padding:8px;font-style:italic;font-weight:normal;height:var(--bx-button-height)}.bx-settings-tabs-container{position:fixed;width:48px;max-height:100vh;display:flex;flex-direction:column}.bx-settings-tabs-container > div:last-of-type{display:flex;flex-direction:column;align-items:end}.bx-settings-tabs-container > div:last-of-type button{flex-shrink:0;border-top-right-radius:0;border-bottom-right-radius:0;margin-top:8px;height:unset;padding:8px 10px}.bx-settings-tabs-container > div:last-of-type button svg{width:16px;height:16px}.bx-settings-tabs{display:flex;flex-direction:column;border-radius:0 0 0 8px;box-shadow:0 0 6px #000;overflow:overlay;flex:1}.bx-settings-tabs svg{width:24px;height:24px;padding:10px;flex-shrink:0;box-sizing:content-box;background:#131313;cursor:pointer;border-left:4px solid #1e1e1e}.bx-settings-tabs svg.bx-active{background:#222;border-color:#008746}.bx-settings-tabs svg:not(.bx-active):hover{background:#2f2f2f;border-color:#484848}.bx-settings-tabs svg:focus{border-color:#fff}.bx-settings-tabs svg[data-group=global][data-need-refresh=true]{background:var(--bx-danger-button-color) !important}.bx-settings-tabs svg[data-group=global][data-need-refresh=true]:hover{background:var(--bx-danger-button-hover-color) !important}.bx-settings-tab-contents{flex-direction:column;margin-left:48px;width:450px;background:#1a1b1e;color:#fff;font-weight:400;font-size:16px;font-family:var(--bx-title-font);text-align:center;box-shadow:0 0 6px #000;overflow:overlay;z-index:1}.bx-settings-tab-contents .bx-top-buttons{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}.bx-settings-tab-contents .bx-top-buttons .bx-button{display:block}.bx-settings-tab-contents h2{margin:16px 0 8px 0;display:flex;align-items:center}.bx-settings-tab-contents h2:first-of-type{margin-top:0}.bx-settings-tab-contents h2 span{display:inline-block;font-size:20px;font-weight:bold;text-align:left;flex:1;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;min-height:var(--bx-button-height);align-content:center}@media (max-width:500px){.bx-settings-tab-contents{width:calc(100vw - 48px)}}.bx-settings-row{display:flex;gap:10px;padding:16px 10px;background:#2a2a2a;border-bottom:1px solid #343434}.bx-settings-row:hover,.bx-settings-row:focus-within{background-color:#242424}.bx-settings-row:not(:has(> input[type=checkbox])){flex-wrap:wrap}.bx-settings-row > span.bx-settings-label{font-size:14px;display:block;text-align:left;align-self:center;margin-bottom:0 !important;flex:1}.bx-settings-row > span.bx-settings-label svg{width:20px;height:20px;margin-inline-end:8px}.bx-settings-row > span.bx-settings-label + *{margin:0 0 0 auto}.bx-settings-row[data-multi-lines="true"]{flex-direction:column}.bx-settings-row[data-multi-lines="true"] > span.bx-settings-label{align-self:start}.bx-settings-row[data-multi-lines="true"] > span.bx-settings-label + *{margin:unset}.bx-settings-row.bx-settings-important-row{background:#733b00}.bx-settings-dialog-note{display:block;color:#afafb0;font-size:12px;font-weight:lighter;font-style:italic}.bx-settings-dialog-note:not(:has(a)){margin-top:4px}.bx-settings-dialog-note a{display:inline-block;padding:4px}.bx-settings-custom-user-agent{display:block;width:100%;padding:6px}.bx-donation-link{display:block;text-align:center;text-decoration:none;height:20px;line-height:20px;font-size:14px;margin-top:10px;margin-bottom:10px}.bx-debug-info button{margin-top:10px}.bx-debug-info pre{margin-top:10px;cursor:copy;color:#fff;padding:8px;border:1px solid #2d2d2d;background:#212121;white-space:break-spaces;text-align:left}.bx-debug-info pre:hover{background:#272727}.bx-settings-app-version{margin-top:10px;text-align:center;color:#747474;font-size:12px}.bx-note-unsupported{display:block;font-size:12px;font-style:italic;font-weight:normal;color:#828282}.bx-settings-tab-content{padding:10px}.bx-settings-tab-content > div *:not(.bx-settings-row):has(+ .bx-settings-row) + .bx-settings-row:has(+ .bx-settings-row){border-top-left-radius:6px;border-top-right-radius:6px}.bx-settings-tab-content > div .bx-settings-row:not(:has(+ .bx-settings-row)){border:none;border-bottom-left-radius:6px;border-bottom-right-radius:6px}.bx-settings-tab-content > div *:not(.bx-settings-row):has(+ .bx-settings-row) + .bx-settings-row:not(:has(+ .bx-settings-row)){border:none;border-radius:6px}.bx-settings-tab-content:not([data-game-id="-1"]) .bx-settings-row[data-override=true],.bx-settings-tab-content:not([data-game-id="-1"]) .bx-settings-row:has(*[data-override=true]){border-left:4px solid #ffa500 !important;border-top-left-radius:0 !important;border-bottom-left-radius:0 !important;padding-left:6px !important}.bx-suggest-toggler{text-align:left;display:flex;border-radius:4px;overflow:hidden;background:#003861;height:45px;align-items:center}.bx-suggest-toggler label{flex:1;align-content:center;padding:0 10px;background:#004f87;height:100%}.bx-suggest-toggler span{display:inline-block;align-self:center;padding:10px;width:45px;text-align:center}.bx-suggest-toggler:hover,.bx-suggest-toggler:focus{cursor:pointer;background:#005da1}.bx-suggest-toggler:hover label,.bx-suggest-toggler:focus label{background:#006fbe}.bx-suggest-toggler[bx-open] span{transform:rotate(90deg)}.bx-suggest-toggler[bx-open]+ .bx-suggest-box{display:block}.bx-suggest-box{display:none}.bx-suggest-wrapper{display:flex;flex-direction:column;gap:10px;margin:10px}.bx-suggest-note{font-size:11px;color:#8c8c8c;font-style:italic;font-weight:100}.bx-suggest-link{font-size:14px;display:inline-block;margin-top:4px;padding:4px}.bx-suggest-row{display:flex;flex-direction:row;gap:10px}.bx-suggest-row label{flex:1;overflow:overlay;border-radius:4px}.bx-suggest-row label .bx-suggest-label{background:#323232;padding:4px 10px;font-size:12px;text-align:left}.bx-suggest-row label .bx-suggest-value{padding:6px;font-size:14px}.bx-suggest-row label .bx-suggest-value.bx-suggest-change{background-color:var(--bx-warning-color)}.bx-suggest-row.bx-suggest-ok input{visibility:hidden}.bx-suggest-row.bx-suggest-ok .bx-suggest-label{background-color:#008114}.bx-suggest-row.bx-suggest-ok .bx-suggest-value{background-color:#13a72a}.bx-suggest-row.bx-suggest-change .bx-suggest-label{background-color:#a65e08}.bx-suggest-row.bx-suggest-change .bx-suggest-value{background-color:#d57f18}.bx-suggest-row.bx-suggest-change:hover label{cursor:pointer}.bx-suggest-row.bx-suggest-change:hover .bx-suggest-label{background-color:#995707}.bx-suggest-row.bx-suggest-change:hover .bx-suggest-value{background-color:#bd7115}.bx-suggest-row.bx-suggest-change input:not(:checked) + label{opacity:.5}.bx-suggest-row.bx-suggest-change input:not(:checked) + label .bx-suggest-label{background-color:#2a2a2a}.bx-suggest-row.bx-suggest-change input:not(:checked) + label .bx-suggest-value{background-color:#393939}.bx-suggest-row.bx-suggest-change:hover input:not(:checked) + label{opacity:1}.bx-suggest-row.bx-suggest-change:hover input:not(:checked) + label .bx-suggest-label{background-color:#202020}.bx-suggest-row.bx-suggest-change:hover input:not(:checked) + label .bx-suggest-value{background-color:#303030}.bx-sub-content-box{background:#161616;padding:10px;box-shadow:0 0 12px #0f0f0f inset;border-radius:10px}.bx-settings-row .bx-sub-content-box{background:#202020;padding:12px;box-shadow:0 0 4px #000 inset;border-radius:6px}.bx-controller-extra-settings[data-has-gamepad=true] > :first-child{display:none}.bx-controller-extra-settings[data-has-gamepad=true] > :last-child{display:block}.bx-controller-extra-settings[data-has-gamepad=false] > :first-child{display:block}.bx-controller-extra-settings[data-has-gamepad=false] > :last-child{display:none}.bx-controller-extra-settings .bx-controller-extra-wrapper{flex:1;min-width:1px}.bx-controller-extra-settings .bx-sub-content-box{flex:1;text-align:left;display:flex;flex-direction:column;margin-top:10px}.bx-controller-extra-settings .bx-sub-content-box > label{font-size:14px}.bx-preset-row{display:flex;gap:8px}.bx-preset-row .bx-select{flex:1}.bx-stream-settings-selection{margin-bottom:8px;position:sticky;z-index:1000;top:0}.bx-stream-settings-selection > div{display:flex;gap:8px;background:#222;padding:10px;border-bottom:4px solid #353638;box-shadow:0 0 6px #000;position:relative;z-index:1}.bx-stream-settings-selection > div .bx-select{flex:1}.bx-stream-settings-selection > div .bx-select label{font-weight:bold;font-size:1.1rem;line-height:initial}.bx-stream-settings-selection > div .bx-select label span{line-height:initial}.bx-stream-settings-selection > div .bx-select .bx-select-indicators{display:none}.bx-stream-settings-selection p{font-family:var(--bx-promptfont-font),var(--bx-normal-font);margin:0;font-size:13px;background:rgba(80,80,80,0.949);height:25px;line-height:23px;position:absolute;bottom:-25px;left:0;right:0;text-shadow:0 1px #000}.bx-toast{user-select:none;-webkit-user-select:none;position:fixed;left:50%;top:24px;transform:translate(-50%,0);background:#212121;border-radius:10px;color:#fff;z-index:var(--bx-toast-z-index);font-family:var(--bx-normal-font);border:2px solid #fff;display:flex;align-items:center;opacity:0;overflow:clip;transition:opacity .2s ease-in;box-shadow:0 0 6px #000}.bx-toast.bx-show{opacity:.95}.bx-toast.bx-hide{opacity:0;pointer-events:none}.bx-toast-msg{font-size:14px;display:inline-block;padding:12px 16px;white-space:pre}.bx-toast-status{font-weight:bold;font-size:14px;text-transform:uppercase;display:inline-block;background:#fff;padding:12px 16px;color:#212121;white-space:pre}.bx-wait-time-box{position:fixed;top:0;right:0;background-color:rgba(0,0,0,0.8);color:#fff;z-index:var(--bx-wait-time-box-z-index);padding:12px;border-radius:0 0 0 8px}.bx-wait-time-box label{display:block;text-transform:uppercase;text-align:right;font-size:12px;font-weight:bold;margin:0}.bx-wait-time-box span{display:block;font-family:var(--bx-monospaced-font);text-align:right;font-size:16px;margin-bottom:10px}.bx-wait-time-box span:last-of-type{margin-bottom:0}.bx-remote-play-settings{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #2d2d2d;display:flex;flex-direction:column;gap:10px}.bx-remote-play-settings > div{display:flex;min-height:30px}.bx-remote-play-settings > div > label{flex:1;font-size:14px;align-self:center}.bx-remote-play-settings > div > label p{margin:4px 0 0;padding:0;color:#888;font-size:12px}.bx-remote-play-resolution{display:block}.bx-remote-play-resolution input[type="radio"]{accent-color:var(--bx-primary-button-color);margin-right:6px}.bx-remote-play-resolution input[type="radio"]:focus{accent-color:var(--bx-primary-button-hover-color)}.bx-remote-play-device-wrapper{display:flex;margin-bottom:12px;gap:10px}.bx-remote-play-device-wrapper:last-child{margin-bottom:2px}.bx-remote-play-device-info{flex:1;align-self:center}.bx-remote-play-device-name{font-size:14px;font-weight:bold;display:inline-block;vertical-align:middle}.bx-remote-play-console-type{font-size:8px;background:#004c87;color:#fff;display:inline-block;border-radius:8px;padding:2px 6px;margin-left:8px;vertical-align:middle}.bx-remote-play-power-state{color:#888;font-size:12px}.bx-remote-play-connect-button{min-height:100%}.bx-remote-play-buttons{display:flex;justify-content:space-between}select.bx-select{min-height:30px}div.bx-select{display:flex;align-items:stretch;flex:0 1 auto;gap:8px}div.bx-select select:disabled ~ button{display:none}div.bx-select select:disabled ~ div{background:#131416;color:#fff;pointer-events:none}div.bx-select select:disabled ~ div .bx-select-indicators{visibility:hidden}div.bx-select > div,div.bx-select button.bx-select-value{min-width:120px;text-align:left;line-height:24px;vertical-align:middle;background:#fff;color:#000;border-radius:4px;padding:2px 8px;display:flex;flex:1;flex-direction:column}div.bx-select > div{min-height:24px}div.bx-select > div input{display:inline-block;margin-right:8px}div.bx-select > div label{margin-bottom:0;font-size:14px;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-height:15px}div.bx-select > div label span{display:block;font-size:10px;font-weight:bold;text-align:left;line-height:20px;white-space:pre;min-height:15px;align-content:center}div.bx-select button.bx-select-value{border:none;cursor:pointer;min-height:30px;font-size:.9rem;align-items:center}div.bx-select button.bx-select-value > div{display:flex;width:100%}div.bx-select button.bx-select-value span{flex:1;text-align:left;display:inline-block}div.bx-select button.bx-select-value input{margin:0 4px;accent-color:var(--bx-primary-button-color);pointer-events:none}div.bx-select button.bx-select-value:hover input,div.bx-select button.bx-select-value:focus input{accent-color:var(--bx-danger-button-color)}div.bx-select button.bx-select-value:hover::after,div.bx-select button.bx-select-value:focus::after{border-color:#4d4d4d !important}div.bx-select button.bx-button{border:none;width:24px;height:auto;padding:0;color:#fff;border-radius:4px;font-weight:bold;font-size:12px;font-family:var(--bx-monospaced-font);flex-shrink:0}div.bx-select button.bx-button span{line-height:unset}div.bx-select[data-controller-friendly=true] > div{box-sizing:content-box}div.bx-select[data-controller-friendly=true] select{position:absolute !important;top:-9999px !important;left:-9999px !important;visibility:hidden !important}div.bx-select[data-controller-friendly=false]{position:relative}div.bx-select[data-controller-friendly=false] > div{box-sizing:border-box}div.bx-select[data-controller-friendly=false] > div label{margin-right:24px}div.bx-select[data-controller-friendly=false] select:disabled{display:none}div.bx-select[data-controller-friendly=false] select:not(:disabled){cursor:pointer;position:absolute;top:0;right:0;bottom:0;display:block;opacity:0;z-index:calc(var(--bx-settings-z-index) + 1)}div.bx-select[data-controller-friendly=false] select:not(:disabled):hover + div{background:#f0f0f0}div.bx-select[data-controller-friendly=false] select:not(:disabled) + div label::after{content:\'▾\';font-size:14px;position:absolute;right:8px;pointer-events:none}.bx-select-indicators{display:flex;height:4px;gap:2px;margin-bottom:2px}.bx-select-indicators span{content:\' \';display:inline-block;flex:1;background:#cfcfcf;border-radius:4px;min-width:1px}.bx-select-indicators span[data-highlighted]{background:#9c9c9c;min-width:6px}.bx-select-indicators span[data-selected]{background:#aacfe7}.bx-select-indicators span[data-highlighted][data-selected]{background:#5fa3d0}.bx-guide-home-achievements-progress{display:flex;gap:10px;flex-direction:row}.bx-guide-home-achievements-progress .bx-button{margin-bottom:0 !important}body[data-bx-media-type=tv] .bx-guide-home-achievements-progress{flex-direction:column}body:not([data-bx-media-type=tv]) .bx-guide-home-achievements-progress{flex-direction:row}body:not([data-bx-media-type=tv]) .bx-guide-home-achievements-progress > button:first-of-type{flex:1}body:not([data-bx-media-type=tv]) .bx-guide-home-achievements-progress > button:last-of-type{width:40px}body:not([data-bx-media-type=tv]) .bx-guide-home-achievements-progress > button:last-of-type span{display:none}.bx-guide-home-buttons > div{display:flex;flex-direction:row;gap:12px}body[data-bx-media-type=tv] .bx-guide-home-buttons > div{flex-direction:column}body[data-bx-media-type=tv] .bx-guide-home-buttons > div button{margin-bottom:0 !important}body:not([data-bx-media-type=tv]) .bx-guide-home-buttons > div button span{display:none}.bx-guide-home-buttons[data-is-playing="true"] button[data-state=\'normal\']{display:none}.bx-guide-home-buttons[data-is-playing="false"] button[data-state=\'playing\']{display:none}#game-stream div[class^=StreamMenu-module__menuContainer] > div[class^=Menu-module]{overflow:visible}.bx-stream-menu-button-on{fill:#000 !important;background-color:#2d2d2d !important;color:#000 !important}.bx-stream-refresh-button{top:calc(env(safe-area-inset-top, 0px) + 10px + 50px) !important}body[data-media-type=default] .bx-stream-refresh-button{left:calc(env(safe-area-inset-left, 0px) + 11px) !important}body[data-media-type=tv] .bx-stream-refresh-button{top:calc(var(--gds-focus-borderSize) + 80px) !important}.bx-stream-home-button{top:calc(env(safe-area-inset-top, 0px) + 10px + 50px * 2) !important}body[data-media-type=default] .bx-stream-home-button{left:calc(env(safe-area-inset-left, 0px) + 12px) !important}body[data-media-type=tv] .bx-stream-home-button{top:calc(var(--gds-focus-borderSize) + 80px * 2) !important}div[data-testid=media-container][data-position=center]{display:flex}div[data-testid=media-container][data-position=top] video,div[data-testid=media-container][data-position=top] canvas{top:0}div[data-testid=media-container][data-position=bottom] video,div[data-testid=media-container][data-position=bottom] canvas{bottom:0}#game-stream video{margin:auto;align-self:center;background:#000;position:absolute;left:0;right:0}#game-stream canvas{align-self:center;margin:auto;position:absolute;left:0;right:0}#game-stream.bx-taking-screenshot:before{animation:bx-anim-taking-screenshot .5s ease;content:\' \';position:absolute;width:100%;height:100%;z-index:var(--bx-screenshot-animation-z-index)}#gamepass-dialog-root div[class^=Guide-module__guide] .bx-button{overflow:visible;margin-bottom:12px}@-moz-keyframes bx-anim-taking-screenshot{0%{border:0 solid rgba(255,255,255,0.502)}50%{border:8px solid rgba(255,255,255,0.502)}100%{border:0 solid rgba(255,255,255,0.502)}}@-webkit-keyframes bx-anim-taking-screenshot{0%{border:0 solid rgba(255,255,255,0.502)}50%{border:8px solid rgba(255,255,255,0.502)}100%{border:0 solid rgba(255,255,255,0.502)}}@-o-keyframes bx-anim-taking-screenshot{0%{border:0 solid rgba(255,255,255,0.502)}50%{border:8px solid rgba(255,255,255,0.502)}100%{border:0 solid rgba(255,255,255,0.502)}}@keyframes bx-anim-taking-screenshot{0%{border:0 solid rgba(255,255,255,0.502)}50%{border:8px solid rgba(255,255,255,0.502)}100%{border:0 solid rgba(255,255,255,0.502)}}.bx-number-stepper{text-align:center}.bx-number-stepper > div{display:flex;align-items:center}.bx-number-stepper > div span{flex:1;display:inline-block;min-width:40px;font-family:var(--bx-monospaced-font);white-space:pre;font-size:13px;margin:0 4px}.bx-number-stepper > div button{flex-shrink:0;border:none;width:24px;height:24px;margin:0;line-height:24px;background-color:var(--bx-default-button-color);color:#fff;border-radius:4px;font-weight:bold;font-size:14px;font-family:var(--bx-monospaced-font)}@media (hover:hover){.bx-number-stepper > div button:hover{background-color:var(--bx-default-button-hover-color)}}.bx-number-stepper > div button:active{background-color:var(--bx-default-button-hover-color)}.bx-number-stepper > div button:disabled + span{font-family:var(--bx-title-font)}.bx-number-stepper input[type=range]{display:block;margin:8px 0 2px auto;min-width:180px;width:100%;color:#959595 !important}.bx-number-stepper input[type=range]:disabled,.bx-number-stepper button:disabled{display:none}.bx-number-stepper[data-disabled=true] input[type=range],.bx-number-stepper[disabled=true] input[type=range],.bx-number-stepper[data-disabled=true] button,.bx-number-stepper[disabled=true] button{display:none}.bx-dual-number-stepper > span{display:block;font-family:var(--bx-monospaced-font);font-size:13px;white-space:pre;margin:0 4px;text-align:center}.bx-dual-number-stepper > div input[type=range]{display:block;width:100%;min-width:180px;background:transparent;color:#959595 !important;appearance:none;padding:8px 0}.bx-dual-number-stepper > div input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(90deg,#fff var(--from),var(--bx-primary-button-color) var(--from) var(--to),#fff var(--to) 100%);height:8px;border-radius:2px}.bx-dual-number-stepper > div input[type=range]::-moz-range-track{background:linear-gradient(90deg,#fff var(--from),var(--bx-primary-button-color) var(--from) var(--to),#fff var(--to) 100%);height:8px;border-radius:2px}.bx-dual-number-stepper > div input[type=range]::-webkit-slider-thumb{margin-top:-4px;appearance:none;width:4px;height:16px;background:#00b85f;border:none;border-radius:2px}.bx-dual-number-stepper > div input[type=range]::-moz-range-thumb{margin-top:-4px;appearance:none;width:4px;height:16px;background:#00b85f;border:none;border-radius:2px}.bx-dual-number-stepper > div input[type=range]:hover::-webkit-slider-runnable-track,.bx-dual-number-stepper > div input[type=range].bx-dual-number-stepper > div input[type=range]:active::-webkit-slider-runnable-track,.bx-dual-number-stepper > div input[type=range]:focus::-webkit-slider-runnable-track{background:linear-gradient(90deg,#fff var(--from),#006635 var(--from) var(--to),#fff var(--to) 100%)}.bx-dual-number-stepper > div input[type=range]:hover::-moz-range-track,.bx-dual-number-stepper > div input[type=range].bx-dual-number-stepper > div input[type=range]:active::-moz-range-track,.bx-dual-number-stepper > div input[type=range]:focus::-moz-range-track{background:linear-gradient(90deg,#fff var(--from),#006635 var(--from) var(--to),#fff var(--to) 100%)}.bx-dual-number-stepper > div input[type=range]:hover::-webkit-slider-thumb,.bx-dual-number-stepper > div input[type=range].bx-dual-number-stepper > div input[type=range]:active::-webkit-slider-thumb,.bx-dual-number-stepper > div input[type=range]:focus::-webkit-slider-thumb{background:#fb3232}.bx-dual-number-stepper > div input[type=range]:hover::-moz-range-thumb,.bx-dual-number-stepper > div input[type=range].bx-dual-number-stepper > div input[type=range]:active::-moz-range-thumb,.bx-dual-number-stepper > div input[type=range]:focus::-moz-range-thumb{background:#fb3232}.bx-dual-number-stepper[data-disabled=true] input[type=range],.bx-dual-number-stepper[disabled=true] input[type=range]{display:none}#bx-game-bar{z-index:var(--bx-game-bar-z-index);position:fixed;bottom:0;width:40px;height:90px;overflow:visible;cursor:pointer}#bx-game-bar > svg{display:none;pointer-events:none;position:absolute;height:28px;margin-top:16px}@media (hover:hover){#bx-game-bar:hover > svg{display:block}}#bx-game-bar .bx-game-bar-container{opacity:0;position:absolute;display:flex;overflow:hidden;background:rgba(26,27,30,0.91);box-shadow:0 0 6px #1c1c1c;transition:opacity .1s ease-in}#bx-game-bar .bx-game-bar-container.bx-show{opacity:.9}#bx-game-bar .bx-game-bar-container.bx-show + svg{display:none !important}#bx-game-bar .bx-game-bar-container.bx-hide{opacity:0;pointer-events:none}#bx-game-bar .bx-game-bar-container button{width:60px;height:60px;border-radius:0}#bx-game-bar .bx-game-bar-container button svg{width:28px;height:28px;transition:transform .08s ease 0s}#bx-game-bar .bx-game-bar-container button:hover{border-radius:0}#bx-game-bar .bx-game-bar-container button:active svg{transform:scale(.75)}#bx-game-bar .bx-game-bar-container button.bx-activated{background-color:#fff}#bx-game-bar .bx-game-bar-container button.bx-activated svg{filter:invert(1)}#bx-game-bar .bx-game-bar-container div[data-activated] button{display:none}#bx-game-bar .bx-game-bar-container div[data-activated=\'false\'] button:first-of-type{display:block}#bx-game-bar .bx-game-bar-container div[data-activated=\'true\'] button:last-of-type{display:block}#bx-game-bar[data-position="bottom-left"]{left:0;direction:ltr}#bx-game-bar[data-position="bottom-left"] .bx-game-bar-container{border-radius:0 10px 10px 0}#bx-game-bar[data-position="bottom-right"]{right:0;direction:rtl}#bx-game-bar[data-position="bottom-right"] .bx-game-bar-container{direction:ltr;border-radius:10px 0 0 10px}.bx-badges{margin-left:0;user-select:none;-webkit-user-select:none}.bx-badge{border:none;display:inline-block;line-height:24px;color:#fff;font-family:var(--bx-title-font-semibold);font-size:14px;font-weight:400;margin:0 8px 8px 0;box-shadow:0 0 6px #000;border-radius:4px}.bx-badge-name{background-color:#2d3036;border-radius:4px 0 0 4px}.bx-badge-name svg{width:16px;height:16px}.bx-badge-value{background-color:#808080;border-radius:0 4px 4px 0}.bx-badge-name,.bx-badge-value{display:inline-block;padding:0 8px;line-height:30px;vertical-align:bottom}.bx-badge-battery[data-charging=true] span:first-of-type::after{content:\' ⚡️\'}div[class^=StreamMenu-module__container] .bx-badges{position:absolute;max-width:500px}#gamepass-dialog-root .bx-badges{position:fixed;top:60px;left:460px;max-width:500px}@media (min-width:568px) and (max-height:480px){#gamepass-dialog-root .bx-badges{position:unset;top:unset;left:unset;margin:8px 0}}.bx-stats-bar{display:flex;flex-direction:row;gap:8px;user-select:none;-webkit-user-select:none;position:fixed;top:0;background-color:#000;color:#fff;font-family:var(--bx-monospaced-font);font-size:.9rem;padding-left:8px;z-index:var(--bx-stats-bar-z-index);text-wrap:nowrap}.bx-stats-bar[data-stats*="[time]"] > .bx-stat-time,.bx-stats-bar[data-stats*="[play]"] > .bx-stat-play,.bx-stats-bar[data-stats*="[batt]"] > .bx-stat-batt,.bx-stats-bar[data-stats*="[res]"] > .bx-stat-res,.bx-stats-bar[data-stats*="[fps]"] > .bx-stat-fps,.bx-stats-bar[data-stats*="[ping]"] > .bx-stat-ping,.bx-stats-bar[data-stats*="[jit]"] > .bx-stat-jit,.bx-stats-bar[data-stats*="[btr]"] > .bx-stat-btr,.bx-stats-bar[data-stats*="[dt]"] > .bx-stat-dt,.bx-stats-bar[data-stats*="[pl]"] > .bx-stat-pl,.bx-stats-bar[data-stats*="[fl]"] > .bx-stat-fl,.bx-stats-bar[data-stats*="[dl]"] > .bx-stat-dl,.bx-stats-bar[data-stats*="[ul]"] > .bx-stat-ul{display:inline-flex;align-items:baseline}.bx-stats-bar[data-stats$="[time]"] > .bx-stat-time,.bx-stats-bar[data-stats$="[play]"] > .bx-stat-play,.bx-stats-bar[data-stats$="[batt]"] > .bx-stat-batt,.bx-stats-bar[data-stats$="[res]"] > .bx-stat-res,.bx-stats-bar[data-stats$="[fps]"] > .bx-stat-fps,.bx-stats-bar[data-stats$="[ping]"] > .bx-stat-ping,.bx-stats-bar[data-stats$="[jit]"] > .bx-stat-jit,.bx-stats-bar[data-stats$="[btr]"] > .bx-stat-btr,.bx-stats-bar[data-stats$="[dt]"] > .bx-stat-dt,.bx-stats-bar[data-stats$="[pl]"] > .bx-stat-pl,.bx-stats-bar[data-stats$="[fl]"] > .bx-stat-fl,.bx-stats-bar[data-stats$="[dl]"] > .bx-stat-dl,.bx-stats-bar[data-stats$="[ul]"] > .bx-stat-ul{border-right:none}.bx-stats-bar::before{display:none;content:\'👀\';vertical-align:middle;margin-right:8px}.bx-stats-bar[data-display=glancing]::before{display:inline-block}.bx-stats-bar[data-position=top-left]{left:0;border-radius:0 0 4px 0}.bx-stats-bar[data-position=top-right]{right:0;border-radius:0 0 0 4px}.bx-stats-bar[data-position=top-center]{transform:translate(-50%,0);left:50%;border-radius:0 0 4px 4px}.bx-stats-bar[data-shadow=true]{background:none;filter:drop-shadow(1px 0 0 rgba(0,0,0,0.941)) drop-shadow(-1px 0 0 rgba(0,0,0,0.941)) drop-shadow(0 1px 0 rgba(0,0,0,0.941)) drop-shadow(0 -1px 0 rgba(0,0,0,0.941))}.bx-stats-bar > div{display:none;border-right:1px solid #fff;padding-right:8px}.bx-stats-bar label{margin:0 8px 0 0;font-family:var(--bx-title-font);font-size:70%;font-weight:bold;vertical-align:middle;cursor:help}.bx-stats-bar span{display:inline-block;text-align:right;vertical-align:middle;white-space:pre}.bx-stats-bar span[data-grade=good]{color:#6bffff}.bx-stats-bar span[data-grade=ok]{color:#fff16b}.bx-stats-bar span[data-grade=bad]{color:#ff5f5f}.bx-mkb-settings{display:flex;flex-direction:column;flex:1;padding-bottom:10px;overflow:hidden}.bx-mkb-pointer-lock-msg{user-select:none;-webkit-user-select:none;position:fixed;left:50%;bottom:40px;transform:translateX(-50%);margin:auto;background:#151515;z-index:var(--bx-mkb-pointer-lock-msg-z-index);color:#fff;font-weight:400;font-family:"Segoe UI",Arial,Helvetica,sans-serif;font-size:1.3rem;padding:12px;border-radius:8px;align-items:center;box-shadow:0 0 6px #000;min-width:300px;opacity:.9;display:flex;flex-direction:column;gap:10px}.bx-mkb-pointer-lock-msg:hover{opacity:1}.bx-mkb-pointer-lock-msg > p{margin:0;width:100%;font-size:22px;margin-bottom:4px;font-weight:bold;text-align:left}.bx-mkb-pointer-lock-msg > div{width:100%;display:flex;flex-direction:row;gap:10px}.bx-mkb-pointer-lock-msg > div button:first-of-type{flex-shrink:1}.bx-mkb-pointer-lock-msg > div button:last-of-type{flex-grow:1}.bx-mkb-key-row{display:flex;margin-bottom:10px;align-items:center;gap:20px}.bx-mkb-key-row label{margin-bottom:0;font-family:var(--bx-promptfont-font);font-size:32px;text-align:center}.bx-mkb-settings.bx-editing .bx-mkb-key-row button{background:#393939;border-radius:4px;border:none}.bx-mkb-settings.bx-editing .bx-mkb-key-row button:hover{background:#333;cursor:pointer}.bx-mkb-action-buttons > div{text-align:right;display:none}.bx-mkb-action-buttons button{margin-left:8px}.bx-mkb-settings:not(.bx-editing) .bx-mkb-action-buttons > div:first-child{display:block}.bx-mkb-settings.bx-editing .bx-mkb-action-buttons > div:last-child{display:block}.bx-mkb-note{display:block;margin:0 0 10px;font-size:12px;text-align:center}button.bx-binding-button{flex:1;min-height:38px;border:none;border-radius:4px;font-size:14px;color:#fff;display:flex;align-items:center;align-self:center;padding:0 6px}button.bx-binding-button:disabled{background:#131416;padding:0 8px}button.bx-binding-button:not(:disabled){border:2px solid transparent;border-top:none;border-bottom:4px solid #252525;background:#3b3b3b;cursor:pointer}button.bx-binding-button:not(:disabled):hover,button.bx-binding-button:not(:disabled).bx-focusable:focus{background:#20b217;border-bottom-color:#186c13}button.bx-binding-button:not(:disabled):active{background:#16900f;border-bottom:3px solid #0c4e08;border-left-width:2px;border-right-width:2px}button.bx-binding-button:not(:disabled).bx-focusable:focus::after{top:-6px;left:-8px;right:-8px;bottom:-10px}.bx-settings-row .bx-binding-button-wrapper button.bx-binding-button{min-width:60px}.bx-controller-customizations-container .bx-btn-detect{display:block;margin-bottom:20px}.bx-controller-customizations-container .bx-btn-detect.bx-monospaced{background:none;font-weight:bold;font-size:12px}.bx-controller-customizations-container .bx-buttons-grid{display:grid;grid-template-columns:auto auto;column-gap:20px;row-gap:10px;margin-bottom:20px}.bx-controller-key-row{display:flex;align-items:stretch}.bx-controller-key-row > label{margin-bottom:0;font-family:var(--bx-promptfont-font);font-size:32px;text-align:center;min-width:50px;flex-shrink:0;display:flex;align-self:center}.bx-controller-key-row > label::after{content:\'❯\';margin:0 12px;font-size:16px;align-self:center}.bx-controller-key-row .bx-select{width:100% !important}.bx-controller-key-row .bx-select > div{min-width:50px}.bx-controller-key-row .bx-select label{font-family:var(--bx-promptfont-font),var(--bx-normal-font);font-size:32px;text-align:center;margin-bottom:6px;height:40px;line-height:40px}.bx-controller-key-row:hover > label{color:#ffe64b}.bx-controller-key-row:hover > label::after{color:#fff}.bx-controller-customization-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.bx-controller-customization-summary span{font-family:var(--bx-promptfont);font-size:24px;border-radius:6px;background:#131313;color:#fff;display:inline-block;padding:2px;text-align:center}.bx-product-details-icons{padding:8px;border-radius:4px}.bx-product-details-icons svg{margin-right:8px}.bx-product-details-buttons{display:flex;gap:10px;flex-direction:row}.bx-product-details-buttons button{max-width:max-content;margin:10px 0 0 0;display:flex}@media (min-width:568px) and (max-height:480px){.bx-product-details-buttons{flex-direction:column}.bx-product-details-buttons button{margin:8px 0 0 10px}}', PREF_HIDE_SECTIONS = getGlobalPref("ui.hideSections"), selectorToHide = [];
+ let css = ':root{--bx-title-font:Bahnschrift,Arial,Helvetica,sans-serif;--bx-title-font-semibold:Bahnschrift Semibold,Arial,Helvetica,sans-serif;--bx-normal-font:"Segoe UI",Arial,Helvetica,sans-serif;--bx-monospaced-font:Consolas,"Courier New",Courier,monospace;--bx-promptfont-font:promptfont;--bx-button-height:40px;--bx-default-button-color:#2d3036;--bx-default-button-rgb:45,48,54;--bx-default-button-hover-color:#515863;--bx-default-button-hover-rgb:81,88,99;--bx-default-button-active-color:#222428;--bx-default-button-active-rgb:34,36,40;--bx-default-button-disabled-color:#8e8e8e;--bx-default-button-disabled-rgb:142,142,142;--bx-primary-button-color:#008746;--bx-primary-button-rgb:0,135,70;--bx-primary-button-hover-color:#04b358;--bx-primary-button-hover-rgb:4,179,88;--bx-primary-button-active-color:#044e2a;--bx-primary-button-active-rgb:4,78,42;--bx-primary-button-disabled-color:#448262;--bx-primary-button-disabled-rgb:68,130,98;--bx-warning-button-color:#c16e04;--bx-warning-button-rgb:193,110,4;--bx-warning-button-hover-color:#fa9005;--bx-warning-button-hover-rgb:250,144,5;--bx-warning-button-active-color:#965603;--bx-warning-button-active-rgb:150,86,3;--bx-warning-button-disabled-color:#a2816c;--bx-warning-button-disabled-rgb:162,129,108;--bx-danger-button-color:#c10404;--bx-danger-button-rgb:193,4,4;--bx-danger-button-hover-color:#e61d1d;--bx-danger-button-hover-rgb:230,29,29;--bx-danger-button-active-color:#a26c6c;--bx-danger-button-active-rgb:162,108,108;--bx-danger-button-disabled-color:#bd8282;--bx-danger-button-disabled-rgb:189,130,130;--bx-fullscreen-text-z-index:9999;--bx-toast-z-index:6000;--bx-key-binding-dialog-z-index:5010;--bx-key-binding-dialog-overlay-z-index:5000;--bx-stats-bar-z-index:4010;--bx-navigation-dialog-z-index:3010;--bx-navigation-dialog-overlay-z-index:3000;--bx-mkb-pointer-lock-msg-z-index:2000;--bx-game-bar-z-index:1000;--bx-game-translator-z-index:900;--bx-screenshot-animation-z-index:200;--bx-wait-time-box-z-index:100}@font-face{font-family:\'promptfont\';src:url("https://redphx.github.io/better-xcloud/fonts/promptfont.otf");unicode-range:U+2196-E011,U+27F6,U+FF31}#StreamHud div[class^=HUDButton-module__hiddenContainer] ~ div:not([class^=HUDButton-module__hiddenContainer]){opacity:0;pointer-events:none !important;position:absolute;top:-9999px;left:-9999px}@media screen and (min-width:641px) and (max-width:767px){header button[class^="ExperienceDropdown-module__toggleButton"],header button[class^="XboxButton-module__headerXboxButton"]{margin-right:10px !important}header a[href="/play"] > div > div,header button[class^="ExperienceDropdown-module__toggleButton"] > div > div{font-size:12px}header a[href="/play"] > div > svg,header button[class^="ExperienceDropdown-module__toggleButton"] > div > svg{width:20px;height:20px}}@media screen and (max-width:640px){header a[href="/play"],header button[class^="ExperienceDropdown-module__toggleButton"]{display:none}}.bx-full-width{width:100% !important}.bx-full-height{height:100% !important}.bx-auto-height{height:auto !important}.bx-no-scroll{overflow:hidden !important}.bx-hide-scroll-bar{scrollbar-width:none}.bx-hide-scroll-bar::-webkit-scrollbar{display:none}.bx-gone{display:none !important}.bx-offscreen{position:absolute !important;top:-9999px !important;left:-9999px !important;visibility:hidden !important}.bx-hidden{visibility:hidden !important}.bx-invisible{opacity:0}.bx-unclickable{pointer-events:none}.bx-pixel{width:1px !important;height:1px !important}.bx-no-margin{margin:0 !important}.bx-no-padding{padding:0 !important}.bx-prompt{font-family:var(--bx-promptfont-font) !important}.bx-monospaced{font-family:var(--bx-monospaced-font) !important}.bx-line-through{text-decoration:line-through !important}.bx-normal-case{text-transform:none !important}.bx-normal-link{text-transform:none !important;text-align:left !important;font-weight:400 !important;font-family:var(--bx-normal-font) !important}.bx-frosted{backdrop-filter:blur(4px) brightness(1.5)}select[multiple],select[multiple]:focus{overflow:auto;border:none}select[multiple] option,select[multiple]:focus option{padding:4px 6px}select[multiple] option:checked,select[multiple]:focus option:checked{background:#1a7bc0 linear-gradient(0deg,#1a7bc0 0%,#1a7bc0 100%)}select[multiple] option:checked::before,select[multiple]:focus option:checked::before{content:\'☑️\';font-size:12px;display:inline-block;margin-right:6px;height:100%;line-height:100%;vertical-align:middle}#headerArea,#uhfSkipToMain,.uhf-footer{display:none}#game-stream div[class^=NotFocusedDialog]{position:absolute !important;top:-9999px !important;left:-9999px !important;width:0 !important;height:0 !important}#game-stream video:not([src]){visibility:hidden}.bx-game-tile-wait-time{position:absolute;top:0;left:0;z-index:1;background:rgba(0,0,0,0.5);display:flex;border-radius:4px 0 4px 0;align-items:center;padding:4px 8px}.bx-game-tile-wait-time svg{width:14px;height:16px;margin-right:2px}.bx-game-tile-wait-time span{display:inline-block;height:16px;line-height:16px;font-size:12px;font-weight:bold;margin-left:2px}.bx-game-tile-wait-time[data-duration=short]{background-color:rgba(0,133,133,0.75)}.bx-game-tile-wait-time[data-duration=medium]{background-color:rgba(213,133,0,0.75)}.bx-game-tile-wait-time[data-duration=long]{background-color:rgba(150,0,0,0.75)}.bx-fullscreen-text{position:fixed;top:0;bottom:0;left:0;right:0;background:rgba(0,0,0,0.8);z-index:var(--bx-fullscreen-text-z-index);line-height:100vh;color:#fff;text-align:center;font-weight:400;font-family:var(--bx-normal-font);font-size:1.3rem;user-select:none;-webkit-user-select:none}#root section[class*=DeviceCodePage-module__page]{margin-left:20px !important;margin-right:20px !important;margin-top:20px !important;max-width:800px !important}#root div[class*=DeviceCodePage-module__back]{display:none}.bx-blink-me{animation:bx-blinker 1s linear infinite}.bx-horizontal-shaking{animation:bx-horizontal-shaking .4s ease-in-out 2}@-moz-keyframes bx-blinker{100%{opacity:0}}@-webkit-keyframes bx-blinker{100%{opacity:0}}@-o-keyframes bx-blinker{100%{opacity:0}}@keyframes bx-blinker{100%{opacity:0}}@-moz-keyframes bx-horizontal-shaking{0%{transform:translateX(0)}25%{transform:translateX(5px)}50%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}@-webkit-keyframes bx-horizontal-shaking{0%{transform:translateX(0)}25%{transform:translateX(5px)}50%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}@-o-keyframes bx-horizontal-shaking{0%{transform:translateX(0)}25%{transform:translateX(5px)}50%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}@keyframes bx-horizontal-shaking{0%{transform:translateX(0)}25%{transform:translateX(5px)}50%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}.bx-button{--button-rgb:var(--bx-default-button-rgb);--button-hover-rgb:var(--bx-default-button-hover-rgb);--button-active-rgb:var(--bx-default-button-active-rgb);--button-disabled-rgb:var(--bx-default-button-disabled-rgb);background-color:rgb(var(--button-rgb));user-select:none;-webkit-user-select:none;color:#fff;font-family:var(--bx-title-font-semibold);font-size:14px;border:none;font-weight:400;height:var(--bx-button-height);border-radius:4px;padding:0 8px;text-transform:uppercase;cursor:pointer;overflow:hidden}.bx-button:not([disabled]):active{background-color:rgb(var(--button-active-rgb))}.bx-button:focus{outline:none !important}.bx-button:not([disabled]):not(:active):hover,.bx-button:not([disabled]):not(:active).bx-focusable:focus{background-color:rgb(var(--button-hover-rgb))}.bx-button:disabled{cursor:default;background-color:rgb(var(--button-disabled-rgb));opacity:.5}.bx-button.bx-ghost{background-color:transparent}.bx-button.bx-ghost:not([disabled]):not(:active):hover,.bx-button.bx-ghost:not([disabled]):not(:active).bx-focusable:focus{background-color:rgb(var(--button-hover-rgb))}.bx-button.bx-primary{--button-rgb:var(--bx-primary-button-rgb)}.bx-button.bx-primary:not([disabled]):active{--button-active-rgb:var(--bx-primary-button-active-rgb)}.bx-button.bx-primary:not([disabled]):not(:active):hover,.bx-button.bx-primary:not([disabled]):not(:active).bx-focusable:focus{--button-hover-rgb:var(--bx-primary-button-hover-rgb)}.bx-button.bx-primary:disabled{--button-disabled-rgb:var(--bx-primary-button-disabled-rgb)}.bx-button.bx-warning{--button-rgb:var(--bx-warning-button-rgb)}.bx-button.bx-warning:not([disabled]):active{--button-active-rgb:var(--bx-warning-button-active-rgb)}.bx-button.bx-warning:not([disabled]):not(:active):hover,.bx-button.bx-warning:not([disabled]):not(:active).bx-focusable:focus{--button-hover-rgb:var(--bx-warning-button-hover-rgb)}.bx-button.bx-warning:disabled{--button-disabled-rgb:var(--bx-warning-button-disabled-rgb)}.bx-button.bx-danger{--button-rgb:var(--bx-danger-button-rgb)}.bx-button.bx-danger:not([disabled]):active{--button-active-rgb:var(--bx-danger-button-active-rgb)}.bx-button.bx-danger:not([disabled]):not(:active):hover,.bx-button.bx-danger:not([disabled]):not(:active).bx-focusable:focus{--button-hover-rgb:var(--bx-danger-button-hover-rgb)}.bx-button.bx-danger:disabled{--button-disabled-rgb:var(--bx-danger-button-disabled-rgb)}.bx-button.bx-frosted{--button-alpha:.2;background-color:rgba(var(--button-rgb), var(--button-alpha))}.bx-button.bx-frosted:not([disabled]):not(:active):hover,.bx-button.bx-frosted:not([disabled]):not(:active).bx-focusable:focus{background-color:rgba(var(--button-hover-rgb), var(--button-alpha))}.bx-button.bx-drop-shadow{box-shadow:0 0 4px rgba(0,0,0,0.502)}.bx-button.bx-tall{height:calc(var(--bx-button-height) * 1.5) !important}.bx-button.bx-circular{border-radius:var(--bx-button-height);width:var(--bx-button-height);height:var(--bx-button-height)}.bx-button svg{display:inline-block;width:16px;height:var(--bx-button-height)}.bx-button span{display:inline-block;line-height:var(--bx-button-height);vertical-align:middle;color:#fff;overflow:hidden;white-space:nowrap}.bx-button span:not(:only-child){margin-inline-start:8px}.bx-button.bx-button-multi-lines{height:auto;text-align:left;padding:10px}.bx-button.bx-button-multi-lines span{line-height:unset;display:block}.bx-button.bx-button-multi-lines span:last-of-type{text-transform:none;font-weight:normal;font-family:"Segoe Sans Variable Text";font-size:12px;margin-top:4px}.bx-focusable{position:relative;overflow:visible}.bx-focusable::after{border:2px solid transparent;border-radius:10px}.bx-focusable:focus::after{content:\'\';border-color:#fff;position:absolute;top:-6px;left:-6px;right:-6px;bottom:-6px}html[data-active-input=touch] .bx-focusable:focus::after,html[data-active-input=mouse] .bx-focusable:focus::after{border-color:transparent !important}.bx-focusable.bx-circular::after{border-radius:var(--bx-button-height)}a.bx-button{display:inline-block}a.bx-button.bx-full-width{text-align:center}button.bx-inactive{pointer-events:none;opacity:.2;background:transparent !important}.bx-header-remote-play-button{height:auto;margin-right:8px !important}.bx-header-remote-play-button svg{width:24px;height:24px}.bx-header-settings-button{line-height:30px;font-size:14px;text-transform:uppercase;position:relative}.bx-header-settings-button[data-update-available]::before{content:\'🌟\' !important;line-height:var(--bx-button-height);display:inline-block;margin-left:4px}.bx-key-binding-dialog-overlay{position:fixed;inset:0;z-index:var(--bx-key-binding-dialog-overlay-z-index);background:#000;opacity:50%}.bx-key-binding-dialog{display:flex;flex-flow:column;max-height:90vh;position:fixed;top:50%;left:50%;margin-right:-50%;transform:translate(-50%,-50%);min-width:420px;padding:16px;border-radius:8px;z-index:var(--bx-key-binding-dialog-z-index);background:#1a1b1e;color:#fff;font-weight:400;font-size:16px;font-family:var(--bx-normal-font);box-shadow:0 0 6px #000;user-select:none;-webkit-user-select:none}.bx-key-binding-dialog *:focus{outline:none !important}.bx-key-binding-dialog h2{margin-bottom:12px;color:#fff;display:block;font-family:var(--bx-title-font);font-size:32px;font-weight:400;line-height:var(--bx-button-height)}.bx-key-binding-dialog > div{overflow:auto;padding:2px 0}.bx-key-binding-dialog > button{padding:8px 32px;margin:10px auto 0;border:none;border-radius:4px;display:block;background-color:#2d3036;text-align:center;color:#fff;text-transform:uppercase;font-family:var(--bx-title-font);font-weight:400;line-height:18px;font-size:14px}@media (hover:hover){.bx-key-binding-dialog > button:hover{background-color:#515863}}.bx-key-binding-dialog > button:focus{background-color:#515863}.bx-key-binding-dialog ul{margin-bottom:1rem}.bx-key-binding-dialog ul li{display:none}.bx-key-binding-dialog ul[data-flags*="[1]"] > li[data-flag="1"],.bx-key-binding-dialog ul[data-flags*="[2]"] > li[data-flag="2"],.bx-key-binding-dialog ul[data-flags*="[4]"] > li[data-flag="4"],.bx-key-binding-dialog ul[data-flags*="[8]"] > li[data-flag="8"]{display:list-item}@media screen and (max-width:450px){.bx-key-binding-dialog{min-width:100%}}.bx-navigation-dialog{position:absolute;z-index:var(--bx-navigation-dialog-z-index);font-family:var(--bx-title-font)}.bx-navigation-dialog *:focus{outline:none !important}.bx-navigation-dialog select:disabled{-webkit-appearance:none;text-align-last:right;text-align:right;color:#fff;background:#131416;border:none;border-radius:4px;padding:0 5px}.bx-navigation-dialog .bx-focusable::after{border-radius:4px}.bx-navigation-dialog .bx-focusable:focus::after{top:0;left:0;right:0;bottom:0}.bx-navigation-dialog-overlay{position:fixed;background:rgba(11,11,11,0.89);top:0;left:0;right:0;bottom:0;z-index:var(--bx-navigation-dialog-overlay-z-index)}.bx-navigation-dialog-overlay[data-is-playing="true"]{background:transparent}.bx-centered-dialog{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;background:#1a1b1e;border-radius:10px;min-width:min(calc(100vw - 20px), 500px);max-width:calc(100vw - 20px);margin:0 0 0 auto;padding:16px;max-height:95vh;flex-direction:column;overflow:hidden;display:flex;flex-direction:column}.bx-centered-dialog .bx-dialog-title{display:flex;flex-direction:row;align-items:center;margin-bottom:10px}.bx-centered-dialog .bx-dialog-title p{padding:0;margin:0;flex:1;font-size:1.5rem;font-weight:bold}.bx-centered-dialog .bx-dialog-title button{flex-shrink:0}.bx-centered-dialog .bx-dialog-content{flex:1;padding:6px;overflow:auto;overflow-x:hidden}.bx-centered-dialog .bx-dialog-preset-tools{display:flex;margin-bottom:12px;gap:6px}.bx-centered-dialog .bx-dialog-preset-tools button{align-self:center;min-height:50px}.bx-centered-dialog .bx-default-preset-note{font-size:12px;font-style:italic;text-align:center;margin-bottom:10px}.bx-centered-dialog input,.bx-settings-dialog input{accent-color:var(--bx-primary-button-color)}.bx-centered-dialog input:focus,.bx-settings-dialog input:focus{accent-color:var(--bx-danger-button-color)}.bx-centered-dialog select:disabled,.bx-settings-dialog select:disabled{-webkit-appearance:none;background:transparent;text-align-last:right;border:none;color:#fff}.bx-centered-dialog select option:disabled,.bx-settings-dialog select option:disabled{display:none}.bx-centered-dialog input[type=checkbox]:focus,.bx-settings-dialog input[type=checkbox]:focus,.bx-centered-dialog select:focus,.bx-settings-dialog select:focus{filter:drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff)}.bx-centered-dialog a,.bx-settings-dialog a{color:#1c9d1c;text-decoration:none}.bx-centered-dialog a:hover,.bx-settings-dialog a:hover,.bx-centered-dialog a:focus,.bx-settings-dialog a:focus{color:#5dc21e}.bx-centered-dialog label,.bx-settings-dialog label{margin:0}.bx-controller-shortcuts-manager-container .bx-shortcut-note{margin-top:10px;font-size:14px;text-align:center}.bx-controller-shortcuts-manager-container .bx-shortcut-row{display:flex;gap:10px;margin-bottom:10px;align-items:center}.bx-controller-shortcuts-manager-container .bx-shortcut-row label.bx-prompt{flex-shrink:0;font-size:32px;margin:0}.bx-controller-shortcuts-manager-container .bx-shortcut-row label.bx-prompt::first-letter{letter-spacing:6px}.bx-controller-shortcuts-manager-container select:disabled{text-align:left;text-align-last:left}.bx-keyboard-shortcuts-manager-container{display:flex;flex-direction:column;gap:16px}.bx-keyboard-shortcuts-manager-container fieldset{background:#2a2a2a;border:1px solid #2a2a2a;border-radius:4px;padding:4px}.bx-keyboard-shortcuts-manager-container legend{width:auto;padding:4px 8px;margin:0 4px 4px;background:#004f87;box-shadow:0 2px 0 #071e3d;border-radius:4px;font-size:14px;font-weight:bold;text-transform:uppercase}.bx-keyboard-shortcuts-manager-container .bx-settings-row{background:none;padding:10px}.bx-settings-dialog{display:flex;position:fixed;top:0;right:0;bottom:0;opacity:.98;user-select:none;-webkit-user-select:none}.bx-settings-dialog .bx-settings-reload-note{font-size:.8rem;display:block;padding:8px;font-style:italic;font-weight:normal;height:var(--bx-button-height)}.bx-settings-tabs-container{position:fixed;width:48px;max-height:100vh;display:flex;flex-direction:column}.bx-settings-tabs-container > div:last-of-type{display:flex;flex-direction:column;align-items:end}.bx-settings-tabs-container > div:last-of-type button{flex-shrink:0;border-top-right-radius:0;border-bottom-right-radius:0;margin-top:8px;height:unset;padding:8px 10px}.bx-settings-tabs-container > div:last-of-type button svg{width:16px;height:16px}.bx-settings-tabs{display:flex;flex-direction:column;border-radius:0 0 0 8px;box-shadow:0 0 6px #000;overflow:overlay;flex:1}.bx-settings-tabs svg{width:24px;height:24px;padding:10px;flex-shrink:0;box-sizing:content-box;background:#131313;cursor:pointer;border-left:4px solid #1e1e1e}.bx-settings-tabs svg.bx-active{background:#222;border-color:#008746}.bx-settings-tabs svg:not(.bx-active):hover{background:#2f2f2f;border-color:#484848}.bx-settings-tabs svg:focus{border-color:#fff}.bx-settings-tabs svg[data-group=global][data-need-refresh=true]{background:var(--bx-danger-button-color) !important}.bx-settings-tabs svg[data-group=global][data-need-refresh=true]:hover{background:var(--bx-danger-button-hover-color) !important}.bx-settings-tab-contents{flex-direction:column;margin-left:48px;width:450px;background:#1a1b1e;color:#fff;font-weight:400;font-size:16px;font-family:var(--bx-title-font);text-align:center;box-shadow:0 0 6px #000;overflow:overlay;z-index:1}.bx-settings-tab-contents .bx-top-buttons{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}.bx-settings-tab-contents .bx-top-buttons .bx-button{display:block}.bx-settings-tab-contents h2{margin:16px 0 8px 0;display:flex;align-items:center}.bx-settings-tab-contents h2:first-of-type{margin-top:0}.bx-settings-tab-contents h2 span{display:inline-block;font-size:20px;font-weight:bold;text-align:left;flex:1;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;min-height:var(--bx-button-height);align-content:center}@media (max-width:500px){.bx-settings-tab-contents{width:calc(100vw - 48px)}}.bx-settings-row{display:flex;gap:10px;padding:16px 10px;background:#2a2a2a;border-bottom:1px solid #343434}.bx-settings-row:hover,.bx-settings-row:focus-within{background-color:#242424}.bx-settings-row:not(:has(> input[type=checkbox])){flex-wrap:wrap}.bx-settings-row > span.bx-settings-label{font-size:14px;display:block;text-align:left;align-self:center;margin-bottom:0 !important;flex:1}.bx-settings-row > span.bx-settings-label svg{width:20px;height:20px;margin-inline-end:8px}.bx-settings-row > span.bx-settings-label + *{margin:0 0 0 auto}.bx-settings-row[data-multi-lines="true"]{flex-direction:column}.bx-settings-row[data-multi-lines="true"] > span.bx-settings-label{align-self:start}.bx-settings-row[data-multi-lines="true"] > span.bx-settings-label + *{margin:unset}.bx-settings-row.bx-settings-important-row{background:#733b00}.bx-settings-dialog-note{display:block;color:#afafb0;font-size:12px;font-weight:lighter;font-style:italic}.bx-settings-dialog-note:not(:has(a)){margin-top:4px}.bx-settings-dialog-note a{display:inline-block;padding:4px}.bx-settings-custom-user-agent,.bx-settings-text-input{display:block;width:100%;padding:6px}.bx-donation-link{display:block;text-align:center;text-decoration:none;height:20px;line-height:20px;font-size:14px;margin-top:10px;margin-bottom:10px}.bx-debug-info button{margin-top:10px}.bx-debug-info pre{margin-top:10px;cursor:copy;color:#fff;padding:8px;border:1px solid #2d2d2d;background:#212121;white-space:break-spaces;text-align:left}.bx-debug-info pre:hover{background:#272727}.bx-settings-app-version{margin-top:10px;text-align:center;color:#747474;font-size:12px}.bx-note-unsupported{display:block;font-size:12px;font-style:italic;font-weight:normal;color:#828282}.bx-settings-tab-content{padding:10px}.bx-settings-tab-content > div *:not(.bx-settings-row):has(+ .bx-settings-row) + .bx-settings-row:has(+ .bx-settings-row){border-top-left-radius:6px;border-top-right-radius:6px}.bx-settings-tab-content > div .bx-settings-row:not(:has(+ .bx-settings-row)){border:none;border-bottom-left-radius:6px;border-bottom-right-radius:6px}.bx-settings-tab-content > div *:not(.bx-settings-row):has(+ .bx-settings-row) + .bx-settings-row:not(:has(+ .bx-settings-row)){border:none;border-radius:6px}.bx-settings-tab-content:not([data-game-id="-1"]) .bx-settings-row[data-override=true],.bx-settings-tab-content:not([data-game-id="-1"]) .bx-settings-row:has(*[data-override=true]){border-left:4px solid #ffa500 !important;border-top-left-radius:0 !important;border-bottom-left-radius:0 !important;padding-left:6px !important}.bx-suggest-toggler{text-align:left;display:flex;border-radius:4px;overflow:hidden;background:#003861;height:45px;align-items:center}.bx-suggest-toggler label{flex:1;align-content:center;padding:0 10px;background:#004f87;height:100%}.bx-suggest-toggler span{display:inline-block;align-self:center;padding:10px;width:45px;text-align:center}.bx-suggest-toggler:hover,.bx-suggest-toggler:focus{cursor:pointer;background:#005da1}.bx-suggest-toggler:hover label,.bx-suggest-toggler:focus label{background:#006fbe}.bx-suggest-toggler[bx-open] span{transform:rotate(90deg)}.bx-suggest-toggler[bx-open]+ .bx-suggest-box{display:block}.bx-suggest-box{display:none}.bx-suggest-wrapper{display:flex;flex-direction:column;gap:10px;margin:10px}.bx-suggest-note{font-size:11px;color:#8c8c8c;font-style:italic;font-weight:100}.bx-suggest-link{font-size:14px;display:inline-block;margin-top:4px;padding:4px}.bx-suggest-row{display:flex;flex-direction:row;gap:10px}.bx-suggest-row label{flex:1;overflow:overlay;border-radius:4px}.bx-suggest-row label .bx-suggest-label{background:#323232;padding:4px 10px;font-size:12px;text-align:left}.bx-suggest-row label .bx-suggest-value{padding:6px;font-size:14px}.bx-suggest-row label .bx-suggest-value.bx-suggest-change{background-color:var(--bx-warning-color)}.bx-suggest-row.bx-suggest-ok input{visibility:hidden}.bx-suggest-row.bx-suggest-ok .bx-suggest-label{background-color:#008114}.bx-suggest-row.bx-suggest-ok .bx-suggest-value{background-color:#13a72a}.bx-suggest-row.bx-suggest-change .bx-suggest-label{background-color:#a65e08}.bx-suggest-row.bx-suggest-change .bx-suggest-value{background-color:#d57f18}.bx-suggest-row.bx-suggest-change:hover label{cursor:pointer}.bx-suggest-row.bx-suggest-change:hover .bx-suggest-label{background-color:#995707}.bx-suggest-row.bx-suggest-change:hover .bx-suggest-value{background-color:#bd7115}.bx-suggest-row.bx-suggest-change input:not(:checked) + label{opacity:.5}.bx-suggest-row.bx-suggest-change input:not(:checked) + label .bx-suggest-label{background-color:#2a2a2a}.bx-suggest-row.bx-suggest-change input:not(:checked) + label .bx-suggest-value{background-color:#393939}.bx-suggest-row.bx-suggest-change:hover input:not(:checked) + label{opacity:1}.bx-suggest-row.bx-suggest-change:hover input:not(:checked) + label .bx-suggest-label{background-color:#202020}.bx-suggest-row.bx-suggest-change:hover input:not(:checked) + label .bx-suggest-value{background-color:#303030}.bx-sub-content-box{background:#161616;padding:10px;box-shadow:0 0 12px #0f0f0f inset;border-radius:10px}.bx-settings-row .bx-sub-content-box{background:#202020;padding:12px;box-shadow:0 0 4px #000 inset;border-radius:6px}.bx-controller-extra-settings[data-has-gamepad=true] > :first-child{display:none}.bx-controller-extra-settings[data-has-gamepad=true] > :last-child{display:block}.bx-controller-extra-settings[data-has-gamepad=false] > :first-child{display:block}.bx-controller-extra-settings[data-has-gamepad=false] > :last-child{display:none}.bx-controller-extra-settings .bx-controller-extra-wrapper{flex:1;min-width:1px}.bx-controller-extra-settings .bx-sub-content-box{flex:1;text-align:left;display:flex;flex-direction:column;margin-top:10px}.bx-controller-extra-settings .bx-sub-content-box > label{font-size:14px}.bx-preset-row{display:flex;gap:8px}.bx-preset-row .bx-select{flex:1}.bx-stream-settings-selection{margin-bottom:8px;position:sticky;z-index:1000;top:0}.bx-stream-settings-selection > div{display:flex;gap:8px;background:#222;padding:10px;border-bottom:4px solid #353638;box-shadow:0 0 6px #000;position:relative;z-index:1}.bx-stream-settings-selection > div .bx-select{flex:1}.bx-stream-settings-selection > div .bx-select label{font-weight:bold;font-size:1.1rem;line-height:initial}.bx-stream-settings-selection > div .bx-select label span{line-height:initial}.bx-stream-settings-selection > div .bx-select .bx-select-indicators{display:none}.bx-stream-settings-selection p{font-family:var(--bx-promptfont-font),var(--bx-normal-font);margin:0;font-size:13px;background:rgba(80,80,80,0.949);height:25px;line-height:23px;position:absolute;bottom:-25px;left:0;right:0;text-shadow:0 1px #000}.bx-toast{user-select:none;-webkit-user-select:none;position:fixed;left:50%;top:24px;transform:translate(-50%,0);background:#212121;border-radius:10px;color:#fff;z-index:var(--bx-toast-z-index);font-family:var(--bx-normal-font);border:2px solid #fff;display:flex;align-items:center;opacity:0;overflow:clip;transition:opacity .2s ease-in;box-shadow:0 0 6px #000}.bx-toast.bx-show{opacity:.95}.bx-toast.bx-hide{opacity:0;pointer-events:none}.bx-toast-msg{font-size:14px;display:inline-block;padding:12px 16px;white-space:pre}.bx-toast-status{font-weight:bold;font-size:14px;text-transform:uppercase;display:inline-block;background:#fff;padding:12px 16px;color:#212121;white-space:pre}.bx-wait-time-box{position:fixed;top:0;right:0;background-color:rgba(0,0,0,0.8);color:#fff;z-index:var(--bx-wait-time-box-z-index);padding:12px;border-radius:0 0 0 8px}.bx-wait-time-box label{display:block;text-transform:uppercase;text-align:right;font-size:12px;font-weight:bold;margin:0}.bx-wait-time-box span{display:block;font-family:var(--bx-monospaced-font);text-align:right;font-size:16px;margin-bottom:10px}.bx-wait-time-box span:last-of-type{margin-bottom:0}.bx-remote-play-settings{margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #2d2d2d;display:flex;flex-direction:column;gap:10px}.bx-remote-play-settings > div{display:flex;min-height:30px}.bx-remote-play-settings > div > label{flex:1;font-size:14px;align-self:center}.bx-remote-play-settings > div > label p{margin:4px 0 0;padding:0;color:#888;font-size:12px}.bx-remote-play-resolution{display:block}.bx-remote-play-resolution input[type="radio"]{accent-color:var(--bx-primary-button-color);margin-right:6px}.bx-remote-play-resolution input[type="radio"]:focus{accent-color:var(--bx-primary-button-hover-color)}.bx-remote-play-device-wrapper{display:flex;margin-bottom:12px;gap:10px}.bx-remote-play-device-wrapper:last-child{margin-bottom:2px}.bx-remote-play-device-info{flex:1;align-self:center}.bx-remote-play-device-name{font-size:14px;font-weight:bold;display:inline-block;vertical-align:middle}.bx-remote-play-console-type{font-size:8px;background:#004c87;color:#fff;display:inline-block;border-radius:8px;padding:2px 6px;margin-left:8px;vertical-align:middle}.bx-remote-play-power-state{color:#888;font-size:12px}.bx-remote-play-connect-button{min-height:100%}.bx-remote-play-buttons{display:flex;justify-content:space-between}select.bx-select{min-height:30px}div.bx-select{display:flex;align-items:stretch;flex:0 1 auto;gap:8px}div.bx-select select:disabled ~ button{display:none}div.bx-select select:disabled ~ div{background:#131416;color:#fff;pointer-events:none}div.bx-select select:disabled ~ div .bx-select-indicators{visibility:hidden}div.bx-select > div,div.bx-select button.bx-select-value{min-width:120px;text-align:left;line-height:24px;vertical-align:middle;background:#fff;color:#000;border-radius:4px;padding:2px 8px;display:flex;flex:1;flex-direction:column}div.bx-select > div{min-height:24px}div.bx-select > div input{display:inline-block;margin-right:8px}div.bx-select > div label{margin-bottom:0;font-size:14px;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-height:15px}div.bx-select > div label span{display:block;font-size:10px;font-weight:bold;text-align:left;line-height:20px;white-space:pre;min-height:15px;align-content:center}div.bx-select button.bx-select-value{border:none;cursor:pointer;min-height:30px;font-size:.9rem;align-items:center}div.bx-select button.bx-select-value > div{display:flex;width:100%}div.bx-select button.bx-select-value span{flex:1;text-align:left;display:inline-block}div.bx-select button.bx-select-value input{margin:0 4px;accent-color:var(--bx-primary-button-color);pointer-events:none}div.bx-select button.bx-select-value:hover input,div.bx-select button.bx-select-value:focus input{accent-color:var(--bx-danger-button-color)}div.bx-select button.bx-select-value:hover::after,div.bx-select button.bx-select-value:focus::after{border-color:#4d4d4d !important}div.bx-select button.bx-button{border:none;width:24px;height:auto;padding:0;color:#fff;border-radius:4px;font-weight:bold;font-size:12px;font-family:var(--bx-monospaced-font);flex-shrink:0}div.bx-select button.bx-button span{line-height:unset}div.bx-select[data-controller-friendly=true] > div{box-sizing:content-box}div.bx-select[data-controller-friendly=true] select{position:absolute !important;top:-9999px !important;left:-9999px !important;visibility:hidden !important}div.bx-select[data-controller-friendly=false]{position:relative}div.bx-select[data-controller-friendly=false] > div{box-sizing:border-box}div.bx-select[data-controller-friendly=false] > div label{margin-right:24px}div.bx-select[data-controller-friendly=false] select:disabled{display:none}div.bx-select[data-controller-friendly=false] select:not(:disabled){cursor:pointer;position:absolute;top:0;right:0;bottom:0;display:block;opacity:0;z-index:calc(var(--bx-settings-z-index) + 1)}div.bx-select[data-controller-friendly=false] select:not(:disabled):hover + div{background:#f0f0f0}div.bx-select[data-controller-friendly=false] select:not(:disabled) + div label::after{content:\'▾\';font-size:14px;position:absolute;right:8px;pointer-events:none}.bx-select-indicators{display:flex;height:4px;gap:2px;margin-bottom:2px}.bx-select-indicators span{content:\' \';display:inline-block;flex:1;background:#cfcfcf;border-radius:4px;min-width:1px}.bx-select-indicators span[data-highlighted]{background:#9c9c9c;min-width:6px}.bx-select-indicators span[data-selected]{background:#aacfe7}.bx-select-indicators span[data-highlighted][data-selected]{background:#5fa3d0}.bx-guide-home-achievements-progress{display:flex;gap:10px;flex-direction:row}.bx-guide-home-achievements-progress .bx-button{margin-bottom:0 !important}body[data-bx-media-type=tv] .bx-guide-home-achievements-progress{flex-direction:column}body:not([data-bx-media-type=tv]) .bx-guide-home-achievements-progress{flex-direction:row}body:not([data-bx-media-type=tv]) .bx-guide-home-achievements-progress > button:first-of-type{flex:1}body:not([data-bx-media-type=tv]) .bx-guide-home-achievements-progress > button:last-of-type{width:40px}body:not([data-bx-media-type=tv]) .bx-guide-home-achievements-progress > button:last-of-type span{display:none}.bx-guide-home-buttons > div{display:flex;flex-direction:row;gap:12px}body[data-bx-media-type=tv] .bx-guide-home-buttons > div{flex-direction:column}body[data-bx-media-type=tv] .bx-guide-home-buttons > div button{margin-bottom:0 !important}body:not([data-bx-media-type=tv]) .bx-guide-home-buttons > div button span{display:none}.bx-guide-home-buttons[data-is-playing="true"] button[data-state=\'normal\']{display:none}.bx-guide-home-buttons[data-is-playing="false"] button[data-state=\'playing\']{display:none}#game-stream div[class^=StreamMenu-module__menuContainer] > div[class^=Menu-module]{overflow:visible}.bx-stream-menu-button-on{fill:#000 !important;background-color:#2d2d2d !important;color:#000 !important}.bx-stream-refresh-button{top:calc(env(safe-area-inset-top, 0px) + 10px + 50px) !important}body[data-media-type=default] .bx-stream-refresh-button{left:calc(env(safe-area-inset-left, 0px) + 11px) !important}body[data-media-type=tv] .bx-stream-refresh-button{top:calc(var(--gds-focus-borderSize) + 80px) !important}.bx-stream-home-button{top:calc(env(safe-area-inset-top, 0px) + 10px + 50px * 2) !important}body[data-media-type=default] .bx-stream-home-button{left:calc(env(safe-area-inset-left, 0px) + 12px) !important}body[data-media-type=tv] .bx-stream-home-button{top:calc(var(--gds-focus-borderSize) + 80px * 2) !important}div[data-testid=media-container][data-position=center]{display:flex}div[data-testid=media-container][data-position=top] video,div[data-testid=media-container][data-position=top] canvas{top:0}div[data-testid=media-container][data-position=bottom] video,div[data-testid=media-container][data-position=bottom] canvas{bottom:0}#game-stream video{margin:auto;align-self:center;background:#000;position:absolute;left:0;right:0}#game-stream canvas{align-self:center;margin:auto;position:absolute;left:0;right:0}#game-stream.bx-taking-screenshot:before{animation:bx-anim-taking-screenshot .5s ease;content:\' \';position:absolute;width:100%;height:100%;z-index:var(--bx-screenshot-animation-z-index)}.bx-game-translator-overlay{position:fixed;inset:0;overflow:hidden;pointer-events:none !important;z-index:var(--bx-game-translator-z-index);font-family:var(--bx-normal-font)}.bx-game-translator-subtitle{position:absolute;box-sizing:border-box;transform:translateX(-50%);padding:8px 14px;border-radius:8px;color:#fff;line-height:1.25;text-align:center;text-shadow:0 1px 3px #000,0 0 2px #000;overflow-wrap:anywhere}.bx-game-translator-translation{font-weight:600}.bx-game-translator-original{margin-top:4px;font-size:.62em;font-weight:400;opacity:.82}.bx-game-translator-region{position:absolute;box-sizing:border-box;border:2px dashed #00e5ff;background:rgba(0,229,255,0.06)}.bx-game-translator-debug{position:absolute;top:calc(env(safe-area-inset-top, 0px) + 12px);left:50%;transform:translateX(-50%);max-width:90%;padding:5px 8px;border-radius:5px;background:rgba(0,0,0,0.72);color:#00e5ff;font:12px/1.3 var(--bx-monospaced-font);white-space:nowrap}#gamepass-dialog-root div[class^=Guide-module__guide] .bx-button{overflow:visible;margin-bottom:12px}@-moz-keyframes bx-anim-taking-screenshot{0%{border:0 solid rgba(255,255,255,0.502)}50%{border:8px solid rgba(255,255,255,0.502)}100%{border:0 solid rgba(255,255,255,0.502)}}@-webkit-keyframes bx-anim-taking-screenshot{0%{border:0 solid rgba(255,255,255,0.502)}50%{border:8px solid rgba(255,255,255,0.502)}100%{border:0 solid rgba(255,255,255,0.502)}}@-o-keyframes bx-anim-taking-screenshot{0%{border:0 solid rgba(255,255,255,0.502)}50%{border:8px solid rgba(255,255,255,0.502)}100%{border:0 solid rgba(255,255,255,0.502)}}@keyframes bx-anim-taking-screenshot{0%{border:0 solid rgba(255,255,255,0.502)}50%{border:8px solid rgba(255,255,255,0.502)}100%{border:0 solid rgba(255,255,255,0.502)}}.bx-number-stepper{text-align:center}.bx-number-stepper > div{display:flex;align-items:center}.bx-number-stepper > div span{flex:1;display:inline-block;min-width:40px;font-family:var(--bx-monospaced-font);white-space:pre;font-size:13px;margin:0 4px}.bx-number-stepper > div button{flex-shrink:0;border:none;width:24px;height:24px;margin:0;line-height:24px;background-color:var(--bx-default-button-color);color:#fff;border-radius:4px;font-weight:bold;font-size:14px;font-family:var(--bx-monospaced-font)}@media (hover:hover){.bx-number-stepper > div button:hover{background-color:var(--bx-default-button-hover-color)}}.bx-number-stepper > div button:active{background-color:var(--bx-default-button-hover-color)}.bx-number-stepper > div button:disabled + span{font-family:var(--bx-title-font)}.bx-number-stepper input[type=range]{display:block;margin:8px 0 2px auto;min-width:180px;width:100%;color:#959595 !important}.bx-number-stepper input[type=range]:disabled,.bx-number-stepper button:disabled{display:none}.bx-number-stepper[data-disabled=true] input[type=range],.bx-number-stepper[disabled=true] input[type=range],.bx-number-stepper[data-disabled=true] button,.bx-number-stepper[disabled=true] button{display:none}.bx-dual-number-stepper > span{display:block;font-family:var(--bx-monospaced-font);font-size:13px;white-space:pre;margin:0 4px;text-align:center}.bx-dual-number-stepper > div input[type=range]{display:block;width:100%;min-width:180px;background:transparent;color:#959595 !important;appearance:none;padding:8px 0}.bx-dual-number-stepper > div input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(90deg,#fff var(--from),var(--bx-primary-button-color) var(--from) var(--to),#fff var(--to) 100%);height:8px;border-radius:2px}.bx-dual-number-stepper > div input[type=range]::-moz-range-track{background:linear-gradient(90deg,#fff var(--from),var(--bx-primary-button-color) var(--from) var(--to),#fff var(--to) 100%);height:8px;border-radius:2px}.bx-dual-number-stepper > div input[type=range]::-webkit-slider-thumb{margin-top:-4px;appearance:none;width:4px;height:16px;background:#00b85f;border:none;border-radius:2px}.bx-dual-number-stepper > div input[type=range]::-moz-range-thumb{margin-top:-4px;appearance:none;width:4px;height:16px;background:#00b85f;border:none;border-radius:2px}.bx-dual-number-stepper > div input[type=range]:hover::-webkit-slider-runnable-track,.bx-dual-number-stepper > div input[type=range].bx-dual-number-stepper > div input[type=range]:active::-webkit-slider-runnable-track,.bx-dual-number-stepper > div input[type=range]:focus::-webkit-slider-runnable-track{background:linear-gradient(90deg,#fff var(--from),#006635 var(--from) var(--to),#fff var(--to) 100%)}.bx-dual-number-stepper > div input[type=range]:hover::-moz-range-track,.bx-dual-number-stepper > div input[type=range].bx-dual-number-stepper > div input[type=range]:active::-moz-range-track,.bx-dual-number-stepper > div input[type=range]:focus::-moz-range-track{background:linear-gradient(90deg,#fff var(--from),#006635 var(--from) var(--to),#fff var(--to) 100%)}.bx-dual-number-stepper > div input[type=range]:hover::-webkit-slider-thumb,.bx-dual-number-stepper > div input[type=range].bx-dual-number-stepper > div input[type=range]:active::-webkit-slider-thumb,.bx-dual-number-stepper > div input[type=range]:focus::-webkit-slider-thumb{background:#fb3232}.bx-dual-number-stepper > div input[type=range]:hover::-moz-range-thumb,.bx-dual-number-stepper > div input[type=range].bx-dual-number-stepper > div input[type=range]:active::-moz-range-thumb,.bx-dual-number-stepper > div input[type=range]:focus::-moz-range-thumb{background:#fb3232}.bx-dual-number-stepper[data-disabled=true] input[type=range],.bx-dual-number-stepper[disabled=true] input[type=range]{display:none}#bx-game-bar{z-index:var(--bx-game-bar-z-index);position:fixed;bottom:0;width:40px;height:90px;overflow:visible;cursor:pointer}#bx-game-bar > svg{display:none;pointer-events:none;position:absolute;height:28px;margin-top:16px}@media (hover:hover){#bx-game-bar:hover > svg{display:block}}#bx-game-bar .bx-game-bar-container{opacity:0;position:absolute;display:flex;overflow:hidden;background:rgba(26,27,30,0.91);box-shadow:0 0 6px #1c1c1c;transition:opacity .1s ease-in}#bx-game-bar .bx-game-bar-container.bx-show{opacity:.9}#bx-game-bar .bx-game-bar-container.bx-show + svg{display:none !important}#bx-game-bar .bx-game-bar-container.bx-hide{opacity:0;pointer-events:none}#bx-game-bar .bx-game-bar-container button{width:60px;height:60px;border-radius:0}#bx-game-bar .bx-game-bar-container button svg{width:28px;height:28px;transition:transform .08s ease 0s}#bx-game-bar .bx-game-bar-container button:hover{border-radius:0}#bx-game-bar .bx-game-bar-container button:active svg{transform:scale(.75)}#bx-game-bar .bx-game-bar-container button.bx-activated{background-color:#fff}#bx-game-bar .bx-game-bar-container button.bx-activated svg{filter:invert(1)}#bx-game-bar .bx-game-bar-container div[data-activated] button{display:none}#bx-game-bar .bx-game-bar-container div[data-activated=\'false\'] button:first-of-type{display:block}#bx-game-bar .bx-game-bar-container div[data-activated=\'true\'] button:last-of-type{display:block}#bx-game-bar[data-position="bottom-left"]{left:0;direction:ltr}#bx-game-bar[data-position="bottom-left"] .bx-game-bar-container{border-radius:0 10px 10px 0}#bx-game-bar[data-position="bottom-right"]{right:0;direction:rtl}#bx-game-bar[data-position="bottom-right"] .bx-game-bar-container{direction:ltr;border-radius:10px 0 0 10px}.bx-badges{margin-left:0;user-select:none;-webkit-user-select:none}.bx-badge{border:none;display:inline-block;line-height:24px;color:#fff;font-family:var(--bx-title-font-semibold);font-size:14px;font-weight:400;margin:0 8px 8px 0;box-shadow:0 0 6px #000;border-radius:4px}.bx-badge-name{background-color:#2d3036;border-radius:4px 0 0 4px}.bx-badge-name svg{width:16px;height:16px}.bx-badge-value{background-color:#808080;border-radius:0 4px 4px 0}.bx-badge-name,.bx-badge-value{display:inline-block;padding:0 8px;line-height:30px;vertical-align:bottom}.bx-badge-battery[data-charging=true] span:first-of-type::after{content:\' ⚡️\'}div[class^=StreamMenu-module__container] .bx-badges{position:absolute;max-width:500px}#gamepass-dialog-root .bx-badges{position:fixed;top:60px;left:460px;max-width:500px}@media (min-width:568px) and (max-height:480px){#gamepass-dialog-root .bx-badges{position:unset;top:unset;left:unset;margin:8px 0}}.bx-stats-bar{display:flex;flex-direction:row;gap:8px;user-select:none;-webkit-user-select:none;position:fixed;top:0;background-color:#000;color:#fff;font-family:var(--bx-monospaced-font);font-size:.9rem;padding-left:8px;z-index:var(--bx-stats-bar-z-index);text-wrap:nowrap}.bx-stats-bar[data-stats*="[time]"] > .bx-stat-time,.bx-stats-bar[data-stats*="[play]"] > .bx-stat-play,.bx-stats-bar[data-stats*="[batt]"] > .bx-stat-batt,.bx-stats-bar[data-stats*="[res]"] > .bx-stat-res,.bx-stats-bar[data-stats*="[fps]"] > .bx-stat-fps,.bx-stats-bar[data-stats*="[ping]"] > .bx-stat-ping,.bx-stats-bar[data-stats*="[jit]"] > .bx-stat-jit,.bx-stats-bar[data-stats*="[btr]"] > .bx-stat-btr,.bx-stats-bar[data-stats*="[dt]"] > .bx-stat-dt,.bx-stats-bar[data-stats*="[pl]"] > .bx-stat-pl,.bx-stats-bar[data-stats*="[fl]"] > .bx-stat-fl,.bx-stats-bar[data-stats*="[dl]"] > .bx-stat-dl,.bx-stats-bar[data-stats*="[ul]"] > .bx-stat-ul{display:inline-flex;align-items:baseline}.bx-stats-bar[data-stats$="[time]"] > .bx-stat-time,.bx-stats-bar[data-stats$="[play]"] > .bx-stat-play,.bx-stats-bar[data-stats$="[batt]"] > .bx-stat-batt,.bx-stats-bar[data-stats$="[res]"] > .bx-stat-res,.bx-stats-bar[data-stats$="[fps]"] > .bx-stat-fps,.bx-stats-bar[data-stats$="[ping]"] > .bx-stat-ping,.bx-stats-bar[data-stats$="[jit]"] > .bx-stat-jit,.bx-stats-bar[data-stats$="[btr]"] > .bx-stat-btr,.bx-stats-bar[data-stats$="[dt]"] > .bx-stat-dt,.bx-stats-bar[data-stats$="[pl]"] > .bx-stat-pl,.bx-stats-bar[data-stats$="[fl]"] > .bx-stat-fl,.bx-stats-bar[data-stats$="[dl]"] > .bx-stat-dl,.bx-stats-bar[data-stats$="[ul]"] > .bx-stat-ul{border-right:none}.bx-stats-bar::before{display:none;content:\'👀\';vertical-align:middle;margin-right:8px}.bx-stats-bar[data-display=glancing]::before{display:inline-block}.bx-stats-bar[data-position=top-left]{left:0;border-radius:0 0 4px 0}.bx-stats-bar[data-position=top-right]{right:0;border-radius:0 0 0 4px}.bx-stats-bar[data-position=top-center]{transform:translate(-50%,0);left:50%;border-radius:0 0 4px 4px}.bx-stats-bar[data-shadow=true]{background:none;filter:drop-shadow(1px 0 0 rgba(0,0,0,0.941)) drop-shadow(-1px 0 0 rgba(0,0,0,0.941)) drop-shadow(0 1px 0 rgba(0,0,0,0.941)) drop-shadow(0 -1px 0 rgba(0,0,0,0.941))}.bx-stats-bar > div{display:none;border-right:1px solid #fff;padding-right:8px}.bx-stats-bar label{margin:0 8px 0 0;font-family:var(--bx-title-font);font-size:70%;font-weight:bold;vertical-align:middle;cursor:help}.bx-stats-bar span{display:inline-block;text-align:right;vertical-align:middle;white-space:pre}.bx-stats-bar span[data-grade=good]{color:#6bffff}.bx-stats-bar span[data-grade=ok]{color:#fff16b}.bx-stats-bar span[data-grade=bad]{color:#ff5f5f}.bx-mkb-settings{display:flex;flex-direction:column;flex:1;padding-bottom:10px;overflow:hidden}.bx-mkb-pointer-lock-msg{user-select:none;-webkit-user-select:none;position:fixed;left:50%;bottom:40px;transform:translateX(-50%);margin:auto;background:#151515;z-index:var(--bx-mkb-pointer-lock-msg-z-index);color:#fff;font-weight:400;font-family:"Segoe UI",Arial,Helvetica,sans-serif;font-size:1.3rem;padding:12px;border-radius:8px;align-items:center;box-shadow:0 0 6px #000;min-width:300px;opacity:.9;display:flex;flex-direction:column;gap:10px}.bx-mkb-pointer-lock-msg:hover{opacity:1}.bx-mkb-pointer-lock-msg > p{margin:0;width:100%;font-size:22px;margin-bottom:4px;font-weight:bold;text-align:left}.bx-mkb-pointer-lock-msg > div{width:100%;display:flex;flex-direction:row;gap:10px}.bx-mkb-pointer-lock-msg > div button:first-of-type{flex-shrink:1}.bx-mkb-pointer-lock-msg > div button:last-of-type{flex-grow:1}.bx-mkb-key-row{display:flex;margin-bottom:10px;align-items:center;gap:20px}.bx-mkb-key-row label{margin-bottom:0;font-family:var(--bx-promptfont-font);font-size:32px;text-align:center}.bx-mkb-settings.bx-editing .bx-mkb-key-row button{background:#393939;border-radius:4px;border:none}.bx-mkb-settings.bx-editing .bx-mkb-key-row button:hover{background:#333;cursor:pointer}.bx-mkb-action-buttons > div{text-align:right;display:none}.bx-mkb-action-buttons button{margin-left:8px}.bx-mkb-settings:not(.bx-editing) .bx-mkb-action-buttons > div:first-child{display:block}.bx-mkb-settings.bx-editing .bx-mkb-action-buttons > div:last-child{display:block}.bx-mkb-note{display:block;margin:0 0 10px;font-size:12px;text-align:center}button.bx-binding-button{flex:1;min-height:38px;border:none;border-radius:4px;font-size:14px;color:#fff;display:flex;align-items:center;align-self:center;padding:0 6px}button.bx-binding-button:disabled{background:#131416;padding:0 8px}button.bx-binding-button:not(:disabled){border:2px solid transparent;border-top:none;border-bottom:4px solid #252525;background:#3b3b3b;cursor:pointer}button.bx-binding-button:not(:disabled):hover,button.bx-binding-button:not(:disabled).bx-focusable:focus{background:#20b217;border-bottom-color:#186c13}button.bx-binding-button:not(:disabled):active{background:#16900f;border-bottom:3px solid #0c4e08;border-left-width:2px;border-right-width:2px}button.bx-binding-button:not(:disabled).bx-focusable:focus::after{top:-6px;left:-8px;right:-8px;bottom:-10px}.bx-settings-row .bx-binding-button-wrapper button.bx-binding-button{min-width:60px}.bx-controller-customizations-container .bx-btn-detect{display:block;margin-bottom:20px}.bx-controller-customizations-container .bx-btn-detect.bx-monospaced{background:none;font-weight:bold;font-size:12px}.bx-controller-customizations-container .bx-buttons-grid{display:grid;grid-template-columns:auto auto;column-gap:20px;row-gap:10px;margin-bottom:20px}.bx-controller-key-row{display:flex;align-items:stretch}.bx-controller-key-row > label{margin-bottom:0;font-family:var(--bx-promptfont-font);font-size:32px;text-align:center;min-width:50px;flex-shrink:0;display:flex;align-self:center}.bx-controller-key-row > label::after{content:\'❯\';margin:0 12px;font-size:16px;align-self:center}.bx-controller-key-row .bx-select{width:100% !important}.bx-controller-key-row .bx-select > div{min-width:50px}.bx-controller-key-row .bx-select label{font-family:var(--bx-promptfont-font),var(--bx-normal-font);font-size:32px;text-align:center;margin-bottom:6px;height:40px;line-height:40px}.bx-controller-key-row:hover > label{color:#ffe64b}.bx-controller-key-row:hover > label::after{color:#fff}.bx-controller-customization-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.bx-controller-customization-summary span{font-family:var(--bx-promptfont);font-size:24px;border-radius:6px;background:#131313;color:#fff;display:inline-block;padding:2px;text-align:center}.bx-product-details-icons{padding:8px;border-radius:4px}.bx-product-details-icons svg{margin-right:8px}.bx-product-details-buttons{display:flex;gap:10px;flex-direction:row}.bx-product-details-buttons button{max-width:max-content;margin:10px 0 0 0;display:flex}@media (min-width:568px) and (max-height:480px){.bx-product-details-buttons{flex-direction:column}.bx-product-details-buttons button{margin:8px 0 0 10px}}', PREF_HIDE_SECTIONS = getGlobalPref("ui.hideSections"), selectorToHide = [];
  if (PREF_HIDE_SECTIONS.includes("news")) selectorToHide.push("#BodyContent > div[class*=CarouselRow-module]");
  if (getGlobalPref("ui.hideSections").includes("byog")) selectorToHide.push("#BodyContent > div[class*=ShowcaseRow-module__container___]");
  if (PREF_HIDE_SECTIONS.includes("all-games")) selectorToHide.push("#BodyContent div[class*=AllGamesRow-module__gridContainer]"), selectorToHide.push("#BodyContent div[class*=AllGamesRow-module__rowHeader]");
@@ -9427,7 +10532,7 @@ function preloadFonts() {
 class MouseCursorHider {
  static instance;
  static getInstance() {
-  if (typeof MouseCursorHider.instance > "u") if (!getGlobalPref("mkb.enabled") && getGlobalPref("mkb.cursor.hideIdle")) MouseCursorHider.instance = new MouseCursorHider;
+  if (typeof MouseCursorHider.instance === "undefined") if (!getGlobalPref("mkb.enabled") && getGlobalPref("mkb.cursor.hideIdle")) MouseCursorHider.instance = new MouseCursorHider;
    else MouseCursorHider.instance = null;
   return MouseCursorHider.instance;
  }
@@ -9681,7 +10786,7 @@ class StreamPlayerManager {
   (this.canvasPlayer || this.videoPlayer).updateOptions(options, refreshPlayer);
  }
  getPlayerElement(elementType) {
-  if (typeof elementType > "u") elementType = this.playerType === "default" ? "video" : "canvas";
+  if (typeof elementType === "undefined") elementType = this.playerType === "default" ? "video" : "canvas";
   if (elementType !== "video") return this.canvasPlayer?.getCanvas();
   return this.$video;
  }
@@ -9694,7 +10799,7 @@ class StreamPlayerManager {
   this.resizePlayer();
  }
  getVideoPlayerFilterStyle() {
-  throw Error("Method not implemented.");
+  throw new Error("Method not implemented.");
  }
  cleanUpCanvasPlayer() {
   this.canvasPlayer?.destroy(), this.canvasPlayer = null;
@@ -9730,7 +10835,7 @@ function patchVideoApi() {
 }
 function patchRtcCodecs() {
  if (getGlobalPref("stream.video.codecProfile") === "default") return;
- if (typeof RTCRtpTransceiver > "u" || !("setCodecPreferences" in RTCRtpTransceiver.prototype)) return !1;
+ if (typeof RTCRtpTransceiver === "undefined" || !("setCodecPreferences" in RTCRtpTransceiver.prototype)) return !1;
 }
 function patchRtcPeerConnection() {
  let nativeCreateDataChannel = RTCPeerConnection.prototype.createDataChannel;
@@ -9991,7 +11096,7 @@ class RendererAction extends BaseGameBarAction {
 class GameBar {
  static instance;
  static getInstance() {
-  if (typeof GameBar.instance > "u") if (getGlobalPref("gameBar.position") !== "off") GameBar.instance = new GameBar;
+  if (typeof GameBar.instance === "undefined") if (getGlobalPref("gameBar.position") !== "off") GameBar.instance = new GameBar;
    else GameBar.instance = null;
   return GameBar.instance;
  }
@@ -10217,7 +11322,7 @@ var VIBRATION_DATA_MAP = {
 class DeviceVibrationManager {
  static instance;
  static getInstance() {
-  if (typeof DeviceVibrationManager.instance > "u") if (STATES.browser.capabilities.deviceVibration) DeviceVibrationManager.instance = new DeviceVibrationManager;
+  if (typeof DeviceVibrationManager.instance === "undefined") if (STATES.browser.capabilities.deviceVibration) DeviceVibrationManager.instance = new DeviceVibrationManager;
    else DeviceVibrationManager.instance = null;
   return DeviceVibrationManager.instance;
  }
@@ -10312,10 +11417,10 @@ class StreamUiHandler {
   let $btnCloseHud = document.querySelector("button[class*=StreamMenu-module__backButton]");
   if (!$btnCloseHud) return;
   let { $btnRefresh, $btnHome } = StreamUiHandler;
-  if (typeof $btnRefresh > "u") $btnRefresh = StreamUiHandler.cloneCloseButton($btnCloseHud, BxIcon.REFRESH, "bx-stream-refresh-button", () => {
+  if (typeof $btnRefresh === "undefined") $btnRefresh = StreamUiHandler.cloneCloseButton($btnCloseHud, BxIcon.REFRESH, "bx-stream-refresh-button", () => {
     confirm(t("confirm-reload-stream")) && window.location.reload();
    });
-  if (typeof $btnHome > "u") $btnHome = StreamUiHandler.cloneCloseButton($btnCloseHud, BxIcon.HOME, "bx-stream-home-button", () => {
+  if (typeof $btnHome === "undefined") $btnHome = StreamUiHandler.cloneCloseButton($btnCloseHud, BxIcon.HOME, "bx-stream-home-button", () => {
     confirm(t("back-to-home-confirm")) && (window.location.href = window.location.href.substring(0, 31));
    });
   if ($btnRefresh && $btnHome) $btnCloseHud.insertAdjacentElement("afterend", $btnRefresh), $btnRefresh.insertAdjacentElement("afterend", $btnHome);
@@ -10329,11 +11434,11 @@ class StreamUiHandler {
    let $gripHandle = document.querySelector("#StreamHud button[class^=GripHandle]");
    if ($gripHandle && $gripHandle.ariaExpanded === "true") $gripHandle.dispatchEvent(new PointerEvent("pointerdown")), $gripHandle.click(), $gripHandle.dispatchEvent(new PointerEvent("pointerdown")), $gripHandle.click();
   }, $btnStreamSettings = StreamUiHandler.$btnStreamSettings;
-  if (typeof $btnStreamSettings > "u") $btnStreamSettings = StreamUiHandler.cloneStreamHudButton($orgButton, t("better-xcloud"), BxIcon.BETTER_XCLOUD), $btnStreamSettings?.addEventListener("click", (e) => {
+  if (typeof $btnStreamSettings === "undefined") $btnStreamSettings = StreamUiHandler.cloneStreamHudButton($orgButton, t("better-xcloud"), BxIcon.BETTER_XCLOUD), $btnStreamSettings?.addEventListener("click", (e) => {
     hideGripHandle(), e.preventDefault(), SettingsDialog.getInstance().show();
    }), StreamUiHandler.$btnStreamSettings = $btnStreamSettings;
   let streamStats = StreamStats.getInstance(), $btnStreamStats = StreamUiHandler.$btnStreamStats;
-  if (typeof $btnStreamStats > "u") $btnStreamStats = StreamUiHandler.cloneStreamHudButton($orgButton, t("stream-stats"), BxIcon.STREAM_STATS), $btnStreamStats?.addEventListener("click", async (e) => {
+  if (typeof $btnStreamStats === "undefined") $btnStreamStats = StreamUiHandler.cloneStreamHudButton($orgButton, t("stream-stats"), BxIcon.STREAM_STATS), $btnStreamStats?.addEventListener("click", async (e) => {
     hideGripHandle(), e.preventDefault(), await streamStats.toggle();
     let btnStreamStatsOn = !streamStats.isHidden() && !streamStats.isGlancing();
     $btnStreamStats.classList.toggle("bx-stream-menu-button-on", btnStreamStatsOn);
@@ -10379,6 +11484,679 @@ function handleDeepLink() {
  });
  observer.observe(document.documentElement, { subtree: !0, childList: !0 });
 }
+class FrameChangeDetector {
+ previousFrame = null;
+ compare(frame) {
+  let previousFrame = this.previousFrame;
+  if (this.previousFrame = new Uint8Array(frame), !previousFrame || previousFrame.length !== frame.length) return frame.some(Boolean) ? 1 : 0;
+  let difference = 0, union = 0;
+  for (let index = 0;index < frame.length; index++) {
+   let current = frame[index], previous = previousFrame[index];
+   if (current || previous) {
+    if (union++, current !== previous) difference++;
+   }
+  }
+  return union ? difference / union : 0;
+ }
+ reset() {
+  this.previousFrame = null;
+ }
+}
+var DETECTION_WIDTH = 640, MAX_OCR_WIDTH = 1280, OCR_LINE_HEIGHT = 64, OCR_REGIONS = {
+ "top-35": { x: 0.05, y: 0.03, width: 0.9, height: 0.35 },
+ "center-35": { x: 0.05, y: 0.325, width: 0.9, height: 0.35 },
+ "bottom-35": { x: 0.05, y: 0.62, width: 0.9, height: 0.35 }
+};
+class TranslatorFrameCapture {
+ screenshotManager = ScreenshotManager.getInstance();
+ $detectionCanvas = document.createElement("canvas");
+ $ocrSourceCanvas = document.createElement("canvas");
+ $ocrLineCanvases = [];
+ detectionContext;
+ region;
+ constructor(region) {
+  this.region = OCR_REGIONS[region], this.$detectionCanvas.width = DETECTION_WIDTH, this.$detectionCanvas.height = 1, this.detectionContext = this.$detectionCanvas.getContext("2d", {
+   alpha: !1,
+   willReadFrequently: !0
+  });
+ }
+ setRegion(region) {
+  this.region = OCR_REGIONS[region];
+ }
+ getRegion() {
+  return this.region;
+ }
+ getDisplayElement() {
+  return this.screenshotManager.getCurrentFrameSource();
+ }
+ captureForDetection() {
+  let $video = this.screenshotManager.getCurrentFrameSource("video");
+  if (!($video instanceof HTMLVideoElement) || !$video.videoWidth || !$video.videoHeight) return null;
+  let targetHeight = Math.max(1, Math.round(DETECTION_WIDTH * ($video.videoHeight * this.region.height) / ($video.videoWidth * this.region.width)));
+  if (this.$detectionCanvas.height !== targetHeight) this.$detectionCanvas.height = targetHeight;
+  if (!this.screenshotManager.captureFrame(this.$detectionCanvas, {
+   elementType: "video",
+   region: this.region
+  }))
+   return null;
+  return this.detectionContext.getImageData(0, 0, this.$detectionCanvas.width, this.$detectionCanvas.height);
+ }
+ captureForOcr(lines) {
+  let $video = this.screenshotManager.getCurrentFrameSource("video");
+  if (!($video instanceof HTMLVideoElement) || !$video.videoWidth || !$video.videoHeight) return null;
+  let targetWidth = MAX_OCR_WIDTH, targetHeight = Math.max(1, Math.round(targetWidth * ($video.videoHeight * this.region.height) / ($video.videoWidth * this.region.width)));
+  if (this.$ocrSourceCanvas.width !== targetWidth || this.$ocrSourceCanvas.height !== targetHeight) this.$ocrSourceCanvas.width = targetWidth, this.$ocrSourceCanvas.height = targetHeight;
+  if (!this.screenshotManager.captureFrame(this.$ocrSourceCanvas, {
+   elementType: "video",
+   region: this.region
+  }))
+   return null;
+  let canvases = [];
+  for (let index = 0;index < lines.length; index++) {
+   let line = lines[index], sourceX = Math.round(line.x * targetWidth), sourceY = Math.round(line.y * targetHeight), sourceWidth = Math.max(1, Math.round(line.width * targetWidth)), sourceHeight = Math.max(1, Math.round(line.height * targetHeight)), lineWidth = Math.min(MAX_OCR_WIDTH, Math.max(1, Math.round(sourceWidth * OCR_LINE_HEIGHT / sourceHeight))), $lineCanvas = this.$ocrLineCanvases[index] || document.createElement("canvas");
+   this.$ocrLineCanvases[index] = $lineCanvas, $lineCanvas.width = lineWidth, $lineCanvas.height = OCR_LINE_HEIGHT;
+   let context = $lineCanvas.getContext("2d", { alpha: !1 });
+   context.imageSmoothingEnabled = !0, context.imageSmoothingQuality = "high", context.filter = "grayscale(1) contrast(1.8)", context.drawImage(this.$ocrSourceCanvas, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, lineWidth, OCR_LINE_HEIGHT), canvases.push($lineCanvas);
+  }
+  return canvases;
+ }
+ destroy() {
+  this.$detectionCanvas.width = 1, this.$detectionCanvas.height = 1, this.$ocrSourceCanvas.width = 1, this.$ocrSourceCanvas.height = 1;
+  for (let $canvas of this.$ocrLineCanvases)
+   $canvas.width = 1, $canvas.height = 1;
+  this.$ocrLineCanvases.length = 0;
+ }
+}
+var import_tesseract = __toESM(require_src(), 1);
+var TESSERACT_VERSION = "7.0.0", TESSERACT_CORE_VERSION = "7.0.0";
+function cleanRecognizedLine(text, confidence) {
+ let line = text.replace(/\s+/g, " ").trim(), letters = line.match(/[a-z]/gi)?.length || 0, visibleCharacters = line.match(/[^\s]/g)?.length || 0;
+ if (confidence < 35 || letters < 3 || !visibleCharacters || letters / visibleCharacters < 0.45) return "";
+ return line;
+}
+class TesseractOcrEngine {
+ LOG_TAG = "GameTranslator.OCR";
+ worker = null;
+ workerPromise = null;
+ terminated = !1;
+ async getWorker() {
+  if (this.terminated) throw new Error("OCR engine has been terminated");
+  if (!this.workerPromise) this.workerPromise = import_tesseract.createWorker("eng", import_tesseract.OEM.LSTM_ONLY, {
+    workerPath: `https://cdn.jsdelivr.net/npm/tesseract.js@${TESSERACT_VERSION}/dist/worker.min.js`,
+    corePath: `https://cdn.jsdelivr.net/npm/tesseract.js-core@${TESSERACT_CORE_VERSION}`,
+    langPath: "https://tessdata.projectnaptha.com/4.0.0_fast",
+    workerBlobURL: !0,
+    logger: (message) => BxLogger.info(this.LOG_TAG, message.status, message.progress),
+    errorHandler: (error) => BxLogger.error(this.LOG_TAG, error)
+   }).then(async (worker) => {
+    if (await worker.setParameters({
+     tessedit_pageseg_mode: import_tesseract.PSM.SINGLE_LINE,
+     preserve_interword_spaces: "1",
+     user_defined_dpi: "180"
+    }), this.terminated)
+     throw await worker.terminate(), new Error("OCR engine was terminated during initialization");
+    return this.worker = worker, worker;
+   });
+  return this.workerPromise;
+ }
+ async recognize(images) {
+  let worker = await this.getWorker(), lines = [], confidences = [];
+  for (let image of images) {
+   let result = await worker.recognize(image), line = cleanRecognizedLine(result.data.text, result.data.confidence);
+   if (line) lines.push(line), confidences.push(result.data.confidence);
+  }
+  return {
+   text: lines.join(" "),
+   confidence: confidences.length ? confidences.reduce((sum, confidence) => sum + confidence, 0) / confidences.length : 0
+  };
+ }
+ async terminate() {
+  this.terminated = !0;
+  try {
+   await (this.worker || await this.workerPromise)?.terminate();
+  } catch (error) {
+   BxLogger.warning(this.LOG_TAG, "Failed to terminate worker", error);
+  } finally {
+   this.worker = null, this.workerPromise = null;
+  }
+ }
+}
+function getLuminance(red, green, blue) {
+ return 54 * red + 183 * green + 19 * blue >> 8;
+}
+class SubtitleDetector {
+ detect(frame) {
+  let { data, width, height } = frame, luminance = new Uint8Array(width * height), ink = new Uint8Array(width * height), rowInk = new Uint16Array(height), sampleRadius = Math.max(2, Math.round(width / 320)), horizontalMargin = Math.round(width * 0.05);
+  for (let pixelIndex = 0, dataIndex = 0;pixelIndex < luminance.length; pixelIndex++, dataIndex += 4)
+   luminance[pixelIndex] = getLuminance(data[dataIndex], data[dataIndex + 1], data[dataIndex + 2]);
+  for (let y = sampleRadius;y < height - sampleRadius; y++)
+   for (let x = horizontalMargin;x < width - horizontalMargin; x++) {
+    let pixelIndex = y * width + x, dataIndex = pixelIndex * 4, value = luminance[pixelIndex];
+    if (value < 135) continue;
+    let red = data[dataIndex], green = data[dataIndex + 1], blue = data[dataIndex + 2];
+    if (Math.max(red, green, blue) - Math.min(red, green, blue) > 90 && value < 205) continue;
+    let darkestNeighbour = Math.min(luminance[pixelIndex - sampleRadius], luminance[pixelIndex + sampleRadius], luminance[pixelIndex - sampleRadius * width], luminance[pixelIndex + sampleRadius * width]);
+    if (value - darkestNeighbour < 24) continue;
+    ink[pixelIndex] = 1, rowInk[y]++;
+   }
+  let minimumRowInk = Math.max(4, Math.round(width * 0.006)), activeRows = [];
+  for (let y = 0;y < height; y++)
+   if (rowInk[y] >= minimumRowInk) activeRows.push(y);
+  let rowGroups = [];
+  for (let y of activeRows) {
+   let group = rowGroups[rowGroups.length - 1];
+   if (!group || y - group[group.length - 1] > 2) rowGroups.push([y]);
+   else group.push(y);
+  }
+  let lines = [], signatureWidth = Math.ceil(width / 4), signatureHeight = Math.ceil(height / 4), signature = new Uint8Array(signatureWidth * signatureHeight), horizontalPadding = Math.round(width * 0.03), verticalPadding = Math.max(3, Math.round(height * 0.05));
+  for (let group of rowGroups) {
+   let firstRow = group[0], lastRow = group[group.length - 1], centerY = (firstRow + lastRow) / 2 / height;
+   if (group.length < 2 || centerY < 0.42 || lastRow - firstRow + 1 > height * 0.18) continue;
+   let firstColumn = width, lastColumn = 0;
+   for (let y = Math.max(0, firstRow - 1);y <= Math.min(height - 1, lastRow + 1); y++)
+    for (let x = horizontalMargin;x < width - horizontalMargin; x++)
+     if (ink[y * width + x]) firstColumn = Math.min(firstColumn, x), lastColumn = Math.max(lastColumn, x);
+   let centerX = (firstColumn + lastColumn) / 2 / width;
+   if (firstColumn >= lastColumn || lastColumn - firstColumn < width * 0.05 || centerX < 0.18 || centerX > 0.82) continue;
+   let x0 = Math.max(0, firstColumn - horizontalPadding), x1 = Math.min(width, lastColumn + horizontalPadding + 1), y0 = Math.max(0, firstRow - verticalPadding), y1 = Math.min(height, lastRow + verticalPadding + 1);
+   lines.push({
+    x: x0 / width,
+    y: y0 / height,
+    width: (x1 - x0) / width,
+    height: (y1 - y0) / height
+   });
+   for (let y = Math.max(0, firstRow - 1);y <= Math.min(height - 1, lastRow + 1); y++)
+    for (let x = Math.max(0, firstColumn - 2);x <= Math.min(width - 1, lastColumn + 2); x++)
+     if (ink[y * width + x]) signature[Math.floor(y / 4) * signatureWidth + Math.floor(x / 4)] = 1;
+  }
+  return { lines, signature };
+ }
+}
+function normalizeDisplayText(text) {
+ return text.replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/(^|[.!?]\s+)\|\s+(?=[a-z])/gi, "$1I ").replace(/\s+/g, " ").trim();
+}
+function normalizeText(text) {
+ return normalizeDisplayText(text).toLocaleLowerCase("en-US").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+}
+function levenshteinDistance(left, right) {
+ if (!left.length) return right.length;
+ if (!right.length) return left.length;
+ let previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+ for (let leftIndex = 1;leftIndex <= left.length; leftIndex++) {
+  let current = [leftIndex];
+  for (let rightIndex = 1;rightIndex <= right.length; rightIndex++) {
+   let substitutionCost = left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1;
+   current[rightIndex] = Math.min(current[rightIndex - 1] + 1, previous[rightIndex] + 1, previous[rightIndex - 1] + substitutionCost);
+  }
+  previous = current;
+ }
+ return previous[right.length];
+}
+function similarity(left, right) {
+ let maxLength = Math.max(left.length, right.length);
+ return maxLength === 0 ? 1 : 1 - levenshteinDistance(left, right) / maxLength;
+}
+function looksLikeCompleteSubtitle(text) {
+ return /[.!?…–—-]["')\]]?$/.test(text.trim());
+}
+class TextStabilizer {
+ delay;
+ onStable;
+ timeoutId = null;
+ candidate = "";
+ candidateKey = "";
+ lastEmittedKey = "";
+ candidateStartedAt = 0;
+ constructor(delay, onStable) {
+  this.delay = delay, this.onStable = onStable;
+ }
+ setDelay(delay) {
+  this.delay = delay;
+ }
+ push(rawText, quick = !1) {
+  let text = normalizeDisplayText(rawText), key = normalizeText(text), containsEnoughText = (key.match(/[a-z]/g) || []).length >= 2 && key.length <= 400, nextText = containsEnoughText ? text : "", nextKey = containsEnoughText ? key : "";
+  if (nextKey === this.lastEmittedKey || nextKey && similarity(nextKey, this.lastEmittedKey) >= 0.92) return;
+  if (nextKey === this.candidateKey) {
+   if (quick) this.schedule(Math.min(this.delay, 120));
+   return;
+  }
+  if (nextKey && this.candidateKey && similarity(nextKey, this.candidateKey) >= 0.88) {
+   if (this.candidate = nextText, this.candidateKey = nextKey, quick) this.schedule(Math.min(this.delay, 120));
+   return;
+  }
+  this.candidate = nextText, this.candidateKey = nextKey, this.candidateStartedAt = performance.now(), this.schedule(quick ? Math.min(this.delay, 120) : this.delay);
+ }
+ schedule(delay) {
+  let elapsed = performance.now() - this.candidateStartedAt, remainingDelay = Math.max(0, delay - elapsed);
+  this.timeoutId && clearTimeout(this.timeoutId), this.timeoutId = setTimeout(() => {
+   this.timeoutId = null, this.lastEmittedKey = this.candidateKey, this.onStable(this.candidate);
+  }, remainingDelay);
+ }
+ reset() {
+  this.timeoutId && clearTimeout(this.timeoutId), this.timeoutId = null, this.candidate = "", this.candidateKey = "", this.lastEmittedKey = "", this.candidateStartedAt = 0;
+ }
+}
+function compactText(text) {
+ return text.replaceAll(/\s+/g, " ").trim();
+}
+function buildDeepLContext(context) {
+ if (!context) return "";
+ let sections = [];
+ if (context.gameTitle) sections.push(`Game title: ${compactText(context.gameTitle)}`);
+ if (context.gameDescription) sections.push(`Game description: ${compactText(context.gameDescription).slice(0, 600)}`);
+ if (context.previousSubtitles.length) sections.push(`Previous dialogue:
+${context.previousSubtitles.slice(-2).join(`
+`)}`);
+ return sections.join(`
+`);
+}
+class GameTranslationContext {
+ gameTitle = "";
+ gameDescription = "";
+ previousSubtitles = [];
+ reset(gameTitle = "") {
+  this.gameTitle = compactText(gameTitle), this.gameDescription = "", this.previousSubtitles = [];
+ }
+ setGameDescription(description) {
+  this.gameDescription = compactText(description).slice(0, 600);
+ }
+ rememberSubtitle(text) {
+  let subtitle = compactText(text);
+  if (!subtitle || this.previousSubtitles.at(-1) === subtitle) return;
+  this.previousSubtitles.push(subtitle), this.previousSubtitles = this.previousSubtitles.slice(-2);
+ }
+ snapshot() {
+  return {
+   gameTitle: this.gameTitle || void 0,
+   gameDescription: this.gameDescription || void 0,
+   previousSubtitles: [...this.previousSubtitles]
+  };
+ }
+}
+function getRenderedContentRect($player) {
+ let rect = $player.getBoundingClientRect(), sourceWidth = $player instanceof HTMLVideoElement ? $player.videoWidth : $player.width, sourceHeight = $player instanceof HTMLVideoElement ? $player.videoHeight : $player.height, objectFit = getComputedStyle($player).objectFit;
+ if (!sourceWidth || !sourceHeight || objectFit !== "contain") return rect;
+ let scale = Math.min(rect.width / sourceWidth, rect.height / sourceHeight), width = sourceWidth * scale, height = sourceHeight * scale;
+ return new DOMRect(rect.left + (rect.width - width) / 2, rect.top + (rect.height - height) / 2, width, height);
+}
+class TranslationOverlay {
+ $host;
+ $root;
+ $subtitle;
+ $translation;
+ $original;
+ $region;
+ $debug;
+ settings;
+ originalText = "";
+ constructor($video, settings) {
+  this.settings = settings, this.$host = $video.closest("#game-stream") || $video.parentElement, this.$root = CE("div", { class: "bx-game-translator-overlay" }, this.$subtitle = CE("div", { class: "bx-game-translator-subtitle bx-gone" }, this.$translation = CE("div", { class: "bx-game-translator-translation" }), this.$original = CE("div", { class: "bx-game-translator-original" })), this.$region = CE("div", { class: "bx-game-translator-region bx-gone" }), this.$debug = CE("div", { class: "bx-game-translator-debug bx-gone" })), this.$subtitle.setAttribute("aria-live", "polite"), this.$host.appendChild(this.$root), this.applySettings(settings);
+ }
+ applySettings(settings) {
+  this.settings = settings, this.$subtitle.style.fontSize = `${settings.fontSize}px`, this.$subtitle.style.backgroundColor = `rgba(0, 0, 0, ${settings.backgroundOpacity / 100})`, this.$original.classList.toggle("bx-gone", !settings.showOriginal || !this.originalText), this.$region.classList.toggle("bx-gone", !settings.debugRegion), this.$debug.classList.toggle("bx-gone", !settings.debugRegion);
+ }
+ updateGeometry($player, region) {
+  if (!$player || !$player.isConnected) return;
+  let contentRect = getRenderedContentRect($player);
+  if (!contentRect.width || !contentRect.height) return;
+  this.$subtitle.style.left = `${contentRect.left + contentRect.width / 2}px`, this.$subtitle.style.bottom = `${window.innerHeight - contentRect.bottom + contentRect.height * this.settings.verticalPosition / 100}px`, this.$subtitle.style.maxWidth = `${contentRect.width * 0.9}px`, this.$region.style.left = `${contentRect.left + contentRect.width * region.x}px`, this.$region.style.top = `${contentRect.top + contentRect.height * region.y}px`, this.$region.style.width = `${contentRect.width * region.width}px`, this.$region.style.height = `${contentRect.height * region.height}px`;
+ }
+ show(originalText, translatedText) {
+  this.originalText = originalText, this.$translation.textContent = translatedText, this.$original.textContent = originalText, this.$original.classList.toggle("bx-gone", !this.settings.showOriginal || !originalText), this.$subtitle.classList.toggle("bx-gone", !translatedText);
+ }
+ showError(message) {
+  this.show("", message);
+ }
+ clear() {
+  this.show("", "");
+ }
+ updateDebug(metrics) {
+  let values = [];
+  typeof metrics.interval === "number" && values.push(`Interval: ${metrics.interval} ms`), typeof metrics.changeScore === "number" && values.push(`Change: ${metrics.changeScore.toFixed(3)}`), typeof metrics.ocrTime === "number" && values.push(`OCR: ${Math.round(metrics.ocrTime)} ms`), typeof metrics.ocrConfidence === "number" && values.push(`Confidence: ${Math.round(metrics.ocrConfidence)}%`), typeof metrics.candidates === "number" && values.push(`Lines: ${metrics.candidates}`), typeof metrics.translationTime === "number" && values.push(`Translate: ${Math.round(metrics.translationTime)} ms`), this.$debug.textContent = values.join(" · ");
+ }
+ destroy() {
+  this.$root.remove();
+ }
+}
+class BrowserTranslationProvider {
+ translatorPromise = null;
+ async prepare(sourceLanguage, targetLanguage, onDownloadProgress) {
+  let factory = window.Translator;
+  if (!factory) throw new Error("Browser Translator API is unavailable");
+  if (this.translatorPromise) return await this.translatorPromise, { availability: "available", created: !1 };
+  let options = { sourceLanguage, targetLanguage }, availability = await factory.availability(options);
+  if (availability === "unavailable") throw new Error(`Browser Translator does not support ${sourceLanguage} → ${targetLanguage}`);
+  let translatorPromise = factory.create({
+   ...options,
+   monitor: (monitor) => {
+    monitor.addEventListener("downloadprogress", (event) => {
+     let progress = "loaded" in event ? Number(event.loaded) : 0;
+     onDownloadProgress?.(Math.max(0, Math.min(1, progress)));
+    });
+   }
+  });
+  this.translatorPromise = translatorPromise;
+  try {
+   await translatorPromise;
+  } catch (error) {
+   if (this.translatorPromise === translatorPromise) this.translatorPromise = null;
+   throw error;
+  }
+  return { availability, created: !0 };
+ }
+ async translate(text, sourceLanguage, targetLanguage, signal) {
+  await this.prepare(sourceLanguage, targetLanguage);
+  let translated = (await (await this.translatorPromise).translate(text, { signal })).trim();
+  if (!translated) throw new Error("Browser Translator returned an empty translation");
+  return translated;
+ }
+ destroy() {
+  let translatorPromise = this.translatorPromise;
+  this.translatorPromise = null, translatorPromise?.then((translator) => translator.destroy()).catch(() => {});
+ }
+}
+class DeepLContextTranslationProvider {
+ getProxyUrl;
+ fetcher;
+ constructor(getProxyUrl, fetcher) {
+  this.getProxyUrl = getProxyUrl, this.fetcher = fetcher;
+ }
+ async prepare() {
+  this.getValidatedProxyUrl();
+ }
+ async translate(text, sourceLanguage, targetLanguage, signal, context) {
+  let deeplContext = buildDeepLContext(context), body = {
+   text: [text],
+   source_lang: sourceLanguage.toUpperCase(),
+   target_lang: targetLanguage.toUpperCase()
+  };
+  if (deeplContext) body.context = deeplContext;
+  let response = await this.fetcher(this.getValidatedProxyUrl(), {
+   method: "POST",
+   headers: {
+    "Content-Type": "application/json"
+   },
+   body: JSON.stringify(body),
+   signal
+  }), payload = await response.json(), translatedText = payload.translations?.[0]?.text?.trim();
+  if (!response.ok || !translatedText) throw new Error(payload.message || `DeepL proxy returned HTTP ${response.status}`);
+  return translatedText;
+ }
+ getValidatedProxyUrl() {
+  let proxyUrl = this.getProxyUrl().trim();
+  if (!proxyUrl) throw new Error("DeepL proxy URL is not configured");
+  let url;
+  try {
+   url = new URL(proxyUrl);
+  } catch {
+   throw new Error("DeepL proxy URL is invalid");
+  }
+  if (url.protocol !== "https:" && url.hostname !== "localhost" && url.hostname !== "127.0.0.1") throw new Error("DeepL proxy URL must use HTTPS");
+  return url.toString();
+ }
+}
+class MyMemoryTranslationProvider {
+ async translate(text, sourceLanguage, targetLanguage, signal) {
+  let params = new URLSearchParams({
+   q: text,
+   langpair: `${sourceLanguage}|${targetLanguage}`,
+   mt: "1"
+  }), response = await NATIVE_FETCH(`https://api.mymemory.translated.net/get?${params}`, { signal });
+  if (!response.ok) throw new Error(`Translation request failed with HTTP ${response.status}`);
+  let payload = await response.json(), translatedText = payload.responseData?.translatedText?.trim();
+  if (Number(payload.responseStatus) !== 200 || !translatedText) throw new Error(`Translation provider returned status ${payload.responseStatus}`);
+  let decoder = document.createElement("textarea");
+  return decoder.innerHTML = translatedText, decoder.value;
+ }
+}
+class TranslationService {
+ cache = new Map;
+ providers;
+ constructor(getDeepLProxyUrl) {
+  this.providers = {
+   browser: new BrowserTranslationProvider,
+   "deepl-context": new DeepLContextTranslationProvider(getDeepLProxyUrl, NATIVE_FETCH),
+   "my-memory": new MyMemoryTranslationProvider
+  };
+ }
+ async prepare(providerId, onDownloadProgress) {
+  await this.providers[providerId].prepare?.("en", "ru", onDownloadProgress);
+ }
+ async translate(providerId, text, signal, context) {
+  let contextKey = providerId === "deepl-context" ? normalizeText(context?.gameTitle || "") : "", cacheKey = `${providerId}:${contextKey}:${normalizeText(text)}`, cached = this.cache.get(cacheKey);
+  if (cached) return { text: cached, cacheHit: !0, latency: 0 };
+  let startedAt = performance.now(), translated = await this.providers[providerId].translate(text, "en", "ru", signal, context), latency = performance.now() - startedAt;
+  return this.cache.set(cacheKey, translated), { text: translated, cacheHit: !1, latency };
+ }
+ clear() {
+  this.cache.clear();
+ }
+ destroy() {
+  this.clear(), Object.values(this.providers).forEach((provider) => provider.destroy?.());
+ }
+}
+var TRANSLATOR_PREFS = new Set([
+ "gameTranslator.enabled",
+ "gameTranslator.ocr.region",
+ "gameTranslator.ocr.interval",
+ "gameTranslator.changeThreshold",
+ "gameTranslator.stabilizationInterval",
+ "gameTranslator.provider",
+ "gameTranslator.deepl.proxyUrl",
+ "gameTranslator.showOriginal",
+ "gameTranslator.debugRegion",
+ "gameTranslator.fontSize",
+ "gameTranslator.verticalPosition",
+ "gameTranslator.backgroundOpacity"
+]);
+function readSettings() {
+ return {
+  enabled: getGlobalPref("gameTranslator.enabled"),
+  ocrRegion: getGlobalPref("gameTranslator.ocr.region"),
+  ocrInterval: Number(getGlobalPref("gameTranslator.ocr.interval")),
+  changeThreshold: getGlobalPref("gameTranslator.changeThreshold") / 100,
+  stabilizationInterval: Number(getGlobalPref("gameTranslator.stabilizationInterval")),
+  provider: getGlobalPref("gameTranslator.provider"),
+  showOriginal: getGlobalPref("gameTranslator.showOriginal"),
+  debugRegion: getGlobalPref("gameTranslator.debugRegion"),
+  fontSize: getGlobalPref("gameTranslator.fontSize"),
+  verticalPosition: getGlobalPref("gameTranslator.verticalPosition"),
+  backgroundOpacity: getGlobalPref("gameTranslator.backgroundOpacity")
+ };
+}
+class GameTranslator {
+ static instance;
+ static eventsSetup = !1;
+ static getInstance = () => GameTranslator.instance ?? (GameTranslator.instance = new GameTranslator);
+ LOG_TAG = "GameTranslator";
+ changeDetector = new FrameChangeDetector;
+ subtitleDetector = new SubtitleDetector;
+ translationService = new TranslationService(() => getGlobalPref("gameTranslator.deepl.proxyUrl"));
+ translationContext = new GameTranslationContext;
+ settings = readSettings();
+ frameCapture = null;
+ ocrEngine = null;
+ stabilizer = null;
+ overlay = null;
+ timerId = null;
+ translationAbortController = null;
+ providerPreparationId = 0;
+ sessionId = 0;
+ ocrBusy = !1;
+ analyzePending = !1;
+ disabledByError = !1;
+ debugMetrics = { interval: 333 };
+ constructor() {}
+ static setupEvents() {
+  if (GameTranslator.eventsSetup) return;
+  GameTranslator.eventsSetup = !0, BxEventBus.Stream.on("state.playing", ({ $video }) => {
+   if ($video) GameTranslator.getInstance().start($video);
+  }), BxEventBus.Stream.on("state.stopped", () => {
+   GameTranslator.getInstance().stop();
+  }), BxEventBus.Script.on("setting.changed", ({ settingKey }) => {
+   if (TRANSLATOR_PREFS.has(settingKey)) GameTranslator.getInstance().onSettingsChanged(settingKey);
+  });
+ }
+ start($video) {
+  if (this.settings = readSettings(), !this.settings.enabled) return;
+  if (this.stop(), !("Worker" in window) || !("WebAssembly" in window)) {
+   Toast.show("Game Translator", "WebWorker/WASM is not supported");
+   return;
+  }
+  let sessionId = ++this.sessionId;
+  this.initializeTranslationContext(sessionId), this.disabledByError = !1, this.analyzePending = !1, this.frameCapture = new TranslatorFrameCapture(this.settings.ocrRegion), this.ocrEngine = new TesseractOcrEngine, this.stabilizer = new TextStabilizer(this.settings.stabilizationInterval, (text) => {
+   if (sessionId === this.sessionId) this.onStableText(text, sessionId);
+  }), this.overlay = new TranslationOverlay($video, this.settings), this.debugMetrics = { interval: this.settings.ocrInterval }, this.overlay.updateDebug(this.debugMetrics), this.updateOverlayGeometry(), this.startTimer(sessionId), this.prepareProvider(), BxLogger.info(this.LOG_TAG, "Started", {
+   captureInterval: this.settings.ocrInterval,
+   region: this.settings.ocrRegion,
+   changeThreshold: this.settings.changeThreshold
+  });
+ }
+ startTimer(sessionId) {
+  this.timerId && window.clearInterval(this.timerId), this.timerId = window.setInterval(() => {
+   this.analyze(sessionId);
+  }, this.settings.ocrInterval), this.analyze(sessionId);
+ }
+ async analyze(sessionId) {
+  if (sessionId !== this.sessionId || this.disabledByError) return;
+  if (this.ocrBusy) {
+   this.analyzePending = !0;
+   return;
+  }
+  let frameCapture = this.frameCapture, ocrEngine = this.ocrEngine;
+  if (!frameCapture || !ocrEngine) return;
+  this.updateOverlayGeometry();
+  let detectionFrame;
+  try {
+   detectionFrame = frameCapture.captureForDetection();
+  } catch (error) {
+   this.handleCaptureError(error);
+   return;
+  }
+  if (!detectionFrame) return;
+  let detection = this.subtitleDetector.detect(detectionFrame), changeScore = this.changeDetector.compare(detection.signature);
+  if (this.debugMetrics.changeScore = changeScore, this.debugMetrics.candidates = detection.lines.length, this.overlay?.updateDebug(this.debugMetrics), BxLogger.info(this.LOG_TAG, "Frame change", changeScore), !detection.lines.length) {
+   this.stabilizer?.push("");
+   return;
+  }
+  if (changeScore < this.settings.changeThreshold) return;
+  let $ocrCanvas;
+  try {
+   $ocrCanvas = frameCapture.captureForOcr(detection.lines);
+  } catch (error) {
+   this.handleCaptureError(error);
+   return;
+  }
+  if (!$ocrCanvas?.length) return;
+  this.ocrBusy = !0;
+  let startedAt = performance.now();
+  try {
+   let result = await ocrEngine.recognize($ocrCanvas);
+   if (sessionId !== this.sessionId) return;
+   let ocrTime = performance.now() - startedAt;
+   this.debugMetrics.ocrTime = ocrTime, this.debugMetrics.ocrConfidence = result.confidence, this.overlay?.updateDebug(this.debugMetrics), BxLogger.info(this.LOG_TAG, "OCR result", {
+    executionTime: ocrTime,
+    confidence: result.confidence,
+    text: result.text
+   }), this.stabilizer?.push(result.text, result.confidence >= 45 && looksLikeCompleteSubtitle(result.text));
+  } catch (error) {
+   if (sessionId === this.sessionId) this.handleOcrError(error);
+  } finally {
+   if (this.ocrBusy = !1, this.analyzePending && sessionId === this.sessionId) this.analyzePending = !1, this.analyze(sessionId);
+  }
+ }
+ async onStableText(text, sessionId) {
+  if (this.translationAbortController?.abort(), this.translationAbortController = null, !text) {
+   this.overlay?.clear();
+   return;
+  }
+  BxLogger.info(this.LOG_TAG, "Stabilized text", text);
+  let abortController = new AbortController;
+  this.translationAbortController = abortController;
+  try {
+   let context = this.translationContext.snapshot();
+   this.translationContext.rememberSubtitle(text);
+   let result = await this.translationService.translate(this.settings.provider, text, abortController.signal, context);
+   if (sessionId !== this.sessionId || abortController.signal.aborted) return;
+   this.debugMetrics.translationTime = result.latency, this.overlay?.updateDebug(this.debugMetrics), this.overlay?.show(text, result.text), BxLogger.info(this.LOG_TAG, result.cacheHit ? "Translation cache hit" : "Translation cache miss", {
+    latency: result.latency,
+    translatedText: result.text
+   });
+  } catch (error) {
+   if (sessionId === this.sessionId && !abortController.signal.aborted) BxLogger.error(this.LOG_TAG, "Translation failed", error), this.overlay?.showError("Translation unavailable");
+  } finally {
+   if (this.translationAbortController === abortController) this.translationAbortController = null;
+  }
+ }
+ handleOcrError(error) {
+  this.disabledByError = !0, this.timerId && window.clearInterval(this.timerId), this.timerId = null, BxLogger.error(this.LOG_TAG, "OCR unavailable", error), this.overlay?.showError("OCR unavailable (check CSP/network access)"), Toast.show("Game Translator", "OCR unavailable");
+ }
+ handleCaptureError(error) {
+  this.disabledByError = !0, this.timerId && window.clearInterval(this.timerId), this.timerId = null, BxLogger.error(this.LOG_TAG, "Frame capture unavailable", error), this.overlay?.showError("Frame capture unavailable"), Toast.show("Game Translator", "Frame capture unavailable");
+ }
+ updateOverlayGeometry() {
+  let frameCapture = this.frameCapture;
+  if (!frameCapture) return;
+  let $player = frameCapture.getDisplayElement();
+  this.overlay?.updateGeometry($player, frameCapture.getRegion());
+ }
+ onSettingsChanged(settingKey) {
+  let previousSettings = this.settings;
+  this.settings = readSettings();
+  let providerChanged = previousSettings.provider !== this.settings.provider, providerConfigChanged = settingKey === "gameTranslator.deepl.proxyUrl";
+  if (!this.settings.enabled) {
+   this.stop();
+   return;
+  }
+  if (!previousSettings.enabled && this.settings.enabled && STATES.isPlaying) {
+   let $video = ScreenshotManager.getInstance().getCurrentFrameSource("video");
+   if ($video instanceof HTMLVideoElement) this.start($video);
+   return;
+  }
+  if (providerChanged || providerConfigChanged) this.translationAbortController?.abort(), this.translationAbortController = null, this.translationService.destroy();
+  if (providerChanged && this.settings.provider === "deepl-context") this.loadGameDescription(this.sessionId);
+  if (providerChanged || providerConfigChanged || !previousSettings.enabled) this.prepareProvider();
+  if (!this.frameCapture || !this.overlay || !this.stabilizer) return;
+  if (this.frameCapture.setRegion(this.settings.ocrRegion), this.changeDetector.reset(), this.stabilizer.setDelay(this.settings.stabilizationInterval), this.overlay.applySettings(this.settings), this.updateOverlayGeometry(), previousSettings.ocrInterval !== this.settings.ocrInterval) this.debugMetrics.interval = this.settings.ocrInterval, this.startTimer(this.sessionId);
+ }
+ prepareProvider() {
+  if (this.settings.provider === "my-memory") return;
+  let preparationId = ++this.providerPreparationId, showedDownloadToast = !1;
+  this.translationService.prepare(this.settings.provider, (progress) => {
+   if (preparationId !== this.providerPreparationId) return;
+   if (BxLogger.info(this.LOG_TAG, "Translation model download", Math.round(progress * 100)), !showedDownloadToast) showedDownloadToast = !0, Toast.show("Game Translator", "Downloading Chrome translation model…");
+  }).then(() => {
+   if (preparationId === this.providerPreparationId) BxLogger.info(this.LOG_TAG, "Translation provider is ready", this.settings.provider), showedDownloadToast && Toast.show("Game Translator", "Chrome Translator is ready");
+  }).catch((error) => {
+   if (preparationId === this.providerPreparationId) {
+    BxLogger.error(this.LOG_TAG, "Translation provider preparation failed", error);
+    let status = this.settings.provider === "deepl-context" ? "Configure the DeepL proxy URL" : "Chrome Translator is unavailable; select MyMemory";
+    Toast.show("Game Translator", status);
+   }
+  });
+ }
+ initializeTranslationContext(sessionId) {
+  let titleInfo = STATES.currentStream.titleInfo;
+  if (this.translationContext.reset(titleInfo?.product.title), this.settings.provider === "deepl-context") this.loadGameDescription(sessionId);
+ }
+ loadGameDescription(sessionId) {
+  let titleInfo = STATES.currentStream.titleInfo, productId = titleInfo?.details.productId;
+  if (!productId) return;
+  XboxApi.getProductContext(productId).then((context) => {
+   if (sessionId !== this.sessionId || !context) return;
+   if (!titleInfo?.product.title && context.title) this.translationContext.reset(context.title);
+   this.translationContext.setGameDescription(context.description), BxLogger.info(this.LOG_TAG, "Game translation context ready", {
+    title: context.title,
+    hasDescription: !!context.description
+   });
+  });
+ }
+ stop() {
+  this.sessionId++, this.providerPreparationId++, this.timerId && window.clearInterval(this.timerId), this.timerId = null, this.translationAbortController?.abort(), this.translationAbortController = null, this.translationService.destroy(), this.translationContext.reset(), this.stabilizer?.reset(), this.stabilizer = null, this.changeDetector.reset(), this.frameCapture?.destroy(), this.frameCapture = null, this.overlay?.destroy(), this.overlay = null;
+  let ocrEngine = this.ocrEngine;
+  this.ocrEngine = null, ocrEngine && ocrEngine.terminate(), this.ocrBusy = !1, this.analyzePending = !1, this.disabledByError = !1, BxLogger.info(this.LOG_TAG, "Stopped");
+ }
+}
 SettingsManager.getInstance();
 if (window.location.pathname.includes("/auth/msa")) {
  let nativePushState = window.history.pushState;
@@ -10389,7 +12167,7 @@ if (window.location.pathname.includes("/auth/msa")) {
    return;
   }
   return nativePushState.apply(this, arguments);
- }, Error("[Better xCloud] Refreshing the page after logging in");
+ }, new Error("[Better xCloud] Refreshing the page after logging in");
 }
 BxLogger.info("readyState", document.readyState);
 if (BX_FLAGS.SafariWorkaround && document.readyState !== "loading") {
@@ -10405,9 +12183,9 @@ if (BX_FLAGS.SafariWorkaround && document.readyState !== "loading") {
  let $fragment = document.createDocumentFragment();
  throw $fragment.appendChild(CE("style", !1, css)), $fragment.appendChild(CE("div", {
   class: "bx-reload-overlay"
- }, CE("div", !1, CE("p", !1, t("load-failed-message")), $secondaryAction))), document.documentElement.appendChild($fragment), isSafari && window.location.reload(!0), Error("[Better xCloud] Executing workaround for Safari");
+ }, CE("div", !1, CE("p", !1, t("load-failed-message")), $secondaryAction))), document.documentElement.appendChild($fragment), isSafari && window.location.reload(!0), new Error("[Better xCloud] Executing workaround for Safari");
 }
-if (!window.location.pathname.match(/^\/[a-zA-Z]{2}-[a-zA-Z]{2}\/play/)) throw Error("[Better xCloud] Not xCloud page");
+if (!window.location.pathname.match(/^\/[a-zA-Z]{2}-[a-zA-Z]{2}\/play/)) throw new Error("[Better xCloud] Not xCloud page");
 window.addEventListener("load", (e) => {
  window.setTimeout(() => {
   if (document.body.classList.contains("legacyBackground")) window.stop(), window.location.reload(!0);
@@ -10516,7 +12294,7 @@ function main() {
   BX_FLAGS.ForceNativeMkbTitles.push(...customList);
  }
  if (StreamSettings.setup(), patchRtcPeerConnection(), patchRtcCodecs(), interceptHttpRequests(), patchVideoApi(), patchCanvasContext(), AppInterface && patchPointerLockApi(), getGlobalPref("audio.volume.booster.enabled") && patchAudioContext(), getGlobalPref("block.tracking")) patchMeControl(), disableAdobeAudienceManager();
- if (addCss(), StreamStatsCollector.setupEvents(), StreamBadges.setupEvents(), StreamStats.setupEvents(), WebGPUPlayer.prepare(), STATES.userAgent.capabilities.touch && TouchController.updateCustomList(), DeviceVibrationManager.getInstance(), BX_FLAGS.CheckForUpdate && checkForUpdate(), Patcher.init(), disablePwa(), getGlobalPref("touchController.mode") === "all") TouchController.setup();
+ if (addCss(), StreamStatsCollector.setupEvents(), StreamBadges.setupEvents(), StreamStats.setupEvents(), GameTranslator.setupEvents(), WebGPUPlayer.prepare(), STATES.userAgent.capabilities.touch && TouchController.updateCustomList(), DeviceVibrationManager.getInstance(), BX_FLAGS.CheckForUpdate && checkForUpdate(), Patcher.init(), disablePwa(), getGlobalPref("touchController.mode") === "all") TouchController.setup();
  if (AppInterface && (getGlobalPref("mkb.enabled") || getGlobalPref("nativeMkb.mode") === "on")) STATES.pointerServerPort = AppInterface.startPointerServer() || 9269, BxLogger.info("startPointerServer", "Port", STATES.pointerServerPort.toString());
  if (getGlobalPref("ui.gameCard.waitTime.show") && GameTile.setup(), EmulatedMkbHandler.setupEvents(), getGlobalPref("ui.controllerStatus.show")) window.addEventListener("gamepadconnected", (e) => showGamepadToast(e.gamepad)), window.addEventListener("gamepaddisconnected", (e) => showGamepadToast(e.gamepad));
 }

@@ -49,6 +49,7 @@ import { StreamUiHandler } from "./modules/stream/stream-ui";
 import { TrueAchievements } from "./utils/true-achievements";
 import { localRedirect } from "./modules/ui/ui";
 import { handleDeepLink } from "./utils/deep-link";
+import { GameTranslator } from "./modules/game-translator/game-translator";
 
 SettingsManager.getInstance();
 
@@ -449,6 +450,8 @@ function main() {
     StreamStats.setupEvents();
 
     if (isFullVersion()) {
+        GameTranslator.setupEvents();
+
         WebGPUPlayer.prepare();
 
         STATES.userAgent.capabilities.touch && TouchController.updateCustomList();

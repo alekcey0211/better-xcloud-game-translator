@@ -93,6 +93,60 @@ div[data-testid=media-container] {
     }
 }
 
+.bx-game-translator-overlay {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none !important;
+    z-index: var(--bx-game-translator-z-index);
+    font-family: var(--bx-normal-font);
+}
+
+.bx-game-translator-subtitle {
+    position: absolute;
+    box-sizing: border-box;
+    transform: translateX(-50%);
+    padding: 8px 14px;
+    border-radius: 8px;
+    color: #fff;
+    line-height: 1.25;
+    text-align: center;
+    text-shadow: 0 1px 3px #000, 0 0 2px #000;
+    overflow-wrap: anywhere;
+}
+
+.bx-game-translator-translation {
+    font-weight: 600;
+}
+
+.bx-game-translator-original {
+    margin-top: 4px;
+    font-size: 0.62em;
+    font-weight: 400;
+    opacity: 0.82;
+}
+
+.bx-game-translator-region {
+    position: absolute;
+    box-sizing: border-box;
+    border: 2px dashed #00e5ff;
+    background: rgba(0, 229, 255, 0.06);
+}
+
+.bx-game-translator-debug {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 90%;
+    padding: 5px 8px;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.72);
+    color: #00e5ff;
+    font: 12px/1.3 var(--bx-monospaced-font);
+    white-space: nowrap;
+}
+
 #gamepass-dialog-root div[class^=Guide-module__guide] {
     .bx-button {
         overflow: visible;

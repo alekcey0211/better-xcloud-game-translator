@@ -9,6 +9,10 @@
   "bin": {
     "build": "build.ts"
   },
+  "scripts": {
+    "test:game-translator": "node --experimental-strip-types --test tests/game-translator.test.ts",
+    "test:game-translator:video": "node --experimental-strip-types scripts/test-game-translator-video.ts"
+  },
   "devDependencies": {
     "@types/bun": "^1.2.21",
     "@types/node": "^24.3.0",
@@ -20,5 +24,8 @@
   },
   "peerDependencies": {
     "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "tesseract.js": "7.0.0"
   }
 }

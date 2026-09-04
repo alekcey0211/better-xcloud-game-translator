@@ -8,7 +8,7 @@ import { CE } from "../html";
 import { t, SUPPORTED_LANGUAGES } from "../translation";
 import { UserAgent } from "../user-agent";
 import { BaseSettingsStorage } from "./base-settings-storage";
-import { CodecProfile, StreamResolution, TouchControllerMode, TouchControllerStyleStandard, TouchControllerStyleCustom, GameBarPosition, NativeMkbMode, UiLayout, UiSection, BlockFeature, UiTheme } from "@/enums/pref-values";
+import { CodecProfile, StreamResolution, TouchControllerMode, TouchControllerStyleStandard, TouchControllerStyleCustom, GameBarPosition, NativeMkbMode, UiLayout, UiSection, BlockFeature, UiTheme, GameTranslatorOcrRegion, GameTranslatorProvider } from "@/enums/pref-values";
 import { GhPagesUtils } from "../gh-pages";
 import { BxEventBus } from "../bx-event-bus";
 
@@ -185,6 +185,121 @@ export class GlobalSettingsStorage extends BaseSettingsStorage<GlobalPref> {
             requiredVariants: 'full',
             label: t('screenshot-apply-filters'),
             default: false,
+        },
+
+        [GlobalPref.GAME_TRANSLATOR_ENABLED]: {
+            requiredVariants: 'full',
+            label: t('game-translator-enable'),
+            default: false,
+            experimental: true,
+            note: t('game-translator-privacy-note'),
+        },
+        [GlobalPref.GAME_TRANSLATOR_OCR_REGION]: {
+            requiredVariants: 'full',
+            label: t('game-translator-ocr-region'),
+            default: GameTranslatorOcrRegion.BOTTOM,
+            options: {
+                [GameTranslatorOcrRegion.TOP]: t('game-translator-region-top'),
+                [GameTranslatorOcrRegion.CENTER]: t('game-translator-region-center'),
+                [GameTranslatorOcrRegion.BOTTOM]: t('game-translator-region-bottom'),
+            },
+        },
+        [GlobalPref.GAME_TRANSLATOR_OCR_INTERVAL]: {
+            requiredVariants: 'full',
+            label: t('game-translator-ocr-interval'),
+            default: '250',
+            options: {
+                '250': '250 ms',
+                '333': '333 ms',
+                '500': '500 ms',
+                '1000': '1000 ms',
+            },
+        },
+        [GlobalPref.GAME_TRANSLATOR_CHANGE_THRESHOLD]: {
+            requiredVariants: 'full',
+            label: t('game-translator-change-threshold'),
+            default: 12,
+            min: 2,
+            max: 40,
+            params: {
+                steps: 2,
+                suffix: '%',
+                exactTicks: 10,
+            },
+        },
+        [GlobalPref.GAME_TRANSLATOR_STABILIZATION_INTERVAL]: {
+            requiredVariants: 'full',
+            label: t('game-translator-stabilization'),
+            default: '250',
+            options: {
+                '250': '250 ms',
+                '500': '500 ms',
+                '750': '750 ms',
+                '1000': '1000 ms',
+            },
+        },
+        [GlobalPref.GAME_TRANSLATOR_PROVIDER]: {
+            requiredVariants: 'full',
+            label: t('game-translator-provider'),
+            default: GameTranslatorProvider.MY_MEMORY,
+            options: {
+                [GameTranslatorProvider.BROWSER]: t('game-translator-provider-browser'),
+                [GameTranslatorProvider.DEEPL_CONTEXT]: t('game-translator-provider-deepl'),
+                [GameTranslatorProvider.MY_MEMORY]: 'MyMemory',
+            },
+            note: t('game-translator-provider-note'),
+        },
+        [GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL]: {
+            requiredVariants: 'full',
+            label: t('game-translator-deepl-proxy-url'),
+            default: '',
+            note: t('game-translator-deepl-proxy-note'),
+        },
+        [GlobalPref.GAME_TRANSLATOR_SHOW_ORIGINAL]: {
+            requiredVariants: 'full',
+            label: t('game-translator-show-original'),
+            default: false,
+        },
+        [GlobalPref.GAME_TRANSLATOR_DEBUG_REGION]: {
+            requiredVariants: 'full',
+            label: t('game-translator-debug-region'),
+            default: false,
+        },
+        [GlobalPref.GAME_TRANSLATOR_FONT_SIZE]: {
+            requiredVariants: 'full',
+            label: t('game-translator-font-size'),
+            default: 26,
+            min: 16,
+            max: 40,
+            params: {
+                steps: 2,
+                suffix: 'px',
+                exactTicks: 8,
+            },
+        },
+        [GlobalPref.GAME_TRANSLATOR_VERTICAL_POSITION]: {
+            requiredVariants: 'full',
+            label: t('game-translator-vertical-position'),
+            default: 8,
+            min: 2,
+            max: 40,
+            params: {
+                steps: 2,
+                suffix: '%',
+                exactTicks: 10,
+            },
+        },
+        [GlobalPref.GAME_TRANSLATOR_BACKGROUND_OPACITY]: {
+            requiredVariants: 'full',
+            label: t('game-translator-background-opacity'),
+            default: 72,
+            min: 0,
+            max: 100,
+            params: {
+                steps: 5,
+                suffix: '%',
+                exactTicks: 25,
+            },
         },
 
         [GlobalPref.UI_SKIP_SPLASH_VIDEO]: {

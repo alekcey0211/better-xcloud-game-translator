@@ -148,3 +148,15 @@ export const enum UiTheme {
     DEFAULT = 'default',
     DARK_OLED = 'dark-oled',
 }
+
+export const enum GameTranslatorOcrRegion {
+    TOP = 'top-35',
+    CENTER = 'center-35',
+    BOTTOM = 'bottom-35',
+}
+
+export const enum GameTranslatorProvider {
+    BROWSER = 'browser',
+    DEEPL_CONTEXT = 'deepl-context',
+    MY_MEMORY = 'my-memory',
+}

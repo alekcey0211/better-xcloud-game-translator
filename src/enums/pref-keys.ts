@@ -1,5 +1,5 @@
 import type { BaseSettingsStorage } from "@/utils/settings-storages/base-settings-storage";
-import type { BlockFeature, CodecProfile, DeviceVibrationMode, GameBarPosition, LoadingScreenRocket, NativeMkbMode, StreamPlayerType, StreamResolution, StreamStat, StreamStatPosition, StreamVideoProcessing, StreamVideoProcessingMode, TouchControllerMode, TouchControllerStyleCustom, TouchControllerStyleStandard, UiLayout, UiSection, UiTheme, VideoPosition, VideoPowerPreference, VideoRatio } from "./pref-values"
+import type { BlockFeature, CodecProfile, DeviceVibrationMode, GameBarPosition, GameTranslatorOcrRegion, GameTranslatorProvider, LoadingScreenRocket, NativeMkbMode, StreamPlayerType, StreamResolution, StreamStat, StreamStatPosition, StreamVideoProcessing, StreamVideoProcessingMode, TouchControllerMode, TouchControllerStyleCustom, TouchControllerStyleStandard, UiLayout, UiSection, UiTheme, VideoPosition, VideoPowerPreference, VideoRatio } from "./pref-values"
 
 export const enum StorageKey {
     GLOBAL = 'BetterXcloud',
@@ -84,6 +84,19 @@ export const enum GlobalPref {
     REMOTE_PLAY_PREFER_IPV6 = 'xhome.ipv6.prefer',
 
     GAME_FORTNITE_FORCE_CONSOLE = 'game.fortnite.forceConsole',
+
+    GAME_TRANSLATOR_ENABLED = 'gameTranslator.enabled',
+    GAME_TRANSLATOR_OCR_REGION = 'gameTranslator.ocr.region',
+    GAME_TRANSLATOR_OCR_INTERVAL = 'gameTranslator.ocr.interval',
+    GAME_TRANSLATOR_CHANGE_THRESHOLD = 'gameTranslator.changeThreshold',
+    GAME_TRANSLATOR_STABILIZATION_INTERVAL = 'gameTranslator.stabilizationInterval',
+    GAME_TRANSLATOR_PROVIDER = 'gameTranslator.provider',
+    GAME_TRANSLATOR_DEEPL_PROXY_URL = 'gameTranslator.deepl.proxyUrl',
+    GAME_TRANSLATOR_SHOW_ORIGINAL = 'gameTranslator.showOriginal',
+    GAME_TRANSLATOR_DEBUG_REGION = 'gameTranslator.debugRegion',
+    GAME_TRANSLATOR_FONT_SIZE = 'gameTranslator.fontSize',
+    GAME_TRANSLATOR_VERTICAL_POSITION = 'gameTranslator.verticalPosition',
+    GAME_TRANSLATOR_BACKGROUND_OPACITY = 'gameTranslator.backgroundOpacity',
 }
 
 export type GlobalPrefTypeMap = {
@@ -93,6 +106,18 @@ export type GlobalPrefTypeMap = {
     [GlobalPref.BLOCK_TRACKING]: boolean;
     [GlobalPref.GAME_BAR_POSITION]: GameBarPosition;
     [GlobalPref.GAME_FORTNITE_FORCE_CONSOLE]: boolean;
+    [GlobalPref.GAME_TRANSLATOR_ENABLED]: boolean;
+    [GlobalPref.GAME_TRANSLATOR_OCR_REGION]: GameTranslatorOcrRegion;
+    [GlobalPref.GAME_TRANSLATOR_OCR_INTERVAL]: string;
+    [GlobalPref.GAME_TRANSLATOR_CHANGE_THRESHOLD]: number;
+    [GlobalPref.GAME_TRANSLATOR_STABILIZATION_INTERVAL]: string;
+    [GlobalPref.GAME_TRANSLATOR_PROVIDER]: GameTranslatorProvider;
+    [GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL]: string;
+    [GlobalPref.GAME_TRANSLATOR_SHOW_ORIGINAL]: boolean;
+    [GlobalPref.GAME_TRANSLATOR_DEBUG_REGION]: boolean;
+    [GlobalPref.GAME_TRANSLATOR_FONT_SIZE]: number;
+    [GlobalPref.GAME_TRANSLATOR_VERTICAL_POSITION]: number;
+    [GlobalPref.GAME_TRANSLATOR_BACKGROUND_OPACITY]: number;
     [GlobalPref.LOADING_SCREEN_GAME_ART]: boolean;
     [GlobalPref.LOADING_SCREEN_ROCKET]: LoadingScreenRocket;
     [GlobalPref.LOADING_SCREEN_SHOW_WAIT_TIME]: boolean;
@@ -229,6 +254,18 @@ export const ALL_PREFS: {
         GlobalPref.BLOCK_TRACKING,
         GlobalPref.GAME_BAR_POSITION,
         GlobalPref.GAME_FORTNITE_FORCE_CONSOLE,
+        GlobalPref.GAME_TRANSLATOR_ENABLED,
+        GlobalPref.GAME_TRANSLATOR_OCR_REGION,
+        GlobalPref.GAME_TRANSLATOR_OCR_INTERVAL,
+        GlobalPref.GAME_TRANSLATOR_CHANGE_THRESHOLD,
+        GlobalPref.GAME_TRANSLATOR_STABILIZATION_INTERVAL,
+        GlobalPref.GAME_TRANSLATOR_PROVIDER,
+        GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL,
+        GlobalPref.GAME_TRANSLATOR_SHOW_ORIGINAL,
+        GlobalPref.GAME_TRANSLATOR_DEBUG_REGION,
+        GlobalPref.GAME_TRANSLATOR_FONT_SIZE,
+        GlobalPref.GAME_TRANSLATOR_VERTICAL_POSITION,
+        GlobalPref.GAME_TRANSLATOR_BACKGROUND_OPACITY,
         GlobalPref.LOADING_SCREEN_GAME_ART,
         GlobalPref.LOADING_SCREEN_ROCKET,
         GlobalPref.LOADING_SCREEN_SHOW_WAIT_TIME,
