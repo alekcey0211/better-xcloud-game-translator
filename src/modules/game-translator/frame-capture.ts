@@ -156,7 +156,8 @@ export class TranslatorFrameCapture {
         }
 
         const context = this.$ocrCanvas.getContext('2d', { alpha: false })!;
-        context.filter = 'grayscale(1) contrast(1.45)';
+        // Moderate contrast helps Tesseract without turning textured scenery into glyph-like edges.
+        context.filter = 'grayscale(1) contrast(1.25)';
         context.drawImage(this.$ocrSourceCanvas, 0, 0);
         context.filter = 'none';
 

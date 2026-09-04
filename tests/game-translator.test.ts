@@ -5,6 +5,7 @@ import { FrameChangeDetector } from "../src/modules/game-translator/frame-change
 import { BrowserTranslationProvider } from "../src/modules/game-translator/browser-translation-provider.ts";
 import { DeepLContextTranslationProvider } from "../src/modules/game-translator/deepl-context-translation-provider.ts";
 import { createOcrLayout, OCR_LINE_GAP, OCR_LINE_HEIGHT } from "../src/modules/game-translator/ocr-layout.ts";
+import { haveSimilarSceneText, SceneTextTracker } from "../src/modules/game-translator/scene-text-tracker.ts";
 import { createSceneSignature, isLikelyEnglishSceneText } from "../src/modules/game-translator/scene-text.ts";
 import { SubtitleDetector } from "../src/modules/game-translator/subtitle-detector.ts";
 import { isLikelySubtitleText, MIN_SUBTITLE_OCR_CONFIDENCE } from "../src/modules/game-translator/subtitle-text-filter.ts";
@@ -140,12 +141,51 @@ test('full-screen mode creates a compact signature for scene change detection', 
 });
 
 test('full-screen text filter accepts English UI and rejects non-text regions', () => {
-    assert.ok(isLikelyEnglishSceneText('Open inventory'));
-    assert.ok(isLikelyEnglishSceneText('AMMO 12 / 30'));
-    assert.ok(isLikelyEnglishSceneText('Mission complete'));
-    assert.ok(!isLikelyEnglishSceneText('123 / 456'));
-    assert.ok(!isLikelyEnglishSceneText('https://example.com'));
-    assert.ok(!isLikelyEnglishSceneText('Сохранение'));
+    assert.ok(isLikelyEnglishSceneText('Open inventory', 75));
+    assert.ok(isLikelyEnglishSceneText('AMMO 12 / 30', 85));
+    assert.ok(isLikelyEnglishSceneText('Mission complete', 75));
+    assert.ok(!isLikelyEnglishSceneText('Open inventory', 65));
+    assert.ok(!isLikelyEnglishSceneText('Settings', 70));
+    assert.ok(!isLikelyEnglishSceneText('123 / 456', 99));
+    assert.ok(!isLikelyEnglishSceneText('https://example.com', 99));
+    assert.ok(!isLikelyEnglishSceneText('|||| TTTT', 99));
+    assert.ok(!isLikelyEnglishSceneText('Сохранение', 99));
+});
+
+test('full-screen text tracker confirms stable OCR and rejects moving noise', () => {
+    const tracker = new SceneTextTracker();
+    const line = {
+        text: 'Open inventory',
+        confidence: 78,
+        box: { x: 0.2, y: 0.3, width: 0.25, height: 0.05 },
+    };
+
+    assert.deepEqual(tracker.update([line]), []);
+    assert.equal(tracker.needsConfirmation(), true);
+
+    const repeatedLine = {
+        ...line,
+        text: 'Open inventory.',
+        box: { ...line.box, x: 0.21 },
+    };
+    assert.ok(haveSimilarSceneText(line, repeatedLine));
+    assert.deepEqual(tracker.update([repeatedLine]), [repeatedLine]);
+    assert.equal(tracker.needsConfirmation(), false);
+
+    const movingNoise = {
+        ...line,
+        text: 'Random noise',
+        box: { ...line.box, x: 0.7 },
+    };
+    assert.ok(!haveSimilarSceneText(line, movingNoise));
+    assert.deepEqual(tracker.update([movingNoise]), []);
+    assert.equal(tracker.needsConfirmation(), true);
+    assert.deepEqual(tracker.update([{
+        ...movingNoise,
+        text: 'Different artifact',
+        box: { ...movingNoise.box, y: 0.7 },
+    }]), []);
+    assert.equal(tracker.needsConfirmation(), false);
 });
 
 test('normalization and complete-subtitle detection handle game dialogue punctuation', () => {

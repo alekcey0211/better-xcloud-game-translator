@@ -12,7 +12,8 @@ import { XboxApi } from "@/utils/xbox-api";
 import { FrameChangeDetector } from "./frame-change-detector";
 import { TranslatorFrameCapture } from "./frame-capture";
 import { TesseractOcrEngine, type SceneOcrLine } from "./ocr-engine";
-import { createSceneSignature, isLikelyEnglishSceneText } from "./scene-text";
+import { createSceneSignature, isLikelyEnglishSceneText, MIN_SCENE_OCR_CONFIDENCE } from "./scene-text";
+import { SceneTextTracker } from "./scene-text-tracker";
 import { SubtitleDetector } from "./subtitle-detector";
 import { isLikelySubtitleText, MIN_SUBTITLE_OCR_CONFIDENCE } from "./subtitle-text-filter";
 import { SubtitleTracker } from "./subtitle-tracker";
@@ -78,6 +79,7 @@ export class GameTranslator {
     private readonly changeDetector = new FrameChangeDetector();
     private readonly subtitleDetector = new SubtitleDetector();
     private readonly subtitleTracker = new SubtitleTracker();
+    private readonly sceneTextTracker = new SceneTextTracker();
     private readonly translationService = new TranslationService(
         () => getGlobalPref(GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL),
     );
@@ -320,7 +322,10 @@ export class GameTranslator {
         const changeScore = this.changeDetector.compare(createSceneSignature(detectionFrame));
         this.debugMetrics.changeScore = changeScore;
         this.overlay?.updateDebug(this.debugMetrics);
-        if (changeScore < Math.min(this.settings.changeThreshold, this.MAX_SCENE_CHANGE_THRESHOLD)) {
+        if (
+            changeScore < Math.min(this.settings.changeThreshold, this.MAX_SCENE_CHANGE_THRESHOLD)
+            && !this.sceneTextTracker.needsConfirmation()
+        ) {
             return;
         }
 
@@ -343,7 +348,8 @@ export class GameTranslator {
                 return;
             }
 
-            const lines = this.selectSceneTextLines(recognizedLines);
+            const filteredLines = this.selectSceneTextLines(recognizedLines);
+            const lines = this.sceneTextTracker.update(filteredLines);
             this.debugMetrics.ocrTime = performance.now() - ocrStartedAt;
             this.debugMetrics.ocrConfidence = lines.length
                 ? lines.reduce((sum, line) => sum + line.confidence, 0) / lines.length
@@ -385,10 +391,10 @@ export class GameTranslator {
         const candidates = lines.filter(line => {
             const key = normalizeText(line.text);
             if (
-                line.confidence < MIN_SUBTITLE_OCR_CONFIDENCE
+                line.confidence < MIN_SCENE_OCR_CONFIDENCE
                 || line.box.height < 0.012
                 || line.box.height > 0.25
-                || !isLikelyEnglishSceneText(line.text)
+                || !isLikelyEnglishSceneText(line.text, line.confidence)
                 || seen.has(key)
             ) {
                 return false;
@@ -422,6 +428,9 @@ export class GameTranslator {
                         abortController.signal,
                         context,
                     );
+                    if (normalizeText(result.text) === normalizeText(line.text)) {
+                        return null;
+                    }
                     return {
                         originalText: line.text,
                         translatedText: result.text,
@@ -566,6 +575,7 @@ export class GameTranslator {
         this.frameCapture.setMode(this.settings.mode);
         this.changeDetector.reset();
         this.subtitleTracker.reset();
+        this.sceneTextTracker.reset();
         this.stabilizer.setDelay(this.settings.stabilizationInterval);
         this.overlay.applySettings(this.settings);
         modeChanged && this.overlay.resetContent();
@@ -652,6 +662,7 @@ export class GameTranslator {
         this.stabilizer = null;
         this.changeDetector.reset();
         this.subtitleTracker.reset();
+        this.sceneTextTracker.reset();
         this.frameCapture?.destroy();
         this.frameCapture = null;
         this.overlay?.destroy();

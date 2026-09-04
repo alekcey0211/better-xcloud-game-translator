@@ -4,6 +4,7 @@ import { normalizeText } from "./text-stabilizer.ts";
 const SIGNATURE_COLUMNS = 32;
 const SIGNATURE_ROWS = 18;
 const MAX_SCENE_TEXT_LENGTH = 160;
+export const MIN_SCENE_OCR_CONFIDENCE = 60;
 
 export function createSceneSignature(frame: PixelFrame) {
     const signature = new Uint8Array(SIGNATURE_COLUMNS * SIGNATURE_ROWS);
@@ -45,7 +46,7 @@ export function createSceneSignature(frame: PixelFrame) {
     return signature;
 }
 
-export function isLikelyEnglishSceneText(rawText: string) {
+export function isLikelyEnglishSceneText(rawText: string, confidence = 100) {
     const text = rawText.replace(/\s+/g, ' ').trim();
     const normalized = normalizeText(text);
     if (!normalized || normalized.length > MAX_SCENE_TEXT_LENGTH || /https?:\/\//i.test(text)) {
@@ -54,6 +55,16 @@ export function isLikelyEnglishSceneText(rawText: string) {
 
     const letters = text.match(/\p{L}/gu)?.length || 0;
     const latinLetters = text.match(/[a-z]/gi)?.length || 0;
+    const visibleCharacters = text.match(/\S/g)?.length || 0;
+    const expectedCharacters = text.match(/[a-z0-9.,!?':;()\[\]\/&+%-]/gi)?.length || 0;
+    const words = normalized.split(' ');
+    const singleLetterWords = words.filter(word => word.length === 1 && !/^[ai]$/.test(word)).length;
+    const minimumConfidence = words.length === 1 ? 82 : words.length === 2 ? 70 : MIN_SCENE_OCR_CONFIDENCE;
 
-    return latinLetters >= 2 && latinLetters / Math.max(1, letters) >= 0.7;
+    return confidence >= minimumConfidence
+        && latinLetters >= 2
+        && latinLetters / Math.max(1, letters) >= 0.7
+        && expectedCharacters / Math.max(1, visibleCharacters) >= 0.75
+        && singleLetterWords <= 1
+        && !/(.)\1{3,}/i.test(normalized);
 }

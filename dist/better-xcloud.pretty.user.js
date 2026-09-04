@@ -11628,7 +11628,7 @@ class TranslatorFrameCapture {
   }))
    return null;
   let context = this.$ocrCanvas.getContext("2d", { alpha: !1 });
-  return context.filter = "grayscale(1) contrast(1.45)", context.drawImage(this.$ocrSourceCanvas, 0, 0), context.filter = "none", this.$ocrCanvas;
+  return context.filter = "grayscale(1) contrast(1.25)", context.drawImage(this.$ocrSourceCanvas, 0, 0), context.filter = "none", this.$ocrCanvas;
  }
  destroy() {
   this.$detectionCanvas.width = 1, this.$detectionCanvas.height = 1, this.$ocrSourceCanvas.width = 1, this.$ocrSourceCanvas.height = 1, this.$ocrCanvas.width = 1, this.$ocrCanvas.height = 1;
@@ -11777,7 +11777,7 @@ class TextStabilizer {
   this.timeoutId && clearTimeout(this.timeoutId), this.timeoutId = null, this.candidate = "", this.candidateKey = "", this.lastEmittedKey = "", this.candidateStartedAt = 0;
  }
 }
-var SIGNATURE_COLUMNS = 32, SIGNATURE_ROWS = 18, MAX_SCENE_TEXT_LENGTH = 160;
+var SIGNATURE_COLUMNS = 32, SIGNATURE_ROWS = 18, MAX_SCENE_TEXT_LENGTH = 160, MIN_SCENE_OCR_CONFIDENCE = 60;
 function createSceneSignature(frame) {
  let signature = new Uint8Array(SIGNATURE_COLUMNS * SIGNATURE_ROWS);
  for (let row = 0;row < SIGNATURE_ROWS; row++) {
@@ -11795,11 +11795,43 @@ function createSceneSignature(frame) {
  }
  return signature;
 }
-function isLikelyEnglishSceneText(rawText) {
+function isLikelyEnglishSceneText(rawText, confidence = 100) {
  let text = rawText.replace(/\s+/g, " ").trim(), normalized = normalizeText(text);
  if (!normalized || normalized.length > MAX_SCENE_TEXT_LENGTH || /https?:\/\//i.test(text)) return !1;
- let letters = text.match(/\p{L}/gu)?.length || 0, latinLetters = text.match(/[a-z]/gi)?.length || 0;
- return latinLetters >= 2 && latinLetters / Math.max(1, letters) >= 0.7;
+ let letters = text.match(/\p{L}/gu)?.length || 0, latinLetters = text.match(/[a-z]/gi)?.length || 0, visibleCharacters = text.match(/\S/g)?.length || 0, expectedCharacters = text.match(/[a-z0-9.,!?':;()\[\]\/&+%-]/gi)?.length || 0, words = normalized.split(" "), singleLetterWords = words.filter((word) => word.length === 1 && !/^[ai]$/.test(word)).length, minimumConfidence = words.length === 1 ? 82 : words.length === 2 ? 70 : MIN_SCENE_OCR_CONFIDENCE;
+ return confidence >= minimumConfidence && latinLetters >= 2 && latinLetters / Math.max(1, letters) >= 0.7 && expectedCharacters / Math.max(1, visibleCharacters) >= 0.75 && singleLetterWords <= 1 && !/(.)\1{3,}/i.test(normalized);
+}
+var REQUIRED_OBSERVATIONS = 2, MAX_CENTER_X_SHIFT = 0.06, MAX_CENTER_Y_SHIFT = 0.04;
+function centerX(line) {
+ return line.box.x + line.box.width / 2;
+}
+function centerY(line) {
+ return line.box.y + line.box.height / 2;
+}
+function haveSimilarSceneText(left, right) {
+ let leftText = normalizeText(left.text), rightText = normalizeText(right.text), shorterText = leftText.length < rightText.length ? leftText : rightText, longerText = leftText.length < rightText.length ? rightText : leftText;
+ return (leftText === rightText || shorterText.length >= 4 && longerText.includes(shorterText) && shorterText.length / longerText.length >= 0.75) && Math.abs(centerX(left) - centerX(right)) <= MAX_CENTER_X_SHIFT && Math.abs(centerY(left) - centerY(right)) <= MAX_CENTER_Y_SHIFT;
+}
+class SceneTextTracker {
+ trackedLines = [];
+ confirmationPending = !1;
+ update(lines) {
+  let isConfirmationScan = this.confirmationPending, matchedPrevious = new Set, nextLines = lines.map((line) => {
+   let previousIndex = this.trackedLines.findIndex((candidate, index) => !matchedPrevious.has(index) && haveSimilarSceneText(candidate.line, line));
+   if (previousIndex < 0) return { line, observations: 1 };
+   return matchedPrevious.add(previousIndex), {
+    line,
+    observations: this.trackedLines[previousIndex].observations + 1
+   };
+  });
+  return this.trackedLines = isConfirmationScan ? nextLines.filter((candidate) => candidate.observations >= REQUIRED_OBSERVATIONS) : nextLines, this.confirmationPending = !isConfirmationScan && nextLines.some((candidate) => candidate.observations < REQUIRED_OBSERVATIONS), nextLines.filter((candidate) => candidate.observations >= REQUIRED_OBSERVATIONS).map((candidate) => candidate.line);
+ }
+ needsConfirmation() {
+  return this.confirmationPending;
+ }
+ reset() {
+  this.trackedLines = [], this.confirmationPending = !1;
+ }
 }
 function getLuminance(red, green, blue) {
  return 54 * red + 183 * green + 19 * blue >> 8;
@@ -11830,8 +11862,8 @@ class SubtitleDetector {
   }
   let lines = [], signatureWidth = Math.ceil(width / 4), signatureHeight = Math.ceil(height / 4), signature = new Uint8Array(signatureWidth * signatureHeight), horizontalPadding = Math.round(width * 0.03), verticalPadding = Math.max(3, Math.round(height * 0.05));
   for (let group of rowGroups) {
-   let firstRow = group[0], lastRow = group[group.length - 1], centerY = (firstRow + lastRow) / 2 / height;
-   if (group.length < 2 || centerY < 0.42 || centerY > 0.94 || lastRow - firstRow + 1 > height * 0.18) continue;
+   let firstRow = group[0], lastRow = group[group.length - 1], centerY2 = (firstRow + lastRow) / 2 / height;
+   if (group.length < 2 || centerY2 < 0.42 || centerY2 > 0.94 || lastRow - firstRow + 1 > height * 0.18) continue;
    let firstColumn = width, lastColumn = 0;
    for (let y = Math.max(0, firstRow - 1);y <= Math.min(height - 1, lastRow + 1); y++)
     for (let x = horizontalMargin;x < width - horizontalMargin; x++)
@@ -11868,17 +11900,17 @@ function isLikelySubtitleText(rawText) {
  let words = normalized.split(" "), hasDialoguePunctuation = /[.!?…,:;–—-]["')\]]?$/.test(text);
  return words.length >= 3 || hasDialoguePunctuation;
 }
-function centerX(line) {
+function centerX2(line) {
  return line.x + line.width / 2;
 }
-function centerY(line) {
+function centerY2(line) {
  return line.y + line.height / 2;
 }
 function haveSimilarSubtitlePositions(left, right) {
  if (left.length !== right.length) return !1;
  return left.every((line, index) => {
   let other = right[index];
-  return Math.abs(centerX(line) - centerX(other)) <= 0.15 && Math.abs(centerY(line) - centerY(other)) <= 0.08 && Math.abs(line.height - other.height) <= 0.08;
+  return Math.abs(centerX2(line) - centerX2(other)) <= 0.15 && Math.abs(centerY2(line) - centerY2(other)) <= 0.08 && Math.abs(line.height - other.height) <= 0.08;
  });
 }
 class SubtitleTracker {
@@ -12190,6 +12222,7 @@ class GameTranslator {
  changeDetector = new FrameChangeDetector;
  subtitleDetector = new SubtitleDetector;
  subtitleTracker = new SubtitleTracker;
+ sceneTextTracker = new SceneTextTracker;
  translationService = new TranslationService(() => getGlobalPref("gameTranslator.deepl.proxyUrl"));
  translationContext = new GameTranslationContext;
  settings = readSettings();
@@ -12318,7 +12351,7 @@ class GameTranslator {
  }
  async analyzeScene(detectionFrame, frameCapture, ocrEngine, sessionId) {
   let changeScore = this.changeDetector.compare(createSceneSignature(detectionFrame));
-  if (this.debugMetrics.changeScore = changeScore, this.overlay?.updateDebug(this.debugMetrics), changeScore < Math.min(this.settings.changeThreshold, this.MAX_SCENE_CHANGE_THRESHOLD)) return;
+  if (this.debugMetrics.changeScore = changeScore, this.overlay?.updateDebug(this.debugMetrics), changeScore < Math.min(this.settings.changeThreshold, this.MAX_SCENE_CHANGE_THRESHOLD) && !this.sceneTextTracker.needsConfirmation()) return;
   let $ocrCanvas;
   try {
    $ocrCanvas = frameCapture.captureForSceneOcr();
@@ -12332,7 +12365,7 @@ class GameTranslator {
   try {
    let recognizedLines = await ocrEngine.recognizeScene($ocrCanvas);
    if (sessionId !== this.sessionId) return;
-   let lines = this.selectSceneTextLines(recognizedLines);
+   let filteredLines = this.selectSceneTextLines(recognizedLines), lines = this.sceneTextTracker.update(filteredLines);
    if (this.debugMetrics.ocrTime = performance.now() - ocrStartedAt, this.debugMetrics.ocrConfidence = lines.length ? lines.reduce((sum, line) => sum + line.confidence, 0) / lines.length : 0, this.debugMetrics.candidates = lines.length, this.overlay?.updateDebug(this.debugMetrics), !lines.length) {
     this.overlay?.clearScene();
     return;
@@ -12354,7 +12387,7 @@ class GameTranslator {
   let seen = new Set;
   return lines.filter((line) => {
    let key = normalizeText(line.text);
-   if (line.confidence < MIN_SUBTITLE_OCR_CONFIDENCE || line.box.height < 0.012 || line.box.height > 0.25 || !isLikelyEnglishSceneText(line.text) || seen.has(key)) return !1;
+   if (line.confidence < MIN_SCENE_OCR_CONFIDENCE || line.box.height < 0.012 || line.box.height > 0.25 || !isLikelyEnglishSceneText(line.text, line.confidence) || seen.has(key)) return !1;
    return seen.add(key), !0;
   }).sort((left, right) => {
    let leftPriority = left.confidence + Math.min(25, left.box.width * left.box.height * 2000);
@@ -12367,6 +12400,7 @@ class GameTranslator {
    let batch = lines.slice(index, index + 2), translations = await Promise.all(batch.map(async (line) => {
     try {
      let result = await this.translationService.translate(this.settings.provider, line.text, abortController.signal, context);
+     if (normalizeText(result.text) === normalizeText(line.text)) return null;
      return {
       originalText: line.text,
       translatedText: result.text,
@@ -12440,7 +12474,7 @@ class GameTranslator {
   if (providerChanged && this.settings.provider === "deepl-context") this.loadGameDescription(this.sessionId);
   if (providerChanged || providerConfigChanged || !previousSettings.enabled) this.prepareProvider();
   if (!this.frameCapture || !this.overlay || !this.stabilizer) return;
-  if (this.frameCapture.setRegion(this.settings.ocrRegion), this.frameCapture.setMode(this.settings.mode), this.changeDetector.reset(), this.subtitleTracker.reset(), this.stabilizer.setDelay(this.settings.stabilizationInterval), this.overlay.applySettings(this.settings), modeChanged && this.overlay.resetContent(), this.updateOverlayGeometry(), previousSettings.ocrInterval !== this.settings.ocrInterval || modeChanged) this.debugMetrics.interval = this.getAnalysisInterval(), this.startTimer(this.sessionId);
+  if (this.frameCapture.setRegion(this.settings.ocrRegion), this.frameCapture.setMode(this.settings.mode), this.changeDetector.reset(), this.subtitleTracker.reset(), this.sceneTextTracker.reset(), this.stabilizer.setDelay(this.settings.stabilizationInterval), this.overlay.applySettings(this.settings), modeChanged && this.overlay.resetContent(), this.updateOverlayGeometry(), previousSettings.ocrInterval !== this.settings.ocrInterval || modeChanged) this.debugMetrics.interval = this.getAnalysisInterval(), this.startTimer(this.sessionId);
  }
  prepareProvider() {
   if (this.settings.provider === "my-memory") return;
@@ -12475,7 +12509,7 @@ class GameTranslator {
   });
  }
  stop() {
-  this.sessionId++, this.providerPreparationId++, this.cancelScheduledAnalysis(), this.$video = null, this.translationAbortController?.abort(), this.translationAbortController = null, this.translationService.destroy(), this.translationContext.reset(), this.stabilizer?.reset(), this.stabilizer = null, this.changeDetector.reset(), this.subtitleTracker.reset(), this.frameCapture?.destroy(), this.frameCapture = null, this.overlay?.destroy(), this.overlay = null;
+  this.sessionId++, this.providerPreparationId++, this.cancelScheduledAnalysis(), this.$video = null, this.translationAbortController?.abort(), this.translationAbortController = null, this.translationService.destroy(), this.translationContext.reset(), this.stabilizer?.reset(), this.stabilizer = null, this.changeDetector.reset(), this.subtitleTracker.reset(), this.sceneTextTracker.reset(), this.frameCapture?.destroy(), this.frameCapture = null, this.overlay?.destroy(), this.overlay = null;
   let ocrEngine = this.ocrEngine;
   this.ocrEngine = null, ocrEngine && ocrEngine.terminate(), this.ocrBusy = !1, this.analyzePending = !1, this.disabledByError = !1, BxLogger.info(this.LOG_TAG, "Stopped");
  }
