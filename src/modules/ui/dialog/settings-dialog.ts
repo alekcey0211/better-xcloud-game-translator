@@ -229,10 +229,12 @@ export class SettingsDialog extends NavigationDialog {
         label: t('game-translator'),
         items: [
             GlobalPref.GAME_TRANSLATOR_ENABLED,
+            GlobalPref.GAME_TRANSLATOR_MODE,
             GlobalPref.GAME_TRANSLATOR_OCR_REGION,
             GlobalPref.GAME_TRANSLATOR_OCR_INTERVAL,
             GlobalPref.GAME_TRANSLATOR_CHANGE_THRESHOLD,
             GlobalPref.GAME_TRANSLATOR_STABILIZATION_INTERVAL,
+            GlobalPref.GAME_TRANSLATOR_MIN_DISPLAY_TIME,
             GlobalPref.GAME_TRANSLATOR_PROVIDER,
             {
                 pref: GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL,
