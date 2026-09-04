@@ -1,17 +1,18 @@
 // ==UserScript==
 // @name         Better xCloud
 // @namespace    https://github.com/redphx
-// @version      6.7.12
+// @version      6.7.12.0
 // @description  Improve Xbox Cloud Gaming (xCloud) experience
 // @author       redphx
 // @license      MIT
+// @homepageURL  https://github.com/alekcey0211/better-xcloud-game-translator
 // @match        https://www.xbox.com/*/play*
 // @match        https://www.xbox.com/*/auth/msa?*loggedIn*
 // @exclude      https://www.xbox.com/*/xbox-game-pass/play-day-one
 // @run-at       document-start
 // @grant        none
-// @updateURL    https://raw.githubusercontent.com/redphx/better-xcloud/typescript/dist/better-xcloud.meta.js
-// @downloadURL  https://github.com/redphx/better-xcloud/releases/latest/download/better-xcloud.user.js
+// @updateURL    https://alekcey0211.github.io/better-xcloud-game-translator/better-xcloud.meta.js
+// @downloadURL  https://alekcey0211.github.io/better-xcloud-game-translator/better-xcloud.user.js
 // ==/UserScript==
 "use strict";
 var __create = Object.create;
@@ -1100,7 +1101,7 @@ class UserAgent {
   });
  }
 }
-var SCRIPT_VERSION = "6.7.12", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
+var SCRIPT_VERSION = "6.7.12.0", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
 UserAgent.init();
 var userAgent = window.navigator.userAgent.toLowerCase(), isTv = userAgent.includes("smart-tv") || userAgent.includes("smarttv") || /\baft.*\b/.test(userAgent), isVr = window.navigator.userAgent.includes("VR") && window.navigator.userAgent.includes("OculusBrowser"), browserHasTouchSupport = "ontouchstart" in window || navigator.maxTouchPoints > 0, userAgentHasTouchSupport = !isTv && !isVr && browserHasTouchSupport, STATES = {
  supportedRegion: !0,

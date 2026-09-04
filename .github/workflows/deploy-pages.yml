@@ -1,0 +1,72 @@
+name: Deploy Game Translator
+
+on:
+  push:
+    branches:
+      - typescript
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.21
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run translator tests
+        run: bun run test:game-translator
+
+      - name: Build userscript
+        id: version
+        run: |
+          BASE_VERSION="$(git describe --tags --abbrev=0 | sed 's/^v//')"
+          VERSION="${BASE_VERSION}.${GITHUB_RUN_NUMBER}"
+          echo "value=${VERSION}" >> "$GITHUB_OUTPUT"
+          bun run build.ts --version "$VERSION" --variant full --meta
+
+      - name: Prepare site
+        run: |
+          mkdir public
+          cp dist/better-xcloud.user.js public/
+          cp dist/better-xcloud.pretty.user.js public/
+          cp dist/better-xcloud.meta.js public/
+          sed "s/\[\[VERSION\]\]/${{ steps.version.outputs.value }}/g" .github/pages/index.html > public/index.html
+          touch public/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
