@@ -13,6 +13,7 @@ import { FrameChangeDetector } from "./frame-change-detector";
 import { TranslatorFrameCapture } from "./frame-capture";
 import { TesseractOcrEngine } from "./ocr-engine";
 import { SubtitleDetector } from "./subtitle-detector";
+import { isLikelySubtitleText, MIN_SUBTITLE_OCR_CONFIDENCE } from "./subtitle-text-filter";
 import { SubtitleTracker } from "./subtitle-tracker";
 import { looksLikeCompleteSubtitle, TextStabilizer } from "./text-stabilizer";
 import { GameTranslationContext } from "./translation-context";
@@ -34,6 +35,7 @@ const TRANSLATOR_PREFS = new Set<GlobalPref>([
     GlobalPref.GAME_TRANSLATOR_OCR_INTERVAL,
     GlobalPref.GAME_TRANSLATOR_CHANGE_THRESHOLD,
     GlobalPref.GAME_TRANSLATOR_STABILIZATION_INTERVAL,
+    GlobalPref.GAME_TRANSLATOR_MIN_DISPLAY_TIME,
     GlobalPref.GAME_TRANSLATOR_PROVIDER,
     GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL,
     GlobalPref.GAME_TRANSLATOR_SHOW_ORIGINAL,
@@ -56,6 +58,7 @@ function readSettings(): GameTranslatorSettings {
         fontSize: getGlobalPref(GlobalPref.GAME_TRANSLATOR_FONT_SIZE),
         verticalPosition: getGlobalPref(GlobalPref.GAME_TRANSLATOR_VERTICAL_POSITION),
         backgroundOpacity: getGlobalPref(GlobalPref.GAME_TRANSLATOR_BACKGROUND_OPACITY),
+        minimumDisplayTime: Number(getGlobalPref(GlobalPref.GAME_TRANSLATOR_MIN_DISPLAY_TIME)),
     };
 }
 
@@ -274,9 +277,11 @@ export class GameTranslator {
                 confidence: result.confidence,
                 text: result.text,
             });
+            const isSubtitle = result.confidence >= MIN_SUBTITLE_OCR_CONFIDENCE
+                && isLikelySubtitleText(result.text);
             this.stabilizer?.push(
-                result.text,
-                result.confidence >= 45 && looksLikeCompleteSubtitle(result.text),
+                isSubtitle ? result.text : '',
+                isSubtitle && looksLikeCompleteSubtitle(result.text),
             );
         } catch (error) {
             if (sessionId === this.sessionId) {
@@ -294,13 +299,13 @@ export class GameTranslator {
     }
 
     private async onStableText(text: string, sessionId: number) {
-        this.translationAbortController?.abort();
-        this.translationAbortController = null;
-
         if (!text) {
             this.overlay?.clear();
             return;
         }
+
+        this.translationAbortController?.abort();
+        this.translationAbortController = null;
 
         BxLogger.info(this.LOG_TAG, 'Stabilized text', text);
         const abortController = new AbortController();

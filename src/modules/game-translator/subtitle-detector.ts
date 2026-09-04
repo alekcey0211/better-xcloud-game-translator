@@ -18,6 +18,10 @@ const MAX_NEUTRAL_SATURATION = 90;
 const VERY_BRIGHT_LUMINANCE = 205;
 const MIN_LOCAL_CONTRAST = 24;
 const MAX_SUBTITLE_LINES = 3;
+const MIN_SUBTITLE_CENTER_Y = 0.42;
+const MAX_SUBTITLE_CENTER_Y = 0.94;
+const CENTER_BAND_LEFT = 0.43;
+const CENTER_BAND_RIGHT = 0.57;
 
 function getLuminance(red: number, green: number, blue: number) {
     return (54 * red + 183 * green + 19 * blue) >> 8;
@@ -102,7 +106,12 @@ export class SubtitleDetector {
             const firstRow = group[0];
             const lastRow = group[group.length - 1];
             const centerY = (firstRow + lastRow) / 2 / height;
-            if (group.length < 2 || centerY < 0.42 || lastRow - firstRow + 1 > height * 0.18) {
+            if (
+                group.length < 2
+                || centerY < MIN_SUBTITLE_CENTER_Y
+                || centerY > MAX_SUBTITLE_CENTER_Y
+                || lastRow - firstRow + 1 > height * 0.18
+            ) {
                 continue;
             }
 
@@ -117,8 +126,9 @@ export class SubtitleDetector {
                 }
             }
 
-            const centerX = (firstColumn + lastColumn) / 2 / width;
-            if (firstColumn >= lastColumn || lastColumn - firstColumn < width * 0.05 || centerX < 0.18 || centerX > 0.82) {
+            const crossesSubtitleCenter = firstColumn <= width * CENTER_BAND_RIGHT
+                && lastColumn >= width * CENTER_BAND_LEFT;
+            if (firstColumn >= lastColumn || lastColumn - firstColumn < width * 0.05 || !crossesSubtitleCenter) {
                 continue;
             }
 

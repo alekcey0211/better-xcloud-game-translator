@@ -1427,6 +1427,7 @@ var SUPPORTED_LANGUAGES = {
  "game-translator-debug-region": "Show OCR region and timings",
  "game-translator-enable": "Enable Game Translator",
  "game-translator-font-size": "Translation font size",
+ "game-translator-min-display-time": "Minimum translation display time",
  "game-translator-ocr-interval": "Subtitle scan interval",
  "game-translator-ocr-region": "OCR region",
  "game-translator-privacy-note": "OCR runs locally. Recognized English text and game context leave the device only when an online provider is selected.",
@@ -2382,6 +2383,17 @@ class GlobalSettingsStorage extends BaseSettingsStorage {
     "500": "500 ms",
     "750": "750 ms",
     "1000": "1000 ms"
+   }
+  },
+  "gameTranslator.minimumDisplayTime": {
+   requiredVariants: "full",
+   label: t("game-translator-min-display-time"),
+   default: "5000",
+   options: {
+    "3000": "3 s",
+    "5000": "5 s",
+    "8000": "8 s",
+    "12000": "12 s"
    }
   },
   "gameTranslator.provider": {
@@ -11670,13 +11682,13 @@ class SubtitleDetector {
   let lines = [], signatureWidth = Math.ceil(width / 4), signatureHeight = Math.ceil(height / 4), signature = new Uint8Array(signatureWidth * signatureHeight), horizontalPadding = Math.round(width * 0.03), verticalPadding = Math.max(3, Math.round(height * 0.05));
   for (let group of rowGroups) {
    let firstRow = group[0], lastRow = group[group.length - 1], centerY = (firstRow + lastRow) / 2 / height;
-   if (group.length < 2 || centerY < 0.42 || lastRow - firstRow + 1 > height * 0.18) continue;
+   if (group.length < 2 || centerY < 0.42 || centerY > 0.94 || lastRow - firstRow + 1 > height * 0.18) continue;
    let firstColumn = width, lastColumn = 0;
    for (let y = Math.max(0, firstRow - 1);y <= Math.min(height - 1, lastRow + 1); y++)
     for (let x = horizontalMargin;x < width - horizontalMargin; x++)
      if (ink[y * width + x]) firstColumn = Math.min(firstColumn, x), lastColumn = Math.max(lastColumn, x);
-   let centerX = (firstColumn + lastColumn) / 2 / width;
-   if (firstColumn >= lastColumn || lastColumn - firstColumn < width * 0.05 || centerX < 0.18 || centerX > 0.82) continue;
+   let crossesSubtitleCenter = firstColumn <= width * 0.57 && lastColumn >= width * 0.43;
+   if (firstColumn >= lastColumn || lastColumn - firstColumn < width * 0.05 || !crossesSubtitleCenter) continue;
    let x0 = Math.max(0, firstColumn - horizontalPadding), x1 = Math.min(width, lastColumn + horizontalPadding + 1), y0 = Math.max(0, firstRow - verticalPadding), y1 = Math.min(height, lastRow + verticalPadding + 1);
    lines.push({
     x: x0 / width,
@@ -11690,32 +11702,6 @@ class SubtitleDetector {
   }
   if (lines.length > 3) lines.length = 0, signature.fill(0);
   return { lines, signature };
- }
-}
-function centerX(line) {
- return line.x + line.width / 2;
-}
-function centerY(line) {
- return line.y + line.height / 2;
-}
-function haveSimilarSubtitlePositions(left, right) {
- if (left.length !== right.length) return !1;
- return left.every((line, index) => {
-  let other = right[index];
-  return Math.abs(centerX(line) - centerX(other)) <= 0.15 && Math.abs(centerY(line) - centerY(other)) <= 0.08 && Math.abs(line.height - other.height) <= 0.08;
- });
-}
-class SubtitleTracker {
- candidateLines = null;
- matchingFrames = 0;
- update(lines) {
-  let sortedLines = [...lines].sort((left, right) => left.y - right.y);
-  if (this.candidateLines && haveSimilarSubtitlePositions(this.candidateLines, sortedLines)) this.candidateLines = sortedLines, this.matchingFrames++;
-  else this.candidateLines = sortedLines, this.matchingFrames = 1;
-  return this.matchingFrames >= 2 ? sortedLines : null;
- }
- reset() {
-  this.candidateLines = null, this.matchingFrames = 0;
  }
 }
 function normalizeDisplayText(text) {
@@ -11782,6 +11768,47 @@ class TextStabilizer {
   this.timeoutId && clearTimeout(this.timeoutId), this.timeoutId = null, this.candidate = "", this.candidateKey = "", this.lastEmittedKey = "", this.candidateStartedAt = 0;
  }
 }
+var MIN_SUBTITLE_OCR_CONFIDENCE = 45, UI_TEXT_PATTERNS = [
+ /^(?:press|hold|tap|release)\s+(?:[a-z0-9]|button|key|to)\b/i,
+ /^(?:new\s+)?(?:objective|mission|quest)\s+(?:updated|complete|completed|failed)\b/i,
+ /^(?:checkpoint\s+(?:reached|saved)|auto-?saving|saving|loading)\b/i,
+ /^(?:ammo|armor|health|score|inventory|settings|options|map)\b/i,
+ /\bhttps?:\/\//i
+];
+function isLikelySubtitleText(rawText) {
+ let text = rawText.replace(/\s+/g, " ").trim(), normalized = normalizeText(text);
+ if (!normalized || normalized.length > 240 || UI_TEXT_PATTERNS.some((pattern) => pattern.test(text))) return !1;
+ let letters = text.match(/\p{L}/gu)?.length || 0, digits = text.match(/\p{N}/gu)?.length || 0;
+ if (letters < 2 || digits > Math.max(2, Math.floor(letters / 4))) return !1;
+ let words = normalized.split(" "), hasDialoguePunctuation = /[.!?…,:;–—-]["')\]]?$/.test(text);
+ return words.length >= 3 || hasDialoguePunctuation;
+}
+function centerX(line) {
+ return line.x + line.width / 2;
+}
+function centerY(line) {
+ return line.y + line.height / 2;
+}
+function haveSimilarSubtitlePositions(left, right) {
+ if (left.length !== right.length) return !1;
+ return left.every((line, index) => {
+  let other = right[index];
+  return Math.abs(centerX(line) - centerX(other)) <= 0.15 && Math.abs(centerY(line) - centerY(other)) <= 0.08 && Math.abs(line.height - other.height) <= 0.08;
+ });
+}
+class SubtitleTracker {
+ candidateLines = null;
+ matchingFrames = 0;
+ update(lines) {
+  let sortedLines = [...lines].sort((left, right) => left.y - right.y);
+  if (this.candidateLines && haveSimilarSubtitlePositions(this.candidateLines, sortedLines)) this.candidateLines = sortedLines, this.matchingFrames++;
+  else this.candidateLines = sortedLines, this.matchingFrames = 1;
+  return this.matchingFrames >= 2 ? sortedLines : null;
+ }
+ reset() {
+  this.candidateLines = null, this.matchingFrames = 0;
+ }
+}
 function compactText(text) {
  return text.replaceAll(/\s+/g, " ").trim();
 }
@@ -11819,6 +11846,10 @@ class GameTranslationContext {
   };
  }
 }
+function getTranslationDisplayDuration(text, minimumDisplayTime) {
+ let readableCharacters = text.replace(/\s+/g, " ").trim().length, readingTime = Math.min(12000, readableCharacters * 65);
+ return Math.max(minimumDisplayTime, readingTime);
+}
 function getRenderedContentRect($player) {
  let rect = $player.getBoundingClientRect(), sourceWidth = $player instanceof HTMLVideoElement ? $player.videoWidth : $player.width, sourceHeight = $player instanceof HTMLVideoElement ? $player.videoHeight : $player.height, objectFit = getComputedStyle($player).objectFit;
  if (!sourceWidth || !sourceHeight || objectFit !== "contain") return rect;
@@ -11835,6 +11866,8 @@ class TranslationOverlay {
  $debug;
  settings;
  originalText = "";
+ clearTimerId = null;
+ visibleUntil = 0;
  constructor($video, settings) {
   this.settings = settings, this.$host = $video.closest("#game-stream") || $video.parentElement, this.$root = CE("div", { class: "bx-game-translator-overlay" }, this.$subtitle = CE("div", { class: "bx-game-translator-subtitle bx-gone" }, this.$translation = CE("div", { class: "bx-game-translator-translation" }), this.$original = CE("div", { class: "bx-game-translator-original" })), this.$region = CE("div", { class: "bx-game-translator-region bx-gone" }), this.$debug = CE("div", { class: "bx-game-translator-debug bx-gone" })), this.$subtitle.setAttribute("aria-live", "polite"), this.$host.appendChild(this.$root), this.applySettings(settings);
  }
@@ -11848,20 +11881,34 @@ class TranslationOverlay {
   this.$subtitle.style.left = `${contentRect.left + contentRect.width / 2}px`, this.$subtitle.style.bottom = `${window.innerHeight - contentRect.bottom + contentRect.height * this.settings.verticalPosition / 100}px`, this.$subtitle.style.maxWidth = `${contentRect.width * 0.9}px`, this.$region.style.left = `${contentRect.left + contentRect.width * region.x}px`, this.$region.style.top = `${contentRect.top + contentRect.height * region.y}px`, this.$region.style.width = `${contentRect.width * region.width}px`, this.$region.style.height = `${contentRect.height * region.height}px`;
  }
  show(originalText, translatedText) {
-  this.originalText = originalText, this.$translation.textContent = translatedText, this.$original.textContent = originalText, this.$original.classList.toggle("bx-gone", !this.settings.showOriginal || !originalText), this.$subtitle.classList.toggle("bx-gone", !translatedText);
+  this.cancelClear(), this.originalText = originalText, this.$translation.textContent = translatedText, this.$original.textContent = originalText, this.$original.classList.toggle("bx-gone", !this.settings.showOriginal || !originalText), this.$subtitle.classList.toggle("bx-gone", !translatedText), this.visibleUntil = translatedText ? performance.now() + getTranslationDisplayDuration(translatedText, this.settings.minimumDisplayTime) : 0;
  }
  showError(message) {
   this.show("", message);
  }
  clear() {
-  this.show("", "");
+  if (this.clearTimerId !== null) return;
+  let remainingTime = this.visibleUntil - performance.now();
+  if (remainingTime <= 0) {
+   this.hide();
+   return;
+  }
+  this.clearTimerId = window.setTimeout(() => {
+   this.clearTimerId = null, this.hide();
+  }, remainingTime);
  }
  updateDebug(metrics) {
   let values = [];
   typeof metrics.interval === "number" && values.push(`Interval: ${metrics.interval} ms`), typeof metrics.changeScore === "number" && values.push(`Change: ${metrics.changeScore.toFixed(3)}`), typeof metrics.ocrTime === "number" && values.push(`OCR: ${Math.round(metrics.ocrTime)} ms`), typeof metrics.ocrConfidence === "number" && values.push(`Confidence: ${Math.round(metrics.ocrConfidence)}%`), typeof metrics.candidates === "number" && values.push(`Lines: ${metrics.candidates}`), typeof metrics.translationTime === "number" && values.push(`Translate: ${Math.round(metrics.translationTime)} ms`), this.$debug.textContent = values.join(" · ");
  }
  destroy() {
-  this.$root.remove();
+  this.cancelClear(), this.$root.remove();
+ }
+ hide() {
+  this.originalText = "", this.visibleUntil = 0, this.$translation.textContent = "", this.$original.textContent = "", this.$original.classList.add("bx-gone"), this.$subtitle.classList.add("bx-gone");
+ }
+ cancelClear() {
+  if (this.clearTimerId !== null) window.clearTimeout(this.clearTimerId), this.clearTimerId = null;
  }
 }
 class BrowserTranslationProvider {
@@ -11987,6 +12034,7 @@ var TRANSLATOR_PREFS = new Set([
  "gameTranslator.ocr.interval",
  "gameTranslator.changeThreshold",
  "gameTranslator.stabilizationInterval",
+ "gameTranslator.minimumDisplayTime",
  "gameTranslator.provider",
  "gameTranslator.deepl.proxyUrl",
  "gameTranslator.showOriginal",
@@ -12007,7 +12055,8 @@ function readSettings() {
   debugRegion: getGlobalPref("gameTranslator.debugRegion"),
   fontSize: getGlobalPref("gameTranslator.fontSize"),
   verticalPosition: getGlobalPref("gameTranslator.verticalPosition"),
-  backgroundOpacity: getGlobalPref("gameTranslator.backgroundOpacity")
+  backgroundOpacity: getGlobalPref("gameTranslator.backgroundOpacity"),
+  minimumDisplayTime: Number(getGlobalPref("gameTranslator.minimumDisplayTime"))
  };
 }
 class GameTranslator {
@@ -12127,7 +12176,9 @@ class GameTranslator {
     executionTime: ocrTime,
     confidence: result.confidence,
     text: result.text
-   }), this.stabilizer?.push(result.text, result.confidence >= 45 && looksLikeCompleteSubtitle(result.text));
+   });
+   let isSubtitle = result.confidence >= MIN_SUBTITLE_OCR_CONFIDENCE && isLikelySubtitleText(result.text);
+   this.stabilizer?.push(isSubtitle ? result.text : "", isSubtitle && looksLikeCompleteSubtitle(result.text));
   } catch (error) {
    if (sessionId === this.sessionId) this.handleOcrError(error);
   } finally {
@@ -12136,11 +12187,11 @@ class GameTranslator {
   }
  }
  async onStableText(text, sessionId) {
-  if (this.translationAbortController?.abort(), this.translationAbortController = null, !text) {
+  if (!text) {
    this.overlay?.clear();
    return;
   }
-  BxLogger.info(this.LOG_TAG, "Stabilized text", text);
+  this.translationAbortController?.abort(), this.translationAbortController = null, BxLogger.info(this.LOG_TAG, "Stabilized text", text);
   let abortController = new AbortController;
   this.translationAbortController = abortController;
   try {

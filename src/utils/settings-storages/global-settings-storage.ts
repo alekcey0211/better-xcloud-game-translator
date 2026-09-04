@@ -240,6 +240,17 @@ export class GlobalSettingsStorage extends BaseSettingsStorage<GlobalPref> {
                 '1000': '1000 ms',
             },
         },
+        [GlobalPref.GAME_TRANSLATOR_MIN_DISPLAY_TIME]: {
+            requiredVariants: 'full',
+            label: t('game-translator-min-display-time'),
+            default: '5000',
+            options: {
+                '3000': '3 s',
+                '5000': '5 s',
+                '8000': '8 s',
+                '12000': '12 s',
+            },
+        },
         [GlobalPref.GAME_TRANSLATOR_PROVIDER]: {
             requiredVariants: 'full',
             label: t('game-translator-provider'),

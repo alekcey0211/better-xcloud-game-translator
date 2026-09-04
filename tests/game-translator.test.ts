@@ -6,9 +6,11 @@ import { BrowserTranslationProvider } from "../src/modules/game-translator/brows
 import { DeepLContextTranslationProvider } from "../src/modules/game-translator/deepl-context-translation-provider.ts";
 import { createOcrLayout, OCR_LINE_GAP, OCR_LINE_HEIGHT } from "../src/modules/game-translator/ocr-layout.ts";
 import { SubtitleDetector } from "../src/modules/game-translator/subtitle-detector.ts";
+import { isLikelySubtitleText, MIN_SUBTITLE_OCR_CONFIDENCE } from "../src/modules/game-translator/subtitle-text-filter.ts";
 import { SubtitleTracker } from "../src/modules/game-translator/subtitle-tracker.ts";
 import { looksLikeCompleteSubtitle, normalizeText, TextStabilizer } from "../src/modules/game-translator/text-stabilizer.ts";
 import { buildDeepLContext, GameTranslationContext } from "../src/modules/game-translator/translation-context.ts";
+import { getTranslationDisplayDuration } from "../src/modules/game-translator/translation-retention.ts";
 
 function createFrame(width = 640, height = 140) {
     const data = new Uint8ClampedArray(width * height * 4);
@@ -51,6 +53,16 @@ test('subtitle detector accepts centered text-like lines and rejects corner UI',
     const corner = detector.detect(cornerFrame);
     assert.equal(corner.lines.length, 0);
     assert.ok(!corner.signature.some(Boolean));
+});
+
+test('subtitle detector rejects bright text that does not cross the subtitle center band', () => {
+    const detector = new SubtitleDetector();
+    const frame = createFrame();
+    drawSubtitleStrokes(frame, 120, 250);
+
+    const detection = detector.detect(frame);
+    assert.equal(detection.lines.length, 0);
+    assert.ok(!detection.signature.some(Boolean));
 });
 
 test('subtitle detector rejects menu-like blocks with more than three lines', () => {
@@ -114,6 +126,24 @@ test('normalization and complete-subtitle detection handle game dialogue punctua
     assert.ok(looksLikeCompleteSubtitle('I need your help!'));
     assert.ok(looksLikeCompleteSubtitle("Coen: I didn't know —"));
     assert.ok(!looksLikeCompleteSubtitle('I need your'));
+});
+
+test('subtitle text filter keeps dialogue and rejects common HUD text', () => {
+    assert.equal(MIN_SUBTITLE_OCR_CONFIDENCE, 45);
+    assert.ok(isLikelySubtitleText('What?'));
+    assert.ok(isLikelySubtitleText("I didn't know"));
+    assert.ok(isLikelySubtitleText('Save your breath, brother.'));
+    assert.ok(!isLikelySubtitleText('HOLD X TO SKIP'));
+    assert.ok(!isLikelySubtitleText('OBJECTIVE UPDATED'));
+    assert.ok(!isLikelySubtitleText('Ammo 12 / 30'));
+    assert.ok(!isLikelySubtitleText('Open door'));
+});
+
+test('translation display time gives longer lines enough reading time', () => {
+    assert.equal(getTranslationDisplayDuration('Короткая реплика', 5000), 5000);
+    assert.equal(getTranslationDisplayDuration('а'.repeat(100), 5000), 6500);
+    assert.equal(getTranslationDisplayDuration('а'.repeat(300), 5000), 12000);
+    assert.equal(getTranslationDisplayDuration('Короткая реплика', 8000), 8000);
 });
 
 test('complete subtitle uses the fast stabilization path', async () => {

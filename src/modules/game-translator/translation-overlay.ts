@@ -1,12 +1,15 @@
 import { CE } from "@/utils/html";
 import type { NormalizedFrameRegion } from "@/utils/screenshot-manager";
 
+import { getTranslationDisplayDuration } from "./translation-retention";
+
 export type TranslationOverlaySettings = {
     showOriginal: boolean;
     debugRegion: boolean;
     fontSize: number;
     verticalPosition: number;
     backgroundOpacity: number;
+    minimumDisplayTime: number;
 };
 
 type DebugMetrics = Partial<{
@@ -49,6 +52,8 @@ export class TranslationOverlay {
     private readonly $debug: HTMLElement;
     private settings: TranslationOverlaySettings;
     private originalText = '';
+    private clearTimerId: number | null = null;
+    private visibleUntil = 0;
 
     constructor($video: HTMLVideoElement, settings: TranslationOverlaySettings) {
         this.settings = settings;
@@ -96,11 +101,15 @@ export class TranslationOverlay {
     }
 
     show(originalText: string, translatedText: string) {
+        this.cancelClear();
         this.originalText = originalText;
         this.$translation.textContent = translatedText;
         this.$original.textContent = originalText;
         this.$original.classList.toggle('bx-gone', !this.settings.showOriginal || !originalText);
         this.$subtitle.classList.toggle('bx-gone', !translatedText);
+        this.visibleUntil = translatedText
+            ? performance.now() + getTranslationDisplayDuration(translatedText, this.settings.minimumDisplayTime)
+            : 0;
     }
 
     showError(message: string) {
@@ -108,7 +117,20 @@ export class TranslationOverlay {
     }
 
     clear() {
-        this.show('', '');
+        if (this.clearTimerId !== null) {
+            return;
+        }
+
+        const remainingTime = this.visibleUntil - performance.now();
+        if (remainingTime <= 0) {
+            this.hide();
+            return;
+        }
+
+        this.clearTimerId = window.setTimeout(() => {
+            this.clearTimerId = null;
+            this.hide();
+        }, remainingTime);
     }
 
     updateDebug(metrics: DebugMetrics) {
@@ -123,6 +145,23 @@ export class TranslationOverlay {
     }
 
     destroy() {
+        this.cancelClear();
         this.$root.remove();
+    }
+
+    private hide() {
+        this.originalText = '';
+        this.visibleUntil = 0;
+        this.$translation.textContent = '';
+        this.$original.textContent = '';
+        this.$original.classList.add('bx-gone');
+        this.$subtitle.classList.add('bx-gone');
+    }
+
+    private cancelClear() {
+        if (this.clearTimerId !== null) {
+            window.clearTimeout(this.clearTimerId);
+            this.clearTimerId = null;
+        }
     }
 }
