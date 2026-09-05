@@ -335,7 +335,9 @@ export class GameTranslator {
         } catch (error) {
             if (sessionId === this.sessionId && !abortController.signal.aborted) {
                 BxLogger.error(this.LOG_TAG, 'Translation failed', error);
-                this.overlay?.showError('Translation unavailable');
+                // Keep diagnostics out of the subtitles. Let the previous translation
+                // finish its reading time, without leaving stale dialogue indefinitely.
+                this.overlay?.clear();
             }
         } finally {
             if (this.translationAbortController === abortController) {

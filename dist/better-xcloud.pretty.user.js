@@ -12221,7 +12221,7 @@ class GameTranslator {
     translatedText: result.text
    });
   } catch (error) {
-   if (sessionId === this.sessionId && !abortController.signal.aborted) BxLogger.error(this.LOG_TAG, "Translation failed", error), this.overlay?.showError("Translation unavailable");
+   if (sessionId === this.sessionId && !abortController.signal.aborted) BxLogger.error(this.LOG_TAG, "Translation failed", error), this.overlay?.clear();
   } finally {
    if (this.translationAbortController === abortController) this.translationAbortController = null;
   }
