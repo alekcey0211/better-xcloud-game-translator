@@ -7,7 +7,6 @@ const TESSERACT_CORE_VERSION = '7.0.0';
 
 export interface OcrEngine {
     recognize(image: HTMLCanvasElement): Promise<OcrResult>;
-    recognizeScene(image: HTMLCanvasElement): Promise<SceneOcrLine[]>;
     terminate(): Promise<void>;
 }
 
@@ -16,20 +15,11 @@ export type OcrResult = {
     confidence: number;
 };
 
-export type SceneOcrLine = OcrResult & {
-    box: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    };
-};
-
 function cleanRecognizedLine(text: string, confidence: number) {
     const line = text.replace(/\s+/g, ' ').trim();
     const letters = line.match(/[a-z]/gi)?.length || 0;
     const visibleCharacters = line.match(/[^\s]/g)?.length || 0;
-    if (confidence < 35 || letters < 3 || !visibleCharacters || letters / visibleCharacters < 0.45) {
+    if (confidence < 35 || letters < 2 || !visibleCharacters || letters / visibleCharacters < 0.45) {
         return '';
     }
 
@@ -41,7 +31,6 @@ export class TesseractOcrEngine implements OcrEngine {
     private worker: TesseractWorker | null = null;
     private workerPromise: Promise<TesseractWorker> | null = null;
     private terminated = false;
-    private pageSegmentationMode: PSM | null = null;
 
     private async getWorker() {
         if (this.terminated) {
@@ -62,7 +51,6 @@ export class TesseractOcrEngine implements OcrEngine {
                     preserve_interword_spaces: '1',
                     user_defined_dpi: '180',
                 });
-                this.pageSegmentationMode = PSM.SINGLE_BLOCK;
 
                 if (this.terminated) {
                     await worker.terminate();
@@ -79,55 +67,12 @@ export class TesseractOcrEngine implements OcrEngine {
 
     async recognize(image: HTMLCanvasElement) {
         const worker = await this.getWorker();
-        await this.setPageSegmentationMode(worker, PSM.SINGLE_BLOCK);
         const result = await worker.recognize(image);
 
         return {
             text: cleanRecognizedLine(result.data.text, result.data.confidence),
             confidence: result.data.confidence,
         };
-    }
-
-    async recognizeScene(image: HTMLCanvasElement) {
-        const worker = await this.getWorker();
-        await this.setPageSegmentationMode(worker, PSM.SPARSE_TEXT);
-        const result = await worker.recognize(image, {}, { text: true, blocks: true });
-        const lines: SceneOcrLine[] = [];
-
-        for (const block of result.data.blocks || []) {
-            for (const paragraph of block.paragraphs) {
-                for (const line of paragraph.lines) {
-                    const text = cleanRecognizedLine(line.text, line.confidence);
-                    const width = line.bbox.x1 - line.bbox.x0;
-                    const height = line.bbox.y1 - line.bbox.y0;
-                    if (!text || width <= 0 || height <= 0) {
-                        continue;
-                    }
-
-                    lines.push({
-                        text,
-                        confidence: line.confidence,
-                        box: {
-                            x: line.bbox.x0 / image.width,
-                            y: line.bbox.y0 / image.height,
-                            width: width / image.width,
-                            height: height / image.height,
-                        },
-                    });
-                }
-            }
-        }
-
-        return lines;
-    }
-
-    private async setPageSegmentationMode(worker: TesseractWorker, mode: PSM) {
-        if (this.pageSegmentationMode === mode) {
-            return;
-        }
-
-        await worker.setParameters({ tessedit_pageseg_mode: mode });
-        this.pageSegmentationMode = mode;
     }
 
     async terminate() {
@@ -141,7 +86,6 @@ export class TesseractOcrEngine implements OcrEngine {
         } finally {
             this.worker = null;
             this.workerPromise = null;
-            this.pageSegmentationMode = null;
         }
     }
 }

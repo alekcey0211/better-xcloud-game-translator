@@ -8,7 +8,7 @@ import { CE } from "../html";
 import { t, SUPPORTED_LANGUAGES } from "../translation";
 import { UserAgent } from "../user-agent";
 import { BaseSettingsStorage } from "./base-settings-storage";
-import { CodecProfile, StreamResolution, TouchControllerMode, TouchControllerStyleStandard, TouchControllerStyleCustom, GameBarPosition, NativeMkbMode, UiLayout, UiSection, BlockFeature, UiTheme, GameTranslatorMode, GameTranslatorOcrRegion, GameTranslatorProvider } from "@/enums/pref-values";
+import { CodecProfile, StreamResolution, TouchControllerMode, TouchControllerStyleStandard, TouchControllerStyleCustom, GameBarPosition, NativeMkbMode, UiLayout, UiSection, BlockFeature, UiTheme, GameTranslatorOcrRegion, GameTranslatorProvider } from "@/enums/pref-values";
 import { GhPagesUtils } from "../gh-pages";
 import { BxEventBus } from "../bx-event-bus";
 
@@ -193,16 +193,6 @@ export class GlobalSettingsStorage extends BaseSettingsStorage<GlobalPref> {
             default: false,
             experimental: true,
             note: t('game-translator-privacy-note'),
-        },
-        [GlobalPref.GAME_TRANSLATOR_MODE]: {
-            requiredVariants: 'full',
-            label: t('game-translator-mode'),
-            default: GameTranslatorMode.SUBTITLES,
-            options: {
-                [GameTranslatorMode.SUBTITLES]: t('game-translator-mode-subtitles'),
-                [GameTranslatorMode.ALL_TEXT]: t('game-translator-mode-all-text'),
-            },
-            note: t('game-translator-mode-note'),
         },
         [GlobalPref.GAME_TRANSLATOR_OCR_REGION]: {
             requiredVariants: 'full',

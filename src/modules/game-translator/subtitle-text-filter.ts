@@ -3,10 +3,11 @@ import { normalizeText } from "./text-stabilizer.ts";
 export const MIN_SUBTITLE_OCR_CONFIDENCE = 45;
 
 const UI_TEXT_PATTERNS = [
-    /^(?:press|hold|tap|release)\s+(?:[a-z0-9]|button|key|to)\b/i,
+    /^(?:press|hold|tap|release)\s+(?:[a-z0-9]|button|key)\s+to\b/i,
+    /^(?:press|hold|tap|release)\s+to\b/i,
     /^(?:new\s+)?(?:objective|mission|quest)\s+(?:updated|complete|completed|failed)\b/i,
     /^(?:checkpoint\s+(?:reached|saved)|auto-?saving|saving|loading)\b/i,
-    /^(?:ammo|armor|health|score|inventory|settings|options|map)\b/i,
+    /^(?:ammo|armor|health|score|inventory|settings|options|map)(?:\s*[\d\s/:+%-]+)?[.!]?$/i,
     /\bhttps?:\/\//i,
 ];
 
@@ -27,10 +28,11 @@ export function isLikelySubtitleText(rawText: string) {
         return false;
     }
 
-    const words = normalized.split(' ');
-    const hasDialoguePunctuation = /[.!?…,:;–—-]["')\]]?$/.test(text);
-
-    // Short unpunctuated labels are much more likely to be HUD/menu text than
-    // dialogue. One-word dialogue such as "What?" still passes.
-    return words.length >= 3 || hasDialoguePunctuation;
+    const latinLetters = text.match(/[a-z]/gi)?.length || 0;
+    const visibleCharacters = text.match(/\S/g)?.length || 0;
+    // OCR often loses punctuation on short replies ("No", "Thank you").
+    // Reject explicit HUD patterns and symbol noise, not short dialogue itself.
+    return latinLetters / letters >= 0.7
+        && latinLetters / Math.max(1, visibleCharacters) >= 0.5
+        && !/(.)\1{3,}/i.test(normalized);
 }

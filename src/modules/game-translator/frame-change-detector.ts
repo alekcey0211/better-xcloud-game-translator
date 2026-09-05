@@ -1,9 +1,11 @@
 export class FrameChangeDetector {
     private previousFrame: Uint8Array | null = null;
 
-    compare(frame: Uint8Array) {
+    compare(frame: Uint8Array, updateBaseline = true) {
         const previousFrame = this.previousFrame;
-        this.previousFrame = new Uint8Array(frame);
+        if (updateBaseline) {
+            this.previousFrame = new Uint8Array(frame);
+        }
 
         if (!previousFrame || previousFrame.length !== frame.length) {
             return frame.some(Boolean) ? 1 : 0;

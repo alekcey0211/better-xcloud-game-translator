@@ -155,11 +155,6 @@ export const enum GameTranslatorOcrRegion {
     BOTTOM = 'bottom-35',
 }
 
-export const enum GameTranslatorMode {
-    SUBTITLES = 'subtitles',
-    ALL_TEXT = 'all-text',
-}
-
 export const enum GameTranslatorProvider {
     BROWSER = 'browser',
     DEEPL_CONTEXT = 'deepl-context',

@@ -18,10 +18,8 @@ const MAX_NEUTRAL_SATURATION = 90;
 const VERY_BRIGHT_LUMINANCE = 205;
 const MIN_LOCAL_CONTRAST = 24;
 const MAX_SUBTITLE_LINES = 3;
-const MIN_SUBTITLE_CENTER_Y = 0.42;
-const MAX_SUBTITLE_CENTER_Y = 0.94;
-const CENTER_BAND_LEFT = 0.43;
-const CENTER_BAND_RIGHT = 0.57;
+const CENTER_BAND_LEFT = 0.35;
+const CENTER_BAND_RIGHT = 0.65;
 
 function getLuminance(red: number, green: number, blue: number) {
     return (54 * red + 183 * green + 19 * blue) >> 8;
@@ -105,11 +103,10 @@ export class SubtitleDetector {
         for (const group of rowGroups) {
             const firstRow = group[0];
             const lastRow = group[group.length - 1];
-            const centerY = (firstRow + lastRow) / 2 / height;
+            // The user already selected a subtitle region. Do not crop it again
+            // vertically: higher subtitles and the first line of dialogue get lost.
             if (
                 group.length < 2
-                || centerY < MIN_SUBTITLE_CENTER_Y
-                || centerY > MAX_SUBTITLE_CENTER_Y
                 || lastRow - firstRow + 1 > height * 0.18
             ) {
                 continue;

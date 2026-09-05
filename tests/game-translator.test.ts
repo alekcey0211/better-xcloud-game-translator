@@ -5,11 +5,10 @@ import { FrameChangeDetector } from "../src/modules/game-translator/frame-change
 import { BrowserTranslationProvider } from "../src/modules/game-translator/browser-translation-provider.ts";
 import { DeepLContextTranslationProvider } from "../src/modules/game-translator/deepl-context-translation-provider.ts";
 import { createOcrLayout, OCR_LINE_GAP, OCR_LINE_HEIGHT } from "../src/modules/game-translator/ocr-layout.ts";
-import { haveSimilarSceneText, SceneTextTracker } from "../src/modules/game-translator/scene-text-tracker.ts";
-import { createSceneSignature, isLikelyEnglishSceneText } from "../src/modules/game-translator/scene-text.ts";
 import { SubtitleDetector } from "../src/modules/game-translator/subtitle-detector.ts";
 import { isLikelySubtitleText, MIN_SUBTITLE_OCR_CONFIDENCE } from "../src/modules/game-translator/subtitle-text-filter.ts";
 import { SubtitleTracker } from "../src/modules/game-translator/subtitle-tracker.ts";
+import { SubtitleScanGate } from "../src/modules/game-translator/subtitle-scan-gate.ts";
 import { looksLikeCompleteSubtitle, normalizeText, TextStabilizer } from "../src/modules/game-translator/text-stabilizer.ts";
 import { buildDeepLContext, GameTranslationContext } from "../src/modules/game-translator/translation-context.ts";
 import { getTranslationDisplayDuration } from "../src/modules/game-translator/translation-retention.ts";
@@ -57,14 +56,27 @@ test('subtitle detector accepts centered text-like lines and rejects corner UI',
     assert.ok(!corner.signature.some(Boolean));
 });
 
-test('subtitle detector rejects bright text that does not cross the subtitle center band', () => {
+test('subtitle detector accepts slightly offset dialogue', () => {
     const detector = new SubtitleDetector();
     const frame = createFrame();
     drawSubtitleStrokes(frame, 120, 250);
 
     const detection = detector.detect(frame);
-    assert.equal(detection.lines.length, 0);
-    assert.ok(!detection.signature.some(Boolean));
+    assert.equal(detection.lines.length, 1);
+    assert.ok(detection.signature.some(Boolean));
+});
+
+test('subtitle detector uses the entire selected region, including higher dialogue', () => {
+    const detector = new SubtitleDetector();
+    for (const y of [10, 30, 55, 106, 130]) {
+        const frame = createFrame();
+        drawSubtitleStrokes(frame, 210, 430, y);
+        assert.equal(detector.detect(frame).lines.length, 1, `missed text at y=${y}`);
+    }
+    const frame = createFrame();
+    drawSubtitleStrokes(frame, 210, 430, 30);
+    drawSubtitleStrokes(frame, 240, 400, 45);
+    assert.equal(detector.detect(frame).lines.length, 2);
 });
 
 test('subtitle detector rejects menu-like blocks with more than three lines', () => {
@@ -123,76 +135,36 @@ test('subtitle-aware change score ignores empty frames and detects changed text'
     assert.equal(changeDetector.compare(nextLine), 1);
 });
 
-test('full-screen mode creates a compact signature for scene change detection', () => {
-    const frame = createFrame(320, 180);
-    const firstSignature = createSceneSignature(frame);
-    assert.equal(firstSignature.length, 32 * 18);
-
-    for (let y = 85; y <= 105; y++) {
-        for (let x = 150; x <= 170; x++) {
-            const index = (y * frame.width + x) * 4;
-            frame.data[index] = 240;
-            frame.data[index + 1] = 240;
-            frame.data[index + 2] = 240;
-        }
-    }
-    const nextSignature = createSceneSignature(frame);
-    assert.notDeepEqual(nextSignature, firstSignature);
-});
-
-test('full-screen text filter accepts English UI and rejects non-text regions', () => {
-    assert.ok(isLikelyEnglishSceneText('Open inventory', 75));
-    assert.ok(isLikelyEnglishSceneText('AMMO 12 / 30', 85));
-    assert.ok(isLikelyEnglishSceneText('Mission complete', 75));
-    assert.ok(!isLikelyEnglishSceneText('Open inventory', 65));
-    assert.ok(!isLikelyEnglishSceneText('Settings', 70));
-    assert.ok(!isLikelyEnglishSceneText('123 / 456', 99));
-    assert.ok(!isLikelyEnglishSceneText('https://example.com', 99));
-    assert.ok(!isLikelyEnglishSceneText('|||| TTTT', 99));
-    assert.ok(!isLikelyEnglishSceneText('Сохранение', 99));
-});
-
-test('full-screen text tracker confirms stable OCR and rejects moving noise', () => {
-    const tracker = new SceneTextTracker();
-    const line = {
-        text: 'Open inventory',
-        confidence: 78,
-        box: { x: 0.2, y: 0.3, width: 0.25, height: 0.05 },
-    };
-
-    assert.deepEqual(tracker.update([line]), []);
-    assert.equal(tracker.needsConfirmation(), true);
-
-    const repeatedLine = {
-        ...line,
-        text: 'Open inventory.',
-        box: { ...line.box, x: 0.21 },
-    };
-    assert.ok(haveSimilarSceneText(line, repeatedLine));
-    assert.deepEqual(tracker.update([repeatedLine]), [repeatedLine]);
-    assert.equal(tracker.needsConfirmation(), false);
-
-    const movingNoise = {
-        ...line,
-        text: 'Random noise',
-        box: { ...line.box, x: 0.7 },
-    };
-    assert.ok(!haveSimilarSceneText(line, movingNoise));
-    assert.deepEqual(tracker.update([movingNoise]), []);
-    assert.equal(tracker.needsConfirmation(), true);
-    assert.deepEqual(tracker.update([{
-        ...movingNoise,
-        text: 'Different artifact',
-        box: { ...movingNoise.box, y: 0.7 },
-    }]), []);
-    assert.equal(tracker.needsConfirmation(), false);
-});
-
 test('normalization and complete-subtitle detection handle game dialogue punctuation', () => {
     assert.equal(normalizeText('  I need   your help! '), 'i need your help');
     assert.ok(looksLikeCompleteSubtitle('I need your help!'));
     assert.ok(looksLikeCompleteSubtitle("Coen: I didn't know —"));
     assert.ok(!looksLikeCompleteSubtitle('I need your'));
+});
+
+test('subtitle OCR retries static text at a bounded rate and resets for new dialogue', () => {
+    const gate = new SubtitleScanGate();
+    const signature = new Uint8Array([0, 1, 1, 0]);
+    assert.equal(gate.evaluate(signature, 0.12, 0).shouldScan, true);
+    for (const time of [125, 500, 1000, 1499]) {
+        assert.equal(gate.evaluate(signature, 0.12, time).shouldScan, false);
+    }
+    assert.equal(gate.evaluate(signature, 0.12, 1500).shouldScan, true);
+    assert.equal(gate.evaluate(signature, 0.12, 1625).shouldScan, false);
+    gate.reset();
+    assert.equal(gate.evaluate(signature, 0.12, 1700).shouldScan, true);
+});
+
+test('subtitle OCR detects cumulative changes instead of forgetting them between ticks', () => {
+    const gate = new SubtitleScanGate();
+    const signature = new Uint8Array(100).fill(1);
+    assert.equal(gate.evaluate(signature, 0.12, 0).shouldScan, true);
+    signature.fill(0, 0, 5);
+    assert.equal(gate.evaluate(signature, 0.12, 125).shouldScan, false);
+    signature.fill(0, 0, 10);
+    assert.equal(gate.evaluate(signature, 0.12, 250).shouldScan, false);
+    signature.fill(0, 0, 15);
+    assert.equal(gate.evaluate(signature, 0.12, 375).shouldScan, true);
 });
 
 test('subtitle text filter keeps dialogue and rejects common HUD text', () => {
@@ -203,7 +175,13 @@ test('subtitle text filter keeps dialogue and rejects common HUD text', () => {
     assert.ok(!isLikelySubtitleText('HOLD X TO SKIP'));
     assert.ok(!isLikelySubtitleText('OBJECTIVE UPDATED'));
     assert.ok(!isLikelySubtitleText('Ammo 12 / 30'));
-    assert.ok(!isLikelySubtitleText('Open door'));
+    assert.ok(isLikelySubtitleText('Open door'));
+    for (const text of ['No', 'Go', 'What', 'Thank you', 'Hold a moment', 'Map out a route']) {
+        assert.ok(isLikelySubtitleText(text), `rejected dialogue: ${text}`);
+    }
+    for (const text of ['Inventory', '||||| @@', 'TTTT', 'Сохранение', 'PRESS TO CONTINUE']) {
+        assert.ok(!isLikelySubtitleText(text), `accepted noise: ${text}`);
+    }
 });
 
 test('translation display time gives longer lines enough reading time', () => {
