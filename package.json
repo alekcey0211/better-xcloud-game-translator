@@ -13,7 +13,7 @@
     "serve:quest": "node scripts/serve-userscript.mjs",
     "test:game-translator": "node --experimental-strip-types --test tests/game-translator.test.ts",
     "test:game-translator:video": "node --experimental-strip-types --test tests/game-translator-video.test.ts",
-    "test:game-translator:video:strict": "STRICT_VIDEO_TESTS=1 node --experimental-strip-types --test tests/game-translator-video.test.ts"
+    "test:game-translator:video:strict": "node --experimental-strip-types --test tests/game-translator-video.test.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.2.21",

@@ -103,8 +103,7 @@
         ]
       ],
       "file": "two-lines.png",
-      "expectedText": "Coen: Came here by accident, to be honest. Didn't know anyone lived in these parts.",
-      "knownIssue": "OCR adds background glyphs to the two-line reply; the expected transcript must remain unchanged."
+      "expectedText": "Coen: Came here by accident, to be honest. Didn't know anyone lived in these parts."
     },
     {
       "id": "short-reply",

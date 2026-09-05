@@ -11695,17 +11695,24 @@ class SubtitleDetector {
    if (!group || y - group[group.length - 1] > 2) rowGroups.push([y]);
    else group.push(y);
   }
-  let lines = [], signatureWidth = Math.ceil(width / 4), signatureHeight = Math.ceil(height / 4), signature = new Uint8Array(signatureWidth * signatureHeight), horizontalPadding = Math.round(width * 0.03), verticalPadding = Math.max(3, Math.round(height * 0.05));
+  let lines = [], signatureWidth = Math.ceil(width / 4), signatureHeight = Math.ceil(height / 4), signature = new Uint8Array(signatureWidth * signatureHeight);
   for (let group of rowGroups) {
    let firstRow = group[0], lastRow = group[group.length - 1];
    if (group.length < 2 || lastRow - firstRow + 1 > height * 0.18) continue;
-   let firstColumn = width, lastColumn = 0;
+   let lineHeight = lastRow - firstRow + 1, columnInk = new Uint16Array(width);
    for (let y = Math.max(0, firstRow - 1);y <= Math.min(height - 1, lastRow + 1); y++)
     for (let x = horizontalMargin;x < width - horizontalMargin; x++)
-     if (ink[y * width + x]) firstColumn = Math.min(firstColumn, x), lastColumn = Math.max(lastColumn, x);
-   let crossesSubtitleCenter = firstColumn <= width * 0.65 && lastColumn >= width * 0.35;
-   if (firstColumn >= lastColumn || lastColumn - firstColumn < width * 0.05 || !crossesSubtitleCenter) continue;
-   let x0 = Math.max(0, firstColumn - horizontalPadding), x1 = Math.min(width, lastColumn + horizontalPadding + 1), y0 = Math.max(0, firstRow - verticalPadding), y1 = Math.min(height, lastRow + verticalPadding + 1);
+     if (ink[y * width + x]) columnInk[x]++;
+   let clusters = [], maxGap = Math.max(8, lineHeight * 2);
+   for (let x = horizontalMargin;x < width - horizontalMargin; x++) {
+    if (!columnInk[x]) continue;
+    let previous = clusters[clusters.length - 1];
+    if (!previous || x - previous.last > maxGap) clusters.push({ first: x, last: x, ink: columnInk[x] });
+    else previous.last = x, previous.ink += columnInk[x];
+   }
+   let candidate = clusters.filter((cluster) => cluster.first <= width * 0.65 && cluster.last >= width * 0.35 && cluster.last - cluster.first >= width * 0.05).sort((left, right) => right.ink - left.ink)[0];
+   if (!candidate) continue;
+   let { first: firstColumn, last: lastColumn } = candidate, horizontalPadding = Math.max(3, Math.ceil(lineHeight * 0.5)), verticalPadding = Math.max(2, Math.ceil(lineHeight * 0.3)), x0 = Math.max(0, firstColumn - horizontalPadding), x1 = Math.min(width, lastColumn + horizontalPadding + 1), y0 = Math.max(0, firstRow - verticalPadding), y1 = Math.min(height, lastRow + verticalPadding + 1);
    lines.push({
     x: x0 / width,
     y: y0 / height,

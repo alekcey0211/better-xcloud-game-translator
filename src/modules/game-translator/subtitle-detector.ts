@@ -97,8 +97,6 @@ export class SubtitleDetector {
         const signatureWidth = Math.ceil(width / SIGNATURE_SCALE);
         const signatureHeight = Math.ceil(height / SIGNATURE_SCALE);
         const signature = new Uint8Array(signatureWidth * signatureHeight);
-        const horizontalPadding = Math.round(width * 0.03);
-        const verticalPadding = Math.max(3, Math.round(height * 0.05));
 
         for (const group of rowGroups) {
             const firstRow = group[0];
@@ -112,23 +110,47 @@ export class SubtitleDetector {
                 continue;
             }
 
-            let firstColumn = width;
-            let lastColumn = 0;
+            const lineHeight = lastRow - firstRow + 1;
+            const columnInk = new Uint16Array(width);
             for (let y = Math.max(0, firstRow - 1); y <= Math.min(height - 1, lastRow + 1); y++) {
                 for (let x = horizontalMargin; x < width - horizontalMargin; x++) {
                     if (ink[y * width + x]) {
-                        firstColumn = Math.min(firstColumn, x);
-                        lastColumn = Math.max(lastColumn, x);
+                        columnInk[x]++;
                     }
                 }
             }
 
-            const crossesSubtitleCenter = firstColumn <= width * CENTER_BAND_RIGHT
-                && lastColumn >= width * CENTER_BAND_LEFT;
-            if (firstColumn >= lastColumn || lastColumn - firstColumn < width * 0.05 || !crossesSubtitleCenter) {
+            // A distant bright rock on the same row must not expand the text crop.
+            // Join letters and word spaces, but split off isolated background clusters.
+            const clusters: { first: number; last: number; ink: number }[] = [];
+            const maxGap = Math.max(8, lineHeight * 2);
+            for (let x = horizontalMargin; x < width - horizontalMargin; x++) {
+                if (!columnInk[x]) {
+                    continue;
+                }
+                const previous = clusters[clusters.length - 1];
+                if (!previous || x - previous.last > maxGap) {
+                    clusters.push({ first: x, last: x, ink: columnInk[x] });
+                } else {
+                    previous.last = x;
+                    previous.ink += columnInk[x];
+                }
+            }
+            const candidate = clusters
+                .filter(cluster => cluster.first <= width * CENTER_BAND_RIGHT
+                    && cluster.last >= width * CENTER_BAND_LEFT
+                    && cluster.last - cluster.first >= width * 0.05)
+                .sort((left, right) => right.ink - left.ink)[0];
+            if (!candidate) {
                 continue;
             }
 
+            const firstColumn = candidate.first;
+            const lastColumn = candidate.last;
+            // Padding scales with glyph height, not screen size. Wide padding used
+            // to include scenery and fragments of the neighbouring subtitle line.
+            const horizontalPadding = Math.max(3, Math.ceil(lineHeight * 0.5));
+            const verticalPadding = Math.max(2, Math.ceil(lineHeight * 0.3));
             const x0 = Math.max(0, firstColumn - horizontalPadding);
             const x1 = Math.min(width, lastColumn + horizontalPadding + 1);
             const y0 = Math.max(0, firstRow - verticalPadding);

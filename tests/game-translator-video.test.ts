@@ -15,7 +15,7 @@ const directory = fileURLToPath(new URL('./fixtures/game-translator/quest-2026-0
 const manifest = JSON.parse(readFileSync(resolve(directory, 'manifest.json'), 'utf8')) as {
     width: number;
     height: number;
-    samples: { id: string; timeSeconds: number; file: string; expectedText: string; knownIssue?: string }[];
+    samples: { id: string; timeSeconds: number; file: string; expectedText: string }[];
 };
 
 test('Quest recording: real subtitle crops reach the translation input without background noise', { timeout: 120000 }, async t => {
@@ -56,7 +56,7 @@ test('Quest recording: real subtitle crops reach the translation input without b
                 const actual = normalizeText(acceptedText);
                 const expected = normalizeText(sample.expectedText);
                 if (expected) {
-                    // Missing/reordered dialogue always fails, even for the known noise case.
+                    // Missing/reordered dialogue must fail as well as extra OCR text.
                     const words = actual.split(' ');
                     let index = 0;
                     for (const word of expected.split(' ')) {
@@ -66,9 +66,7 @@ test('Quest recording: real subtitle crops reach the translation input without b
                     }
                 }
                 // Full normalized equality catches extra OCR text as well as missing words.
-                await sampleTest.test('no extra OCR words', {
-                    todo: process.env.STRICT_VIDEO_TESTS === '1' ? undefined : sample.knownIssue,
-                }, () => assert.equal(actual, expected, diagnostic));
+                await sampleTest.test('no extra OCR words', () => assert.equal(actual, expected, diagnostic));
             });
         }
     } finally {

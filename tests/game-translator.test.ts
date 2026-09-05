@@ -66,6 +66,36 @@ test('subtitle detector accepts slightly offset dialogue', () => {
     assert.ok(detection.signature.some(Boolean));
 });
 
+test('subtitle crops and signatures ignore isolated background on the same row', () => {
+    const detector = new SubtitleDetector();
+    const clean = createFrame();
+    drawSubtitleStrokes(clean, 210, 430);
+    const noisy = createFrame();
+    drawSubtitleStrokes(noisy, 210, 430);
+    drawSubtitleStrokes(noisy, 40, 100);
+    drawSubtitleStrokes(noisy, 530, 600);
+
+    const expected = detector.detect(clean);
+    const actual = detector.detect(noisy);
+    assert.equal(expected.lines.length, 1);
+    assert.deepEqual(actual.lines, expected.lines);
+    assert.deepEqual(actual.signature, expected.signature);
+});
+
+test('subtitle crops retain word spaces without including adjacent lines', () => {
+    const detector = new SubtitleDetector();
+    const frame = createFrame();
+    drawSubtitleStrokes(frame, 210, 264, 80);
+    drawSubtitleStrokes(frame, 276, 420, 80);
+    drawSubtitleStrokes(frame, 240, 390, 94);
+    const { lines } = detector.detect(frame);
+
+    assert.equal(lines.length, 2);
+    assert.ok(lines[0].x <= 210 / frame.width);
+    assert.ok(lines[0].x + lines[0].width >= 420 / frame.width);
+    assert.ok(lines[0].y + lines[0].height <= lines[1].y);
+});
+
 test('subtitle detector uses the entire selected region, including higher dialogue', () => {
     const detector = new SubtitleDetector();
     for (const y of [10, 30, 55, 106, 130]) {
