@@ -1,0 +1,182 @@
+{
+  "source": {
+    "name": "Untitled.mp4",
+    "sha256": "0277e52137ebde5c3460a3238185adadfa4a9e97783a31b0e65de17c53acb58a",
+    "width": 1920,
+    "height": 1080,
+    "durationSeconds": 24.0182
+  },
+  "width": 1280,
+  "height": 280,
+  "samples": [
+    {
+      "id": "reply",
+      "timeSeconds": 1,
+      "quad": [
+        [
+          391,
+          513
+        ],
+        [
+          1650,
+          463
+        ],
+        [
+          382,
+          784
+        ],
+        [
+          1683,
+          742
+        ]
+      ],
+      "file": "reply.png",
+      "expectedText": "Coen: Um, alright. Not moving."
+    },
+    {
+      "id": "question",
+      "timeSeconds": 6,
+      "quad": [
+        [
+          405,
+          670
+        ],
+        [
+          1674,
+          619
+        ],
+        [
+          379,
+          958
+        ],
+        [
+          1733,
+          913
+        ]
+      ],
+      "file": "question.png",
+      "expectedText": "Uriash Hermit: Now, tell: why here?"
+    },
+    {
+      "id": "no-subtitle",
+      "timeSeconds": 7,
+      "quad": [
+        [
+          480,
+          580
+        ],
+        [
+          1750,
+          516
+        ],
+        [
+          469,
+          849
+        ],
+        [
+          1799,
+          810
+        ]
+      ],
+      "file": "no-subtitle.png",
+      "expectedText": ""
+    },
+    {
+      "id": "two-lines",
+      "timeSeconds": 9,
+      "quad": [
+        [
+          381,
+          529
+        ],
+        [
+          1638,
+          462
+        ],
+        [
+          374,
+          801
+        ],
+        [
+          1676,
+          741
+        ]
+      ],
+      "file": "two-lines.png",
+      "expectedText": "Coen: Came here by accident, to be honest. Didn't know anyone lived in these parts.",
+      "knownIssue": "OCR adds background glyphs to the two-line reply; the expected transcript must remain unchanged."
+    },
+    {
+      "id": "short-reply",
+      "timeSeconds": 12,
+      "quad": [
+        [
+          373,
+          517
+        ],
+        [
+          1628,
+          454
+        ],
+        [
+          367,
+          790
+        ],
+        [
+          1665,
+          728
+        ]
+      ],
+      "file": "short-reply.png",
+      "expectedText": "Uriash Hermit: Now know."
+    },
+    {
+      "id": "colon",
+      "timeSeconds": 16,
+      "quad": [
+        [
+          369,
+          534
+        ],
+        [
+          1620,
+          469
+        ],
+        [
+          361,
+          806
+        ],
+        [
+          1659,
+          743
+        ]
+      ],
+      "file": "colon.png",
+      "expectedText": "Uriash Hermit: Human not listen. I say slow:"
+    },
+    {
+      "id": "go-away",
+      "timeSeconds": 22,
+      "quad": [
+        [
+          370,
+          614
+        ],
+        [
+          1634,
+          568
+        ],
+        [
+          350,
+          899
+        ],
+        [
+          1680,
+          852
+        ]
+      ],
+      "file": "go-away.png",
+      "expectedText": "Uriash Hermit: Go. Away."
+    }
+  ]
+}
