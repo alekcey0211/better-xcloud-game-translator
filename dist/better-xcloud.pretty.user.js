@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better xCloud
 // @namespace    https://github.com/redphx
-// @version      6.7.13.0
+// @version      6.7.13.1
 // @description  Improve Xbox Cloud Gaming (xCloud) experience
 // @author       redphx
 // @license      MIT
@@ -1103,7 +1103,7 @@ class UserAgent {
   });
  }
 }
-var SCRIPT_VERSION = "6.7.13.0", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
+var SCRIPT_VERSION = "6.7.13.1", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
 UserAgent.init();
 var userAgent = window.navigator.userAgent.toLowerCase(), isTv = userAgent.includes("smart-tv") || userAgent.includes("smarttv") || /\baft.*\b/.test(userAgent), isVr = window.navigator.userAgent.includes("VR") && window.navigator.userAgent.includes("OculusBrowser"), browserHasTouchSupport = "ontouchstart" in window || navigator.maxTouchPoints > 0, userAgentHasTouchSupport = !isTv && !isVr && browserHasTouchSupport, STATES = {
  supportedRegion: !0,
@@ -12015,13 +12015,13 @@ class DictionaryTranslationProvider {
  getDictionaryId;
  fetcher;
  constructor(getDictionaryId, fetcher) {
-  this.getDictionaryId = getDictionaryId, this.fetcher = fetcher;
+  this.getDictionaryId = getDictionaryId, this.fetcher = async (input, init) => fetcher(input, init);
  }
  prepare() {
   let id = this.getDictionaryId();
   if (this.load?.id === id && Date.now() < this.load.retryAt) return this.load.promise;
   this.destroy();
-  let descriptor = Object.hasOwn(GAME_DICTIONARIES, id) ? GAME_DICTIONARIES[id] : void 0;
+  let descriptor = Object.prototype.hasOwnProperty.call(GAME_DICTIONARIES, id) ? GAME_DICTIONARIES[id] : void 0;
   if (!descriptor) return Promise.reject(new Error("Select a game dictionary"));
   let controller = new AbortController, timeout = setTimeout(() => controller.abort(), 20000), load = {
    id,
@@ -12405,7 +12405,7 @@ class GameTranslator {
   }).catch((error) => {
    if (preparationId === this.providerPreparationId) {
     BxLogger.error(this.LOG_TAG, "Translation provider preparation failed", error);
-    let status = isDictionary ? "Не удалось загрузить русификатор. Проверьте сеть и выбранную игру." : this.settings.provider === "deepl-context" ? "Configure the DeepL proxy URL" : "Chrome Translator is unavailable; select MyMemory";
+    let reason = error instanceof Error ? error.message.slice(0, 120) : "неизвестная ошибка", status = isDictionary ? `Не удалось загрузить русификатор: ${reason}` : this.settings.provider === "deepl-context" ? "Configure the DeepL proxy URL" : "Chrome Translator is unavailable; select MyMemory";
     Toast.show("Game Translator", status);
    }
   });

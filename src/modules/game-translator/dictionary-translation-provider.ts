@@ -17,7 +17,10 @@ export class DictionaryTranslationProvider {
 
     constructor(getDictionaryId: () => string, fetcher: Fetcher) {
         this.getDictionaryId = getDictionaryId;
-        this.fetcher = fetcher;
+        // Native window.fetch rejects a provider instance as its receiver.
+        // Call the injected function standalone; async also turns synchronous
+        // transport failures into rejections handled by the load retry/cleanup.
+        this.fetcher = async (input, init) => fetcher(input, init);
     }
 
     prepare() {
@@ -26,7 +29,7 @@ export class DictionaryTranslationProvider {
             return this.load.promise;
         }
         this.destroy();
-        const descriptor = Object.hasOwn(GAME_DICTIONARIES, id)
+        const descriptor = Object.prototype.hasOwnProperty.call(GAME_DICTIONARIES, id)
             ? GAME_DICTIONARIES[id as keyof typeof GAME_DICTIONARIES] : undefined;
         if (!descriptor) {
             return Promise.reject(new Error('Select a game dictionary'));

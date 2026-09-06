@@ -459,7 +459,8 @@ export class GameTranslator {
         }).catch(error => {
             if (preparationId === this.providerPreparationId) {
                 BxLogger.error(this.LOG_TAG, 'Translation provider preparation failed', error);
-                const status = isDictionary ? 'Не удалось загрузить русификатор. Проверьте сеть и выбранную игру.'
+                const reason = error instanceof Error ? error.message.slice(0, 120) : 'неизвестная ошибка';
+                const status = isDictionary ? `Не удалось загрузить русификатор: ${reason}`
                     : this.settings.provider === GameTranslatorProvider.DEEPL_CONTEXT
                     ? 'Configure the DeepL proxy URL'
                     : 'Chrome Translator is unavailable; select MyMemory';

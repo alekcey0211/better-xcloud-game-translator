@@ -78,3 +78,20 @@ bun tests/game-translator-service.test.ts
 шесть реплик должны дать точный русский перевод из пакета после настоящего OCR;
 кадр без субтитров должен остаться пустым. Это не проверка всех диалогов игры
 и не запуск на физическом Quest.
+
+### Браузерная проверка загрузчика
+
+Node-моки не проверяют требование браузерного `fetch` к контексту вызова.
+Для проверки настоящего `window.fetch`, загрузки опубликованного словаря и
+пустого результата для неизвестной фразы:
+
+```bash
+mkdir -p .cache/dictionary-browser-check
+bun build tests/browser/dictionary-loading.ts --outfile .cache/dictionary-browser-check/check.js --target browser
+cp tests/browser/dictionary-loading.html .cache/dictionary-browser-check/index.html
+python3 -m http.server 8766 --bind 127.0.0.1 --directory .cache/dictionary-browser-check
+```
+
+Откройте `http://127.0.0.1:8766` в браузере и дождитесь **PASS**.
+Тест использует настоящий провайдер и передаёт ему небиндированный `window.fetch`,
+как основной userscript. Он не вызывает онлайн-переводчики.

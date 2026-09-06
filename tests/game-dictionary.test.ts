@@ -178,3 +178,30 @@ test('a transient OCR candidate is cancelled when the displayed line returns', a
         stabilizer.reset();
     }
 });
+
+test('native-style fetch is called without a provider receiver', async () => {
+    const provider = new DictionaryTranslationProvider(() => DEFAULT_GAME_DICTIONARY, function (this: unknown) {
+        assert.equal(this, undefined, 'Native fetch rejects the provider as this (Illegal invocation)');
+        return Promise.resolve(new Response(JSON.stringify(pack)));
+    });
+    try {
+        assert.equal(await provider.translate('Go. Away.', 'en', 'ru', signal), 'Иди. Прочь.');
+    } finally {
+        provider.destroy();
+    }
+});
+
+test('synchronous transport errors are throttled and returned as promise rejections', async () => {
+    let calls = 0;
+    const provider = new DictionaryTranslationProvider(() => DEFAULT_GAME_DICTIONARY, () => {
+        calls++;
+        throw new TypeError('Transport failed synchronously');
+    });
+    try {
+        await assert.rejects(provider.prepare(), /Transport failed synchronously/);
+        await assert.rejects(provider.prepare(), /Transport failed synchronously/);
+        assert.equal(calls, 1);
+    } finally {
+        provider.destroy();
+    }
+});
