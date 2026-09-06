@@ -92,6 +92,7 @@ export const enum GlobalPref {
     GAME_TRANSLATOR_STABILIZATION_INTERVAL = 'gameTranslator.stabilizationInterval',
     GAME_TRANSLATOR_MIN_DISPLAY_TIME = 'gameTranslator.minimumDisplayTime',
     GAME_TRANSLATOR_PROVIDER = 'gameTranslator.provider',
+    GAME_TRANSLATOR_DICTIONARY = 'gameTranslator.dictionary',
     GAME_TRANSLATOR_DEEPL_PROXY_URL = 'gameTranslator.deepl.proxyUrl',
     GAME_TRANSLATOR_SHOW_ORIGINAL = 'gameTranslator.showOriginal',
     GAME_TRANSLATOR_DEBUG_REGION = 'gameTranslator.debugRegion',
@@ -114,6 +115,7 @@ export type GlobalPrefTypeMap = {
     [GlobalPref.GAME_TRANSLATOR_STABILIZATION_INTERVAL]: string;
     [GlobalPref.GAME_TRANSLATOR_MIN_DISPLAY_TIME]: string;
     [GlobalPref.GAME_TRANSLATOR_PROVIDER]: GameTranslatorProvider;
+    [GlobalPref.GAME_TRANSLATOR_DICTIONARY]: string;
     [GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL]: string;
     [GlobalPref.GAME_TRANSLATOR_SHOW_ORIGINAL]: boolean;
     [GlobalPref.GAME_TRANSLATOR_DEBUG_REGION]: boolean;
@@ -263,6 +265,7 @@ export const ALL_PREFS: {
         GlobalPref.GAME_TRANSLATOR_STABILIZATION_INTERVAL,
         GlobalPref.GAME_TRANSLATOR_MIN_DISPLAY_TIME,
         GlobalPref.GAME_TRANSLATOR_PROVIDER,
+        GlobalPref.GAME_TRANSLATOR_DICTIONARY,
         GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL,
         GlobalPref.GAME_TRANSLATOR_SHOW_ORIGINAL,
         GlobalPref.GAME_TRANSLATOR_DEBUG_REGION,

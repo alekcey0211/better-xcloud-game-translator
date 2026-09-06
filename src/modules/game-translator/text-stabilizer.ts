@@ -50,6 +50,7 @@ export function looksLikeCompleteSubtitle(text: string) {
 
 export class TextStabilizer {
     private delay: number;
+    private exactMatching: boolean;
     private readonly onStable: (text: string) => void;
     private timeoutId: ReturnType<typeof setTimeout> | null = null;
     private candidate = '';
@@ -57,9 +58,15 @@ export class TextStabilizer {
     private lastEmittedKey = '';
     private candidateStartedAt = 0;
 
-    constructor(delay: number, onStable: (text: string) => void) {
+    constructor(delay: number, onStable: (text: string) => void, exactMatching = false) {
+        this.exactMatching = exactMatching;
         this.delay = delay;
         this.onStable = onStable;
+    }
+
+    setExactMatching(exactMatching: boolean) {
+        this.exactMatching = exactMatching;
+        this.reset();
     }
 
     setDelay(delay: number) {
@@ -68,12 +75,18 @@ export class TextStabilizer {
 
     push(rawText: string, quick = false) {
         const text = normalizeDisplayText(rawText);
-        const key = normalizeText(text);
-        const containsEnoughText = (key.match(/[a-z]/g) || []).length >= 2 && key.length <= 400;
+        const key = this.exactMatching ? text : normalizeText(text);
+        const containsEnoughText = (key.match(/[a-z]/gi) || []).length >= 2 && key.length <= 400;
         const nextText = containsEnoughText ? text : '';
         const nextKey = containsEnoughText ? key : '';
 
-        if (nextKey === this.lastEmittedKey || (nextKey && similarity(nextKey, this.lastEmittedKey) >= 0.92)) {
+        if (nextKey === this.lastEmittedKey || (!this.exactMatching && nextKey && similarity(nextKey, this.lastEmittedKey) >= 0.92)) {
+            // The frame returned to the displayed line (or became empty). Do not
+            // emit a different candidate whose stabilization timer is still pending.
+            this.timeoutId && clearTimeout(this.timeoutId);
+            this.timeoutId = null;
+            this.candidate = nextText;
+            this.candidateKey = nextKey;
             return;
         }
 
@@ -84,7 +97,7 @@ export class TextStabilizer {
             return;
         }
 
-        if (nextKey && this.candidateKey && similarity(nextKey, this.candidateKey) >= 0.88) {
+        if (!this.exactMatching && nextKey && this.candidateKey && similarity(nextKey, this.candidateKey) >= 0.88) {
             this.candidate = nextText;
             this.candidateKey = nextKey;
             if (quick) {

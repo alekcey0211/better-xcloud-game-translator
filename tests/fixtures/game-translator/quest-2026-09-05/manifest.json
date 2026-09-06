@@ -31,7 +31,8 @@
         ]
       ],
       "file": "reply.png",
-      "expectedText": "Coen: Um, alright. Not moving."
+      "expectedText": "Coen: Um, alright. Not moving.",
+      "expectedDictionaryText": "Эм, хорошо. Не двигаюсь."
     },
     {
       "id": "question",
@@ -55,7 +56,8 @@
         ]
       ],
       "file": "question.png",
-      "expectedText": "Uriash Hermit: Now, tell: why here?"
+      "expectedText": "Uriash Hermit: Now, tell: why here?",
+      "expectedDictionaryText": "Теперь говори: зачем здесь?"
     },
     {
       "id": "no-subtitle",
@@ -79,7 +81,8 @@
         ]
       ],
       "file": "no-subtitle.png",
-      "expectedText": ""
+      "expectedText": "",
+      "expectedDictionaryText": ""
     },
     {
       "id": "two-lines",
@@ -103,7 +106,8 @@
         ]
       ],
       "file": "two-lines.png",
-      "expectedText": "Coen: Came here by accident, to be honest. Didn't know anyone lived in these parts."
+      "expectedText": "Coen: Came here by accident, to be honest. Didn't know anyone lived in these parts.",
+      "expectedDictionaryText": "Если честно, я попал сюда случайно. Не знал, что в этих краях кто-то живёт."
     },
     {
       "id": "short-reply",
@@ -127,7 +131,8 @@
         ]
       ],
       "file": "short-reply.png",
-      "expectedText": "Uriash Hermit: Now know."
+      "expectedText": "Uriash Hermit: Now know.",
+      "expectedDictionaryText": "Теперь знать."
     },
     {
       "id": "colon",
@@ -151,7 +156,8 @@
         ]
       ],
       "file": "colon.png",
-      "expectedText": "Uriash Hermit: Human not listen. I say slow:"
+      "expectedText": "Uriash Hermit: Human not listen. I say slow:",
+      "expectedDictionaryText": "Человек не слушать. Я говорить медленно:"
     },
     {
       "id": "go-away",
@@ -175,7 +181,8 @@
         ]
       ],
       "file": "go-away.png",
-      "expectedText": "Uriash Hermit: Go. Away."
+      "expectedText": "Uriash Hermit: Go. Away.",
+      "expectedDictionaryText": "Иди. Прочь."
     }
   ]
 }

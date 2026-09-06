@@ -1,6 +1,7 @@
 import { GameTranslatorProvider } from "@/enums/pref-values";
 import { NATIVE_FETCH } from "@/utils/bx-flags";
 
+import { DictionaryTranslationProvider } from "./dictionary-translation-provider";
 import { BrowserTranslationProvider } from "./browser-translation-provider";
 import { DeepLContextTranslationProvider } from "./deepl-context-translation-provider";
 import { normalizeText } from "./text-stabilizer";
@@ -50,11 +51,14 @@ export type TranslationResult = {
 };
 
 export class TranslationService {
+    private readonly getDictionaryId: () => string;
     private readonly cache = new Map<string, string>();
     private readonly providers: Record<GameTranslatorProvider, TranslationProvider>;
 
-    constructor(getDeepLProxyUrl: () => string) {
+    constructor(getDeepLProxyUrl: () => string, getDictionaryId: () => string) {
+        this.getDictionaryId = getDictionaryId;
         this.providers = {
+            [GameTranslatorProvider.DICTIONARY]: new DictionaryTranslationProvider(getDictionaryId, NATIVE_FETCH),
             [GameTranslatorProvider.BROWSER]: new BrowserTranslationProvider(),
             [GameTranslatorProvider.DEEPL_CONTEXT]: new DeepLContextTranslationProvider(getDeepLProxyUrl, NATIVE_FETCH),
             [GameTranslatorProvider.MY_MEMORY]: new MyMemoryTranslationProvider(),
@@ -66,16 +70,26 @@ export class TranslationService {
     }
 
     async translate(providerId: GameTranslatorProvider, text: string, signal: AbortSignal, context?: TranslationContext): Promise<TranslationResult> {
-        const contextKey = providerId === GameTranslatorProvider.DEEPL_CONTEXT ? normalizeText(context?.gameTitle || '') : '';
-        const cacheKey = `${providerId}:${contextKey}:${normalizeText(text)}`;
-        const cached = this.cache.get(cacheKey);
-        if (cached) {
-            return { text: cached, cacheHit: true, latency: 0 };
+        const contextKey = providerId === GameTranslatorProvider.DICTIONARY ? this.getDictionaryId()
+            : providerId === GameTranslatorProvider.DEEPL_CONTEXT ? normalizeText(context?.gameTitle || '') : '';
+        const textKey = providerId === GameTranslatorProvider.DICTIONARY ? text : normalizeText(text);
+        const cacheKey = `${providerId}:${contextKey}:${textKey}`;
+        if (signal.aborted) {
+            throw new DOMException('Translation cancelled', 'AbortError');
+        }
+        if (this.cache.has(cacheKey)) {
+            return { text: this.cache.get(cacheKey)!, cacheHit: true, latency: 0 };
         }
 
         const startedAt = performance.now();
         const translated = await this.providers[providerId].translate(text, 'en', 'ru', signal, context);
         const latency = performance.now() - startedAt;
+        if (signal.aborted) {
+            throw new DOMException('Translation cancelled', 'AbortError');
+        }
+        if (this.cache.size >= 1000) {
+            this.cache.delete(this.cache.keys().next().value!);
+        }
         this.cache.set(cacheKey, translated);
 
         return { text: translated, cacheHit: false, latency };

@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { createWorker, OEM, PSM } from "tesseract.js";
 
+import { DEFAULT_GAME_DICTIONARY, GAME_DICTIONARIES } from "../src/modules/game-translator/dictionary-catalog.ts";
+import { GameDictionary } from "../src/modules/game-translator/game-dictionary.ts";
 import { SubtitleDetector } from "../src/modules/game-translator/subtitle-detector.ts";
 import { SubtitleTracker } from "../src/modules/game-translator/subtitle-tracker.ts";
 import { isLikelySubtitleText, MIN_SUBTITLE_OCR_CONFIDENCE } from "../src/modules/game-translator/subtitle-text-filter.ts";
@@ -15,8 +17,11 @@ const directory = fileURLToPath(new URL('./fixtures/game-translator/quest-2026-0
 const manifest = JSON.parse(readFileSync(resolve(directory, 'manifest.json'), 'utf8')) as {
     width: number;
     height: number;
-    samples: { id: string; timeSeconds: number; file: string; expectedText: string }[];
+    samples: { id: string; timeSeconds: number; file: string; expectedText: string; expectedDictionaryText: string }[];
 };
+
+const dictionaryFile = GAME_DICTIONARIES[DEFAULT_GAME_DICTIONARY].url.split('/').at(-1)!;
+const dictionary = new GameDictionary(JSON.parse(readFileSync(new URL(`../.github/pages/dictionaries/${dictionaryFile}`, import.meta.url), 'utf8')), DEFAULT_GAME_DICTIONARY);
 
 test('Quest recording: real subtitle crops reach the translation input without background noise', { timeout: 120000 }, async t => {
     const cachePath = fileURLToPath(new URL('../.cache/tesseract/', import.meta.url));
@@ -65,6 +70,9 @@ test('Quest recording: real subtitle crops reach the translation input without b
                         index++;
                     }
                 }
+                await sampleTest.test('dictionary-only translation from real OCR', () => {
+                    assert.equal(dictionary.lookup(acceptedText), sample.expectedDictionaryText, diagnostic);
+                });
                 // Full normalized equality catches extra OCR text as well as missing words.
                 await sampleTest.test('no extra OCR words', () => assert.equal(actual, expected, diagnostic));
             });

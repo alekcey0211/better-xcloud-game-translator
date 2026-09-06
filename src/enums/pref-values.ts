@@ -156,6 +156,7 @@ export const enum GameTranslatorOcrRegion {
 }
 
 export const enum GameTranslatorProvider {
+    DICTIONARY = 'dictionary',
     BROWSER = 'browser',
     DEEPL_CONTEXT = 'deepl-context',
     MY_MEMORY = 'my-memory',

@@ -11,9 +11,10 @@
   },
   "scripts": {
     "serve:quest": "node scripts/serve-userscript.mjs",
-    "test:game-translator": "node --experimental-strip-types --test tests/game-translator.test.ts",
+    "test:game-translator": "node --experimental-strip-types --test tests/game-translator.test.ts tests/game-dictionary.test.ts",
     "test:game-translator:video": "node --experimental-strip-types --test tests/game-translator-video.test.ts",
-    "test:game-translator:video:strict": "node --experimental-strip-types --test tests/game-translator-video.test.ts"
+    "test:game-translator:video:strict": "node --experimental-strip-types --test tests/game-translator-video.test.ts",
+    "test:game-translator:service": "bun tests/game-translator-service.test.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.2.21",

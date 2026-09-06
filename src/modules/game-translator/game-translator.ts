@@ -37,6 +37,7 @@ const TRANSLATOR_PREFS = new Set<GlobalPref>([
     GlobalPref.GAME_TRANSLATOR_STABILIZATION_INTERVAL,
     GlobalPref.GAME_TRANSLATOR_MIN_DISPLAY_TIME,
     GlobalPref.GAME_TRANSLATOR_PROVIDER,
+    GlobalPref.GAME_TRANSLATOR_DICTIONARY,
     GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL,
     GlobalPref.GAME_TRANSLATOR_SHOW_ORIGINAL,
     GlobalPref.GAME_TRANSLATOR_DEBUG_REGION,
@@ -73,6 +74,7 @@ export class GameTranslator {
     private readonly subtitleTracker = new SubtitleTracker();
     private readonly translationService = new TranslationService(
         () => getGlobalPref(GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL),
+        () => getGlobalPref(GlobalPref.GAME_TRANSLATOR_DICTIONARY),
     );
     private readonly translationContext = new GameTranslationContext();
     private settings = readSettings();
@@ -144,7 +146,7 @@ export class GameTranslator {
             if (sessionId === this.sessionId) {
                 void this.onStableText(text, sessionId);
             }
-        });
+        }, this.settings.provider === GameTranslatorProvider.DICTIONARY);
         this.overlay = new TranslationOverlay($video, this.settings);
         this.debugMetrics = { interval: this.settings.ocrInterval };
         this.overlay.updateDebug(this.debugMetrics);
@@ -305,13 +307,12 @@ export class GameTranslator {
     }
 
     private async onStableText(text: string, sessionId: number) {
+        this.translationAbortController?.abort();
+        this.translationAbortController = null;
         if (!text) {
             this.overlay?.clear();
             return;
         }
-
-        this.translationAbortController?.abort();
-        this.translationAbortController = null;
 
         BxLogger.info(this.LOG_TAG, 'Stabilized text', text);
         const abortController = new AbortController();
@@ -327,7 +328,7 @@ export class GameTranslator {
 
             this.debugMetrics.translationTime = result.latency;
             this.overlay?.updateDebug(this.debugMetrics);
-            this.overlay?.show(text, result.text);
+            this.overlay?.show(result.text ? text : '', result.text);
             BxLogger.info(this.LOG_TAG, result.cacheHit ? 'Translation cache hit' : 'Translation cache miss', {
                 latency: result.latency,
                 translatedText: result.text,
@@ -335,9 +336,15 @@ export class GameTranslator {
         } catch (error) {
             if (sessionId === this.sessionId && !abortController.signal.aborted) {
                 BxLogger.error(this.LOG_TAG, 'Translation failed', error);
-                // Keep diagnostics out of the subtitles. Let the previous translation
-                // finish its reading time, without leaving stale dialogue indefinitely.
-                this.overlay?.clear();
+                // Keep diagnostics out of subtitles. Dictionary failures must not leave
+                // the previous dialogue visible or trigger an online fallback.
+                if (this.settings.provider === GameTranslatorProvider.DICTIONARY) {
+                    this.overlay?.show('', '');
+                    // Allow the same line to retry after a transient download failure.
+                    this.stabilizer?.reset();
+                } else {
+                    this.overlay?.clear();
+                }
             }
         } finally {
             if (this.translationAbortController === abortController) {
@@ -376,7 +383,8 @@ export class GameTranslator {
         const previousSettings = this.settings;
         this.settings = readSettings();
         const providerChanged = previousSettings.provider !== this.settings.provider;
-        const providerConfigChanged = settingKey === GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL;
+        const providerConfigChanged = settingKey === GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL
+            || settingKey === GlobalPref.GAME_TRANSLATOR_DICTIONARY;
 
         if (!this.settings.enabled) {
             this.stop();
@@ -395,6 +403,8 @@ export class GameTranslator {
             this.translationAbortController?.abort();
             this.translationAbortController = null;
             this.translationService.destroy();
+            this.stabilizer?.setExactMatching(this.settings.provider === GameTranslatorProvider.DICTIONARY);
+            this.overlay?.show('', '');
         }
         if (providerChanged && this.settings.provider === GameTranslatorProvider.DEEPL_CONTEXT) {
             this.loadGameDescription(this.sessionId);
@@ -421,11 +431,15 @@ export class GameTranslator {
     }
 
     private prepareProvider() {
+        const preparationId = ++this.providerPreparationId;
         if (this.settings.provider === GameTranslatorProvider.MY_MEMORY) {
             return;
         }
 
-        const preparationId = ++this.providerPreparationId;
+        const isDictionary = this.settings.provider === GameTranslatorProvider.DICTIONARY;
+        if (isDictionary && this.overlay) {
+            Toast.show('Game Translator', 'Загрузка русификатора…');
+        }
         let showedDownloadToast = false;
         void this.translationService.prepare(this.settings.provider, progress => {
             if (preparationId !== this.providerPreparationId) {
@@ -440,11 +454,13 @@ export class GameTranslator {
             if (preparationId === this.providerPreparationId) {
                 BxLogger.info(this.LOG_TAG, 'Translation provider is ready', this.settings.provider);
                 showedDownloadToast && Toast.show('Game Translator', 'Chrome Translator is ready');
+                isDictionary && this.overlay && Toast.show('Game Translator', 'Русификатор готов. Без онлайн-перевода.');
             }
         }).catch(error => {
             if (preparationId === this.providerPreparationId) {
                 BxLogger.error(this.LOG_TAG, 'Translation provider preparation failed', error);
-                const status = this.settings.provider === GameTranslatorProvider.DEEPL_CONTEXT
+                const status = isDictionary ? 'Не удалось загрузить русификатор. Проверьте сеть и выбранную игру.'
+                    : this.settings.provider === GameTranslatorProvider.DEEPL_CONTEXT
                     ? 'Configure the DeepL proxy URL'
                     : 'Chrome Translator is unavailable; select MyMemory';
                 Toast.show('Game Translator', status);

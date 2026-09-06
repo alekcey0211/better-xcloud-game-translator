@@ -29,6 +29,7 @@ jobs:
           cp dist/better-xcloud.pretty.user.js public/
           cp dist/better-xcloud.meta.js public/
           cp .github/pages/quest-loader.js public/
+          cp -R .github/pages/dictionaries public/
           BASE_VERSION="$(awk '$2 == "@version" { print $3; exit }' dist/better-xcloud.meta.js)"
           VERSION="${BASE_VERSION}.${GITHUB_RUN_NUMBER}"
           for FILE in public/better-xcloud.user.js public/better-xcloud.pretty.user.js public/better-xcloud.meta.js; do

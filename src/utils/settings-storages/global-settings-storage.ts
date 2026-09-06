@@ -1,3 +1,4 @@
+import { DEFAULT_GAME_DICTIONARY, GAME_DICTIONARIES } from "@/modules/game-translator/dictionary-catalog";
 import { BypassServers } from "@/enums/bypass-servers";
 import { GlobalPref, StorageKey } from "@/enums/pref-keys";
 import { UserAgentProfile } from "@/enums/user-agent";
@@ -254,13 +255,21 @@ export class GlobalSettingsStorage extends BaseSettingsStorage<GlobalPref> {
         [GlobalPref.GAME_TRANSLATOR_PROVIDER]: {
             requiredVariants: 'full',
             label: t('game-translator-provider'),
-            default: GameTranslatorProvider.MY_MEMORY,
+            default: GameTranslatorProvider.DICTIONARY,
             options: {
+                [GameTranslatorProvider.DICTIONARY]: t('game-translator-provider-dictionary'),
                 [GameTranslatorProvider.BROWSER]: t('game-translator-provider-browser'),
                 [GameTranslatorProvider.DEEPL_CONTEXT]: t('game-translator-provider-deepl'),
                 [GameTranslatorProvider.MY_MEMORY]: 'MyMemory',
             },
             note: t('game-translator-provider-note'),
+        },
+        [GlobalPref.GAME_TRANSLATOR_DICTIONARY]: {
+            requiredVariants: 'full',
+            label: t('game-translator-dictionary'),
+            default: DEFAULT_GAME_DICTIONARY,
+            options: Object.fromEntries(Object.entries(GAME_DICTIONARIES).map(([id, pack]) => [id, pack.label])),
+            note: t('game-translator-dictionary-note'),
         },
         [GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL]: {
             requiredVariants: 'full',

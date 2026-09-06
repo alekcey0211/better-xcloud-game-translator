@@ -235,6 +235,7 @@ export class SettingsDialog extends NavigationDialog {
             GlobalPref.GAME_TRANSLATOR_STABILIZATION_INTERVAL,
             GlobalPref.GAME_TRANSLATOR_MIN_DISPLAY_TIME,
             GlobalPref.GAME_TRANSLATOR_PROVIDER,
+            GlobalPref.GAME_TRANSLATOR_DICTIONARY,
             {
                 pref: GlobalPref.GAME_TRANSLATOR_DEEPL_PROXY_URL,
                 multiLines: true,

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better xCloud
 // @namespace    https://github.com/redphx
-// @version      6.7.12.0
+// @version      6.7.13.0
 // @description  Improve Xbox Cloud Gaming (xCloud) experience
 // @author       redphx
 // @license      MIT
@@ -951,6 +951,7 @@ var ALL_PREFS = {
   "gameTranslator.stabilizationInterval",
   "gameTranslator.minimumDisplayTime",
   "gameTranslator.provider",
+  "gameTranslator.dictionary",
   "gameTranslator.deepl.proxyUrl",
   "gameTranslator.showOriginal",
   "gameTranslator.debugRegion",
@@ -1102,7 +1103,7 @@ class UserAgent {
   });
  }
 }
-var SCRIPT_VERSION = "6.7.12.0", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
+var SCRIPT_VERSION = "6.7.13.0", SCRIPT_VARIANT = "full", AppInterface = window.AppInterface;
 UserAgent.init();
 var userAgent = window.navigator.userAgent.toLowerCase(), isTv = userAgent.includes("smart-tv") || userAgent.includes("smarttv") || /\baft.*\b/.test(userAgent), isVr = window.navigator.userAgent.includes("VR") && window.navigator.userAgent.includes("OculusBrowser"), browserHasTouchSupport = "ontouchstart" in window || navigator.maxTouchPoints > 0, userAgentHasTouchSupport = !isTv && !isVr && browserHasTouchSupport, STATES = {
  supportedRegion: !0,
@@ -1433,9 +1434,12 @@ var SUPPORTED_LANGUAGES = {
  "game-translator-ocr-region": "OCR region",
  "game-translator-privacy-note": "OCR runs locally. Recognized English text and game context leave the device only when an online provider is selected.",
  "game-translator-provider": "Translation provider",
+ "game-translator-provider-dictionary": "Game dictionary only (no fallback)",
+ "game-translator-dictionary": "Game dictionary / Русификатор",
+ "game-translator-dictionary-note": "For Game dictionary only: downloads the selected dialogue pack from GitHub Pages (~3.5 MB for Dawnwalker). Unknown or ambiguous lines stay hidden. Translation: clarkkent. No API key or proxy needed.",
  "game-translator-provider-browser": "Chrome Translator (local, desktop)",
  "game-translator-provider-deepl": "DeepL Context (proxy)",
- "game-translator-provider-note": "MyMemory works without setup. Chrome Translator is local and desktop-only. DeepL Context requires the HTTPS proxy URL below.",
+ "game-translator-provider-note": "Game dictionary only never calls online translators. Other providers work only when explicitly selected. DeepL Context requires the HTTPS proxy URL below.",
  "game-translator-region-bottom": "Bottom 35%",
  "game-translator-region-center": "Center 35%",
  "game-translator-region-top": "Top 35%",
@@ -2097,6 +2101,12 @@ class LocalDb {
   });
  }
 }
+var GAME_DICTIONARIES = {
+ "dawnwalker-clarkkent": {
+  label: "The Blood of Dawnwalker — clarkkent (RU)",
+  url: "https://alekcey0211.github.io/better-xcloud-game-translator/dictionaries/dawnwalker-clarkkent-78098908de6b.json"
+ }
+}, DEFAULT_GAME_DICTIONARY = "dawnwalker-clarkkent";
 var BypassServers = {
  br: t("brazil"),
  jp: t("japan"),
@@ -2400,13 +2410,21 @@ class GlobalSettingsStorage extends BaseSettingsStorage {
   "gameTranslator.provider": {
    requiredVariants: "full",
    label: t("game-translator-provider"),
-   default: "my-memory",
+   default: "dictionary",
    options: {
+    dictionary: t("game-translator-provider-dictionary"),
     browser: t("game-translator-provider-browser"),
     "deepl-context": t("game-translator-provider-deepl"),
     "my-memory": "MyMemory"
    },
    note: t("game-translator-provider-note")
+  },
+  "gameTranslator.dictionary": {
+   requiredVariants: "full",
+   label: t("game-translator-dictionary"),
+   default: DEFAULT_GAME_DICTIONARY,
+   options: Object.fromEntries(Object.entries(GAME_DICTIONARIES).map(([id, pack]) => [id, pack.label])),
+   note: t("game-translator-dictionary-note")
   },
   "gameTranslator.deepl.proxyUrl": {
    requiredVariants: "full",
@@ -8399,6 +8417,7 @@ class SettingsDialog extends NavigationDialog {
    "gameTranslator.stabilizationInterval",
    "gameTranslator.minimumDisplayTime",
    "gameTranslator.provider",
+   "gameTranslator.dictionary",
    {
     pref: "gameTranslator.deepl.proxyUrl",
     multiLines: !0,
@@ -11756,26 +11775,33 @@ function looksLikeCompleteSubtitle(text) {
 }
 class TextStabilizer {
  delay;
+ exactMatching;
  onStable;
  timeoutId = null;
  candidate = "";
  candidateKey = "";
  lastEmittedKey = "";
  candidateStartedAt = 0;
- constructor(delay, onStable) {
-  this.delay = delay, this.onStable = onStable;
+ constructor(delay, onStable, exactMatching = !1) {
+  this.exactMatching = exactMatching, this.delay = delay, this.onStable = onStable;
+ }
+ setExactMatching(exactMatching) {
+  this.exactMatching = exactMatching, this.reset();
  }
  setDelay(delay) {
   this.delay = delay;
  }
  push(rawText, quick = !1) {
-  let text = normalizeDisplayText(rawText), key = normalizeText(text), containsEnoughText = (key.match(/[a-z]/g) || []).length >= 2 && key.length <= 400, nextText = containsEnoughText ? text : "", nextKey = containsEnoughText ? key : "";
-  if (nextKey === this.lastEmittedKey || nextKey && similarity(nextKey, this.lastEmittedKey) >= 0.92) return;
+  let text = normalizeDisplayText(rawText), key = this.exactMatching ? text : normalizeText(text), containsEnoughText = (key.match(/[a-z]/gi) || []).length >= 2 && key.length <= 400, nextText = containsEnoughText ? text : "", nextKey = containsEnoughText ? key : "";
+  if (nextKey === this.lastEmittedKey || !this.exactMatching && nextKey && similarity(nextKey, this.lastEmittedKey) >= 0.92) {
+   this.timeoutId && clearTimeout(this.timeoutId), this.timeoutId = null, this.candidate = nextText, this.candidateKey = nextKey;
+   return;
+  }
   if (nextKey === this.candidateKey) {
    if (quick) this.schedule(Math.min(this.delay, 120));
    return;
   }
-  if (nextKey && this.candidateKey && similarity(nextKey, this.candidateKey) >= 0.88) {
+  if (!this.exactMatching && nextKey && this.candidateKey && similarity(nextKey, this.candidateKey) >= 0.88) {
    if (this.candidate = nextText, this.candidateKey = nextKey, quick) this.schedule(Math.min(this.delay, 120));
    return;
   }
@@ -11935,6 +11961,100 @@ class TranslationOverlay {
   if (this.clearTimerId !== null) window.clearTimeout(this.clearTimerId), this.clearTimerId = null;
  }
 }
+function unrealSourceHash(text) {
+ let crc = 4294967295;
+ for (let index = 0;index < text.length; index++) {
+  let code = text.charCodeAt(index);
+  for (let byte of [code & 255, code >>> 8, 0, 0]) {
+   crc ^= byte;
+   for (let bit = 0;bit < 8; bit++)
+    crc = crc >>> 1 ^ (crc & 1 ? 3988292384 : 0);
+  }
+ }
+ return (crc ^ 4294967295) >>> 0;
+}
+function dictionaryCandidates(rawText) {
+ let text = rawText.replace(/\s+/g, " ").trim();
+ if (!text || text.length > 500) return [];
+ let candidates = new Set([text]), withoutSpeaker = text.replace(/^[A-Za-z][A-Za-z '’-]{0,39}:\s+/, "");
+ candidates.add(withoutSpeaker);
+ for (let candidate of [...candidates]) {
+  let clean = candidate.replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/(^|[.!?:]\s+)\|\s+(?=[a-z])/g, "$1I ").replace(/\s+([,.!?:;])/g, "$1");
+  if (candidates.add(clean), candidates.add(clean.replace(/'/g, "’")), candidates.add(clean.replace(/\.\.\./g, "…")), candidates.add(clean.replace(/…/g, "...")), /[A-Za-z]$/.test(clean)) for (let ending of [".", "?", "!", ":"])
+    candidates.add(clean + ending);
+ }
+ return [...candidates];
+}
+class GameDictionary {
+ translations = new Map;
+ constructor(payload, expectedId) {
+  if (!payload || typeof payload !== "object") throw new Error("Invalid dictionary");
+  let data = payload;
+  if (data.schema !== 1 || data.id !== expectedId || data.sourceLanguage !== "en" || data.targetLanguage !== "ru" || !Array.isArray(data.strings) || !Array.isArray(data.entries) || !data.entries.length || data.entries.length > 1e5 || data.strings.length > 1e5) throw new Error("Unsupported dictionary");
+  let strings = data.strings;
+  if (strings.some((text) => typeof text !== "string" || !text.trim() || text.length > 20000)) throw new Error("Invalid dictionary text");
+  for (let entry of data.entries) {
+   if (!Array.isArray(entry) || entry.length !== 2 || !Number.isInteger(entry[0]) || entry[0] < 0 || entry[0] > 4294967295 || !Number.isInteger(entry[1]) || entry[1] < 0 || entry[1] >= strings.length || this.translations.has(entry[0])) throw new Error("Invalid or duplicate dictionary hash");
+   this.translations.set(entry[0], strings[entry[1]]);
+  }
+ }
+ lookup(text) {
+  let result = "";
+  for (let candidate of dictionaryCandidates(text)) {
+   let translation = this.translations.get(unrealSourceHash(candidate));
+   if (translation !== void 0) {
+    if (result && result !== translation) return "";
+    result = translation;
+   }
+  }
+  return result;
+ }
+}
+class DictionaryTranslationProvider {
+ load = null;
+ getDictionaryId;
+ fetcher;
+ constructor(getDictionaryId, fetcher) {
+  this.getDictionaryId = getDictionaryId, this.fetcher = fetcher;
+ }
+ prepare() {
+  let id = this.getDictionaryId();
+  if (this.load?.id === id && Date.now() < this.load.retryAt) return this.load.promise;
+  this.destroy();
+  let descriptor = Object.hasOwn(GAME_DICTIONARIES, id) ? GAME_DICTIONARIES[id] : void 0;
+  if (!descriptor) return Promise.reject(new Error("Select a game dictionary"));
+  let controller = new AbortController, timeout = setTimeout(() => controller.abort(), 20000), load = {
+   id,
+   controller,
+   retryAt: 1 / 0,
+   promise: this.fetcher(descriptor.url, {
+    signal: controller.signal,
+    credentials: "omit",
+    cache: "force-cache"
+   }).then(async (response) => {
+    if (!response.ok) throw new Error(`Dictionary download failed: HTTP ${response.status}`);
+    let json = await response.text();
+    if (json.length > 8000000) throw new Error("Dictionary is too large");
+    let dictionary = new GameDictionary(JSON.parse(json), id);
+    if (controller.signal.aborted) throw new DOMException("Dictionary download cancelled", "AbortError");
+    return dictionary;
+   }).catch((error) => {
+    throw load.retryAt = Date.now() + 30000, error;
+   }).finally(() => clearTimeout(timeout))
+  };
+  return this.load = load, load.promise;
+ }
+ async translate(text, sourceLanguage, targetLanguage, signal) {
+  if (signal.aborted) throw new DOMException("Translation cancelled", "AbortError");
+  if (sourceLanguage !== "en" || targetLanguage !== "ru") return "";
+  let dictionary = await this.prepare();
+  if (signal.aborted) throw new DOMException("Translation cancelled", "AbortError");
+  return dictionary.lookup(text);
+ }
+ destroy() {
+  this.load?.controller.abort(), this.load = null;
+ }
+}
 class BrowserTranslationProvider {
  translatorPromise = null;
  async prepare(sourceLanguage, targetLanguage, onDownloadProgress) {
@@ -12027,10 +12147,12 @@ class MyMemoryTranslationProvider {
  }
 }
 class TranslationService {
+ getDictionaryId;
  cache = new Map;
  providers;
- constructor(getDeepLProxyUrl) {
-  this.providers = {
+ constructor(getDeepLProxyUrl, getDictionaryId) {
+  this.getDictionaryId = getDictionaryId, this.providers = {
+   dictionary: new DictionaryTranslationProvider(getDictionaryId, NATIVE_FETCH),
    browser: new BrowserTranslationProvider,
    "deepl-context": new DeepLContextTranslationProvider(getDeepLProxyUrl, NATIVE_FETCH),
    "my-memory": new MyMemoryTranslationProvider
@@ -12040,9 +12162,12 @@ class TranslationService {
   await this.providers[providerId].prepare?.("en", "ru", onDownloadProgress);
  }
  async translate(providerId, text, signal, context) {
-  let contextKey = providerId === "deepl-context" ? normalizeText(context?.gameTitle || "") : "", cacheKey = `${providerId}:${contextKey}:${normalizeText(text)}`, cached = this.cache.get(cacheKey);
-  if (cached) return { text: cached, cacheHit: !0, latency: 0 };
+  let contextKey = providerId === "dictionary" ? this.getDictionaryId() : providerId === "deepl-context" ? normalizeText(context?.gameTitle || "") : "", textKey = providerId === "dictionary" ? text : normalizeText(text), cacheKey = `${providerId}:${contextKey}:${textKey}`;
+  if (signal.aborted) throw new DOMException("Translation cancelled", "AbortError");
+  if (this.cache.has(cacheKey)) return { text: this.cache.get(cacheKey), cacheHit: !0, latency: 0 };
   let startedAt = performance.now(), translated = await this.providers[providerId].translate(text, "en", "ru", signal, context), latency = performance.now() - startedAt;
+  if (signal.aborted) throw new DOMException("Translation cancelled", "AbortError");
+  if (this.cache.size >= 1000) this.cache.delete(this.cache.keys().next().value);
   return this.cache.set(cacheKey, translated), { text: translated, cacheHit: !1, latency };
  }
  clear() {
@@ -12060,6 +12185,7 @@ var TRANSLATOR_PREFS = new Set([
  "gameTranslator.stabilizationInterval",
  "gameTranslator.minimumDisplayTime",
  "gameTranslator.provider",
+ "gameTranslator.dictionary",
  "gameTranslator.deepl.proxyUrl",
  "gameTranslator.showOriginal",
  "gameTranslator.debugRegion",
@@ -12091,7 +12217,7 @@ class GameTranslator {
  scanGate = new SubtitleScanGate;
  subtitleDetector = new SubtitleDetector;
  subtitleTracker = new SubtitleTracker;
- translationService = new TranslationService(() => getGlobalPref("gameTranslator.deepl.proxyUrl"));
+ translationService = new TranslationService(() => getGlobalPref("gameTranslator.deepl.proxyUrl"), () => getGlobalPref("gameTranslator.dictionary"));
  translationContext = new GameTranslationContext;
  settings = readSettings();
  frameCapture = null;
@@ -12128,7 +12254,7 @@ class GameTranslator {
   let sessionId = ++this.sessionId;
   this.initializeTranslationContext(sessionId), this.disabledByError = !1, this.analyzePending = !1, this.frameCapture = new TranslatorFrameCapture(this.settings.ocrRegion), this.$video = $video, this.ocrEngine = new TesseractOcrEngine, this.stabilizer = new TextStabilizer(this.settings.stabilizationInterval, (text) => {
    if (sessionId === this.sessionId) this.onStableText(text, sessionId);
-  }), this.overlay = new TranslationOverlay($video, this.settings), this.debugMetrics = { interval: this.settings.ocrInterval }, this.overlay.updateDebug(this.debugMetrics), this.updateOverlayGeometry(), this.startTimer(sessionId), this.prepareProvider(), BxLogger.info(this.LOG_TAG, "Started", {
+  }, this.settings.provider === "dictionary"), this.overlay = new TranslationOverlay($video, this.settings), this.debugMetrics = { interval: this.settings.ocrInterval }, this.overlay.updateDebug(this.debugMetrics), this.updateOverlayGeometry(), this.startTimer(sessionId), this.prepareProvider(), BxLogger.info(this.LOG_TAG, "Started", {
    captureInterval: this.settings.ocrInterval,
    region: this.settings.ocrRegion,
    changeThreshold: this.settings.changeThreshold
@@ -12211,11 +12337,11 @@ class GameTranslator {
   }
  }
  async onStableText(text, sessionId) {
-  if (!text) {
+  if (this.translationAbortController?.abort(), this.translationAbortController = null, !text) {
    this.overlay?.clear();
    return;
   }
-  this.translationAbortController?.abort(), this.translationAbortController = null, BxLogger.info(this.LOG_TAG, "Stabilized text", text);
+  BxLogger.info(this.LOG_TAG, "Stabilized text", text);
   let abortController = new AbortController;
   this.translationAbortController = abortController;
   try {
@@ -12223,12 +12349,13 @@ class GameTranslator {
    this.translationContext.rememberSubtitle(text);
    let result = await this.translationService.translate(this.settings.provider, text, abortController.signal, context);
    if (sessionId !== this.sessionId || abortController.signal.aborted) return;
-   this.debugMetrics.translationTime = result.latency, this.overlay?.updateDebug(this.debugMetrics), this.overlay?.show(text, result.text), BxLogger.info(this.LOG_TAG, result.cacheHit ? "Translation cache hit" : "Translation cache miss", {
+   this.debugMetrics.translationTime = result.latency, this.overlay?.updateDebug(this.debugMetrics), this.overlay?.show(result.text ? text : "", result.text), BxLogger.info(this.LOG_TAG, result.cacheHit ? "Translation cache hit" : "Translation cache miss", {
     latency: result.latency,
     translatedText: result.text
    });
   } catch (error) {
-   if (sessionId === this.sessionId && !abortController.signal.aborted) BxLogger.error(this.LOG_TAG, "Translation failed", error), this.overlay?.clear();
+   if (sessionId === this.sessionId && !abortController.signal.aborted) if (BxLogger.error(this.LOG_TAG, "Translation failed", error), this.settings.provider === "dictionary") this.overlay?.show("", ""), this.stabilizer?.reset();
+    else this.overlay?.clear();
   } finally {
    if (this.translationAbortController === abortController) this.translationAbortController = null;
   }
@@ -12248,7 +12375,7 @@ class GameTranslator {
  onSettingsChanged(settingKey) {
   let previousSettings = this.settings;
   this.settings = readSettings();
-  let providerChanged = previousSettings.provider !== this.settings.provider, providerConfigChanged = settingKey === "gameTranslator.deepl.proxyUrl";
+  let providerChanged = previousSettings.provider !== this.settings.provider, providerConfigChanged = settingKey === "gameTranslator.deepl.proxyUrl" || settingKey === "gameTranslator.dictionary";
   if (!this.settings.enabled) {
    this.stop();
    return;
@@ -12258,24 +12385,27 @@ class GameTranslator {
    if ($video instanceof HTMLVideoElement) this.start($video);
    return;
   }
-  if (providerChanged || providerConfigChanged) this.translationAbortController?.abort(), this.translationAbortController = null, this.translationService.destroy();
+  if (providerChanged || providerConfigChanged) this.translationAbortController?.abort(), this.translationAbortController = null, this.translationService.destroy(), this.stabilizer?.setExactMatching(this.settings.provider === "dictionary"), this.overlay?.show("", "");
   if (providerChanged && this.settings.provider === "deepl-context") this.loadGameDescription(this.sessionId);
   if (providerChanged || providerConfigChanged || !previousSettings.enabled) this.prepareProvider();
   if (!this.frameCapture || !this.overlay || !this.stabilizer) return;
   if (this.frameCapture.setRegion(this.settings.ocrRegion), this.scanGate.reset(), this.subtitleTracker.reset(), this.stabilizer.setDelay(this.settings.stabilizationInterval), this.overlay.applySettings(this.settings), this.updateOverlayGeometry(), previousSettings.ocrInterval !== this.settings.ocrInterval) this.debugMetrics.interval = this.settings.ocrInterval, this.startTimer(this.sessionId);
  }
  prepareProvider() {
+  let preparationId = ++this.providerPreparationId;
   if (this.settings.provider === "my-memory") return;
-  let preparationId = ++this.providerPreparationId, showedDownloadToast = !1;
+  let isDictionary = this.settings.provider === "dictionary";
+  if (isDictionary && this.overlay) Toast.show("Game Translator", "Загрузка русификатора…");
+  let showedDownloadToast = !1;
   this.translationService.prepare(this.settings.provider, (progress) => {
    if (preparationId !== this.providerPreparationId) return;
    if (BxLogger.info(this.LOG_TAG, "Translation model download", Math.round(progress * 100)), !showedDownloadToast) showedDownloadToast = !0, Toast.show("Game Translator", "Downloading Chrome translation model…");
   }).then(() => {
-   if (preparationId === this.providerPreparationId) BxLogger.info(this.LOG_TAG, "Translation provider is ready", this.settings.provider), showedDownloadToast && Toast.show("Game Translator", "Chrome Translator is ready");
+   if (preparationId === this.providerPreparationId) BxLogger.info(this.LOG_TAG, "Translation provider is ready", this.settings.provider), showedDownloadToast && Toast.show("Game Translator", "Chrome Translator is ready"), isDictionary && this.overlay && Toast.show("Game Translator", "Русификатор готов. Без онлайн-перевода.");
   }).catch((error) => {
    if (preparationId === this.providerPreparationId) {
     BxLogger.error(this.LOG_TAG, "Translation provider preparation failed", error);
-    let status = this.settings.provider === "deepl-context" ? "Configure the DeepL proxy URL" : "Chrome Translator is unavailable; select MyMemory";
+    let status = isDictionary ? "Не удалось загрузить русификатор. Проверьте сеть и выбранную игру." : this.settings.provider === "deepl-context" ? "Configure the DeepL proxy URL" : "Chrome Translator is unavailable; select MyMemory";
     Toast.show("Game Translator", status);
    }
   });
